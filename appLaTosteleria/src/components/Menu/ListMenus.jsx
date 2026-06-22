@@ -50,11 +50,6 @@ export function ListMenus() {
             >
               <CardContent>
                 <Stack spacing={1.5}>
-                  <Chip
-                    label={menu.activo ? 'Activo' : 'Inactivo'}
-                    color={menu.activo ? 'success' : 'default'}
-                    sx={{ width: 'fit-content' }}
-                  />
                   <Typography variant="h5" fontWeight={700}>
                     {menu.nombre_menu}
                   </Typography>
