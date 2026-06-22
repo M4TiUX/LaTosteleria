@@ -27,6 +27,9 @@ import { ListProduct } from "./components/Product/ListProduct";
 import { DetailProduct } from "./components/Product/DetailProduct";
 import { ListCombo } from "./components/Combo/ListCombo";
 import { DetailCombo } from "./components/Combo/DetailCombo";
+import { ListMenus } from "./components/Menu/ListMenus";
+import { DetailMenu } from "./components/Menu/DetailMenu";
+import { AvailableMenu } from "./components/Menu/AvailableMenu";
 
 
 const rutas=createBrowserRouter(
@@ -130,6 +133,18 @@ const rutas=createBrowserRouter(
         {
           path: '/combo/:id',
           element: <DetailCombo/>
+        },
+        {
+          path: '/menu/',
+          element: <ListMenus/>
+        },
+        {
+          path: '/menu/disponible',
+          element: <AvailableMenu/>
+        },
+        {
+          path: '/menu/:id',
+          element: <DetailMenu/>
         }
       ]
     }

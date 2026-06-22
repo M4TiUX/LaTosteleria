@@ -31,6 +31,7 @@ require_once "models/RentalMovieModel.php";
 require_once "models/ImageModel.php";
 require_once "models/ProductoModel.php";
 require_once "models/ComboModel.php";
+require_once "models/MenuModel.php";
 
 /***--- Agregar todos los controladores*/
 require_once "controllers/UserController.php";
@@ -44,6 +45,7 @@ require_once "controllers/RentalController.php";
 require_once "controllers/ImageController.php";
 require_once "controllers/ProductoController.php";
 require_once "controllers/ComboController.php";
+require_once "controllers/MenuController.php";
 
 //Enrutador
 require_once "routes/RoutesController.php";
