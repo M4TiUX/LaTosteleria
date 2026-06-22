@@ -31,7 +31,7 @@ export function DetailProduct() {
       <Card
         sx={{
           maxWidth: 700,
-          margin: "auto",
+          margin: "40px auto",
           borderRadius: 4,
           boxShadow: 6,
         }}
@@ -53,6 +53,16 @@ export function DetailProduct() {
           <Typography sx={{ mt: 2 }}>
             Categoría: <strong>{producto.nombre_categoria}</strong>
           </Typography>
+
+          <Typography variant="h6" sx={{ mt: 3 }} fontWeight="bold">
+            Ingredientes
+          </Typography>
+
+          {producto.ingredientes?.map((ingrediente) => (
+            <Typography key={ingrediente.id_ingrediente} sx={{ mt: 1 }}>
+              • {ingrediente.nombre_ingrediente}
+            </Typography>
+          ))}
 
           <Typography
             variant="h4"
