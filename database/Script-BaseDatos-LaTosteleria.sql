@@ -179,6 +179,7 @@ CREATE TABLE `estaciones` (
 
 LOCK TABLES `estaciones` WRITE;
 /*!40000 ALTER TABLE `estaciones` DISABLE KEYS */;
+INSERT INTO `estaciones` VALUES (1, 'Preparación de Masa'),(2, 'Horneado'),(3, 'Decoración'),(4, 'Empaque');
 /*!40000 ALTER TABLE `estaciones` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -202,6 +203,7 @@ CREATE TABLE `ingredientes` (
 
 LOCK TABLES `ingredientes` WRITE;
 /*!40000 ALTER TABLE `ingredientes` DISABLE KEYS */;
+INSERT INTO `ingredientes` VALUES (1, 'Harina'),(2, 'Azúcar'),(3, 'Mantequilla'),(4, 'Huevos'),(5, 'Leche'),(6, 'Chocolate'),(7, 'Vainilla'),(8, 'Sal'),(9, 'Levadura'),(10, 'Aguacate'),(11, 'Queso Crema'),(12, 'Galletas Digestivas');
 /*!40000 ALTER TABLE `ingredientes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -233,6 +235,7 @@ CREATE TABLE `menu_items` (
 
 LOCK TABLES `menu_items` WRITE;
 /*!40000 ALTER TABLE `menu_items` DISABLE KEYS */;
+INSERT INTO `menu_items` VALUES (1, 1, 1, NULL),(2, 1, NULL, 1),(3, 2, 2, NULL),(4, 2, 3, NULL),(5, 2, NULL, 2),(6, 3, 3, NULL),(7, 3, NULL, 1),(8, 4, 1, NULL),(9, 4, 2, NULL),(10, 4, 3, NULL),(11, 4, NULL, 1),(12, 4, NULL, 2);
 /*!40000 ALTER TABLE `menu_items` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -261,6 +264,7 @@ CREATE TABLE `menus` (
 
 LOCK TABLES `menus` WRITE;
 /*!40000 ALTER TABLE `menus` DISABLE KEYS */;
+INSERT INTO `menus` VALUES (1, 'Menú Desayuno', '2026-06-22', '2026-06-28', '06:00:00', '11:00:00', 1),(2, 'Menú Almuerzo', '2026-06-22', '2026-06-28', '11:00:00', '15:00:00', 1),(3, 'Menú Especial Tarde', '2026-06-22', '2026-06-28', '15:00:00', '20:00:00', 1),(4, 'Menú Fin de Semana', '2026-06-27', '2026-06-28', '07:00:00', '21:00:00', 1);
 /*!40000 ALTER TABLE `menus` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -355,6 +359,7 @@ CREATE TABLE `procesos_preparacion` (
 
 LOCK TABLES `procesos_preparacion` WRITE;
 /*!40000 ALTER TABLE `procesos_preparacion` DISABLE KEYS */;
+INSERT INTO `procesos_preparacion` VALUES (1, 1, 1, 1, 5),(2, 2, 1, 1, 10),(3, 2, 2, 2, 8),(4, 2, 3, 3, 5),(5, 3, 1, 1, 15),(6, 3, 3, 2, 10);
 /*!40000 ALTER TABLE `procesos_preparacion` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -435,6 +440,7 @@ CREATE TABLE `roles` (
 
 LOCK TABLES `roles` WRITE;
 /*!40000 ALTER TABLE `roles` DISABLE KEYS */;
+INSERT INTO `roles` VALUES (1,'Administrador'),(2,'Cliente'),(3,'Encargado'),(4,'Cocina');
 /*!40000 ALTER TABLE `roles` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -494,6 +500,7 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
+INSERT INTO `usuarios` VALUES (1, 1, 'Manuel Soto', 'admin@latosteleria.com', '$2y$10$1ueeLDj8HL5ghcusBD/byOYhlcDBSiailMADfTkQ76dgU4IevRmNK', NULL, NULL),(2, 2, 'Juan Pérez', 'cliente1@latosteleria.com', '$2y$10$1ueeLDj8HL5ghcusBD/byOYhlcDBSiailMADfTkQ76dgU4IevRmNK', NULL, NULL),(3, 2, 'María López', 'cliente2@latosteleria.com', '$2y$10$1ueeLDj8HL5ghcusBD/byOYhlcDBSiailMADfTkQ76dgU4IevRmNK', NULL, NULL),(4, 3, 'Carlos Encargado', 'encargado@latosteleria.com', '$2y$10$1ueeLDj8HL5ghcusBD/byOYhlcDBSiailMADfTkQ76dgU4IevRmNK', NULL, NULL),(5, 4, 'José Cocina', 'cocina@latosteleria.com', '$2y$10$1ueeLDj8HL5ghcusBD/byOYhlcDBSiailMADfTkQ76dgU4IevRmNK', NULL, NULL);
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
