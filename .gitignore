@@ -2,3 +2,19 @@
 /vendor/
 composer.lock
 /Log/
+
+# React
+node_modules/
+dist/
+
+# PHP
+vendor/
+
+# Logs
+*.log
+
+# VS Code
+.vscode/
+
+# Variables de entorno
+.env

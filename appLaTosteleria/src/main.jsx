@@ -23,6 +23,12 @@ import { Login } from "./components/User/Login";
 import { Logout } from "./components/User/Logout";
 import { Signup } from "./components/User/Signup";
 import { Auth } from "./components/User/Auth";
+import { ListProduct } from "./components/Product/ListProduct";
+import { DetailProduct } from "./components/Product/DetailProduct";
+import { ListCombo } from "./components/Combo/ListCombo";
+import { DetailCombo } from "./components/Combo/DetailCombo";
+
+
 const rutas=createBrowserRouter(
   [
     {
@@ -108,6 +114,22 @@ const rutas=createBrowserRouter(
         {
           path: '/user/create',
           element: <Signup />
+        },
+        {
+          path: '/producto/',
+          element: <ListProduct/>
+        },
+        {
+          path: '/producto/:id',
+          element: <DetailProduct/>
+        },
+        {
+          path: '/combo/',
+          element: <ListCombo/>
+        },
+        {
+          path: '/combo/:id',
+          element: <DetailCombo/>
         }
       ]
     }
