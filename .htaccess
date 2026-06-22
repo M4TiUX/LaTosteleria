@@ -1,6 +1,19 @@
+# CORS Headers
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+    Header set Access-Control-Max-Age "3600"
+</IfModule>
+
 # Esto te permite hacer uso del módulo mod_rewrite 
 # para poder reescribir o redireccionar URLs.
 RewriteEngine On 
+
+# Handle OPTIONS requests
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ $1 [L]
+
 # Si las siguientes condiciones son verdaderas, entonces 
 # se redirecciona a la URL:
 # si el nombre de fichero solicitado no es un archivo que 
