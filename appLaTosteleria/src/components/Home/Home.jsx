@@ -11,10 +11,10 @@ export function Home() {
         color="text.primary" 
         gutterBottom 
       > 
-        Alquiler de Peliculas 
+        La Tostelería
         </Typography> 
       <Typography variant="h5" align="center" color="text.secondary"> 
-        Descubre y alquila tus películas favoritas por días. 
+        Descubre nuestros productos y combos especiales. 
       </Typography> 
     </Container> 
   ); 

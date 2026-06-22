@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import ProductService from "../../services/ProductService";
-import { Card, CardContent, Typography, Button } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  CardMedia,
+} from "@mui/material";
 import { Link } from "react-router-dom";
 
 export function DetailProduct() {
@@ -22,22 +28,39 @@ export function DetailProduct() {
         Detalle del Producto
       </Typography>
 
-      <Card sx={{ maxWidth: 600 }}>
+      <Card
+        sx={{
+          maxWidth: 700,
+          margin: "auto",
+          borderRadius: 4,
+          boxShadow: 6,
+        }}
+      >
+        <CardMedia
+          component="img"
+          height="350"
+          image={`/images/${producto.imagen}`}
+          alt={producto.nombre_producto}
+        />
+
         <CardContent>
-          <Typography variant="h4">{producto.nombre_producto}</Typography>
+          <Typography variant="h4" fontWeight="bold">
+            {producto.nombre_producto}
+          </Typography>
 
           <Typography sx={{ mt: 2 }}>{producto.descripcion}</Typography>
 
           <Typography sx={{ mt: 2 }}>
-            Categoría: {producto.nombre_categoria}
+            Categoría: <strong>{producto.nombre_categoria}</strong>
           </Typography>
 
-          <Typography variant="h5" color="primary" sx={{ mt: 2 }}>
+          <Typography
+            variant="h4"
+            color="success.main"
+            fontWeight="bold"
+            sx={{ mt: 2 }}
+          >
             ₡ {producto.precio}
-          </Typography>
-
-          <Typography sx={{ mt: 2 }}>
-            Imagen: {producto.imagen}
           </Typography>
 
           <Button

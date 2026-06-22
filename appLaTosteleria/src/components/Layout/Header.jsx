@@ -13,7 +13,8 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import MoreIcon from "@mui/icons-material/MoreVert";
-import LiveTvIcon from "@mui/icons-material/LiveTv";
+//import LiveTvIcon from "@mui/icons-material/LiveTv";
+import BakeryDiningIcon from '@mui/icons-material/BakeryDining';
 import Tooltip from "@mui/material/Tooltip";
 import { useCart } from "../../hooks/useCart";
 import { UserContext } from "../../context/UserContext";
@@ -66,9 +67,8 @@ export default function Header() {
   ];
   //Lista enlaces menu principal
   const navItems = [
-    { name: "Peliculas", link: "/movie",roles:null },
-    { name: "Cátalogo de Peliculas", link: "/catalog-movies/", roles:null },
-    { name: "Filtrar Peliculas", link: "/movie/filter", roles:null },
+    { name: "Productos", link: "/producto",roles:null },
+    { name: "Combos", link: "/Combo", roles:null },
     { name: "Mantenimiento Peliculas", link: "/movie-table/", roles:['Administrador'] },
   ];
   //Identificador menu principal
@@ -257,16 +257,16 @@ export default function Header() {
             {menuPrincipalMobile}
           </Menu>
           {/* Enlace página inicio */}
-          <Tooltip title="Alquiler peliculas">
+          <Tooltip title="La Tostelería">
             <IconButton
               size="large"
               edge="end"
               component="a"
               href="/"
-              aria-label="Alquiler peliculas"
+              aria-label="La Tostelería"
               color="primary"
             >
-              <LiveTvIcon />
+              <BakeryDiningIcon />
             </IconButton>
           </Tooltip>
           {/* Enlace página inicio */}

@@ -20,23 +20,44 @@ export function ListCombo() {
       <Grid container spacing={3}>
         {data.map((item) => (
           <Grid item xs={12} sm={6} md={4} key={item.id_combo}>
-            <Card>
+            <Card
+              sx={{
+                height: "100%",
+                borderRadius: 3,
+                boxShadow: 3,
+                transition: "0.3s",
+                "&:hover": {
+                  transform: "translateY(-6px)",
+                  boxShadow: 8,
+                },
+              }}
+            >
               <CardContent>
-                <Typography variant="h5">{item.nombre_combo}</Typography>
-
-                <Typography sx={{ mt: 2 }}>{item.descripcion}</Typography>
-
-                <Typography sx={{ mt: 2 }}>
-                  Categoría: {item.nombre_categoria}
+                <Typography variant="h5" fontWeight="bold">
+                  {item.nombre_combo}
                 </Typography>
 
-                <Typography variant="h6" color="primary" sx={{ mt: 2 }}>
+                <Typography color="text.secondary" sx={{ mt: 1 }}>
+                  {item.descripcion}
+                </Typography>
+
+                <Typography sx={{ mt: 2 }}>
+                  Categoría: <strong>{item.nombre_categoria}</strong>
+                </Typography>
+
+                <Typography
+                  variant="h5"
+                  color="primary"
+                  fontWeight="bold"
+                  sx={{ mt: 2 }}
+                >
                   ₡ {item.precio_especial}
                 </Typography>
 
                 <Button
                   variant="contained"
-                  sx={{ mt: 2 }}
+                  fullWidth
+                  sx={{ mt: 3, borderRadius: 2 }}
                   href={`/combo/${item.id_combo}`}
                 >
                   Ver detalle

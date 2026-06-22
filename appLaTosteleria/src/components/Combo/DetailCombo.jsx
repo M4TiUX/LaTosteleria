@@ -21,28 +21,63 @@ export function DetailCombo() {
         Detalle del Combo
       </Typography>
 
-      <Card sx={{ maxWidth: 700 }}>
+      <Card
+        sx={{
+          maxWidth: 700,
+          margin: "auto",
+          borderRadius: 4,
+          boxShadow: 6,
+        }}
+      >
         <CardContent>
-          <Typography variant="h4">{combo.nombre_combo}</Typography>
+          <Typography variant="h4" fontWeight="bold">
+            {combo.nombre_combo}
+          </Typography>
 
           <Typography sx={{ mt: 2 }}>{combo.descripcion}</Typography>
 
           <Typography sx={{ mt: 2 }}>
-            Categoría: {combo.nombre_categoria}
+            Categoría: <strong>{combo.nombre_categoria}</strong>
           </Typography>
 
-          <Typography variant="h5" color="primary" sx={{ mt: 2 }}>
+          <Typography
+            variant="h5"
+            color="primary"
+            fontWeight="bold"
+            sx={{ mt: 2 }}
+          >
             ₡ {combo.precio_especial}
           </Typography>
 
-          <Typography variant="h6" sx={{ mt: 3 }}>
-            Productos incluidos:
+          <Typography
+            variant="h6"
+            sx={{
+              mt: 4,
+              mb: 2,
+              fontWeight: "bold",
+            }}
+          >
+            Productos incluidos
           </Typography>
 
           {combo.productos?.map((producto) => (
-            <Typography key={producto.id_producto} sx={{ mt: 1 }}>
-              - {producto.nombre_producto} x{producto.cantidad}
-            </Typography>
+            <Card
+              key={producto.id_producto}
+              sx={{
+                mb: 2,
+                backgroundColor: "#f8f9fa",
+              }}
+            >
+              <CardContent>
+                <Typography variant="subtitle1">
+                  {producto.nombre_producto}
+                </Typography>
+
+                <Typography color="text.secondary">
+                  Cantidad: {producto.cantidad}
+                </Typography>
+              </CardContent>
+            </Card>
           ))}
 
           <Button
