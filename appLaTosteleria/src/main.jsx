@@ -6,15 +6,15 @@ import { createBrowserRouter } from "react-router-dom";
 import { Home } from "./components/Home/Home";
 import { RouterProvider } from "react-router";
 import { PageNotFound } from "./components/Home/PageNotFound";
-import { ListMovies } from "./components/Movie/ListMovies";
-import { DetailMovie } from "./components/Movie/DetailMovie";
+import { ListMovies } from "./components/Ventanas/ListMovies";
+import { DetailMovie } from "./components/Ventanas/DetailMovie";
 import ListRentals from "./components/Rental/ListRentals";
 import DetailRental from "./components/Rental/DetailRental";
-import TableMovies from "./components/Movie/TableMovies";
-import { CreateMovie } from "./components/Movie/CreateMovie";
-import { UpdateMovie } from "./components/Movie/UpdateMovie";
-import { CatalogMovies } from "./components/Movie/CatalogMovies";
-import { MovieUploadImage } from "./components/Movie/MovieUploadImage";
+import TableMovies from "./components/Ventanas/TableMovies";
+import { CreateMovie } from "./components/Ventanas/CreateMovie";
+import { UpdateMovie } from "./components/Ventanas/UpdateMovie";
+import { CatalogMovies } from "./components/Ventanas/CatalogMovies";
+import { MovieUploadImage } from "./components/Ventanas/MovieUploadImage";
 import { CreateMovieRental } from "./components/Rental/CreateMovieRental";
 import { GraphRetal } from "./components/Rental/GraphRental";
 import UserProvider from "./components/User/UserProvider";
@@ -23,12 +23,12 @@ import { Login } from "./components/User/Login";
 import { Logout } from "./components/User/Logout";
 import { Signup } from "./components/User/Signup";
 import { Auth } from "./components/User/Auth";
-import { ListProduct } from "./components/Product/ListProduct";
-import { DetailProduct } from "./components/Product/DetailProduct";
+import { ListProduct } from "./components/Producto/ListProduct";
+import { DetailProduct } from "./components/Producto/DetailProduct";
 import { ListCombo } from "./components/Combo/ListCombo";
 import { DetailCombo } from "./components/Combo/DetailCombo";
-import { ProcesoList } from "./components/Proceso/ProcesoList";
-import { ProcesoDetail } from "./components/Proceso/ProcesoDetail";
+import { ProcesosList } from "./components/Procesos/ProcesosList";
+import { ProcesosDetail } from "./components/Procesos/ProcesosDetail";
 
 const rutas = createBrowserRouter([
   {
@@ -132,12 +132,12 @@ const rutas = createBrowserRouter([
         element: <DetailCombo />,
       },
       {
-        path: "/proceso/",
-        element: <ProcesoList />,
+        path: "/procesos/",
+        element: <ProcesosList />,
       },
       {
-        path: "/proceso/:id",
-        element: <ProcesoDetail />,
+        path: "/procesos/:id",
+        element: <ProcesosDetail />,
       },
     ],
   },

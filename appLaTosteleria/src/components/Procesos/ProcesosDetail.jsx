@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import ProcesoServices from "../../services/ProcesosServices";
+import { Card, CardContent, Typography, Button } from "@mui/material";
 
-const API_BASE = "http://localhost/apilatosteleria/ProcesoPreparacion/show";
-
-export default function ProcesosDetail() {
+export function ProcesosDetail() {
   const { id } = useParams();
   const [proceso, setProceso] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch(`${API_BASE}/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
+    // Éxito: Usamos el servicio de la línea 3 (recuerda que Axios usa res.data)
+    ProcesoServices.getProcesoById(id)
+      .then((res) => {
+        const data = res.data;
         if (data.status === 200) {
           setProceso(data.result);
         } else {
@@ -27,34 +28,54 @@ export default function ProcesosDetail() {
   }, [id]);
 
   if (loading) return <p className="text-center mt-10">Cargando detalle...</p>;
-  if (error)   return <p className="text-center mt-10 text-red-500">{error}</p>;
+  if (error) return <p className="text-center mt-10 text-red-500">{error}</p>;
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-      <Link to="/procesos" className="text-amber-600 hover:underline text-sm mb-4 inline-block">
+      {/* Éxito: Usamos el Button de MUI asignándole el componente Link */}
+      <Button
+        component={Link}
+        to="/procesos"
+        variant="text"
+        className="text-amber-600 hover:underline text-sm mb-4 inline-block"
+        style={{ textTransform: 'none', padding: 0 }}
+      >
         ← Volver a procesos
-      </Link>
+      </Button>
 
-      <h1 className="text-2xl font-bold mb-1">{proceso.nombre_producto}</h1>
-      <p className="text-gray-500 mb-6">
+      {/* Éxito: Usamos Typography de MUI */}
+      <Typography variant="h4" component="h1" className="font-bold mb-1 text-2xl">
+        {proceso.nombre_producto}
+      </Typography>
+      
+      <Typography variant="body2" className="text-gray-500 mb-6">
         {proceso.estaciones.length}{" "}
         {proceso.estaciones.length === 1 ? "estación" : "estaciones"} en este proceso
-      </p>
+      </Typography>
 
       <ol className="space-y-3">
         {proceso.estaciones.map((estacion) => (
-          <li
-            key={estacion.id_estacion}
-            className="flex items-center gap-4 bg-white shadow rounded-xl p-4 border border-gray-100"
+          /* Éxito: Usamos Card y CardContent de MUI para las tarjetas de las estaciones */
+          <Card 
+            key={estacion.id_estacion} 
+            component="li" 
+            variant="outlined"
+            className="bg-white shadow rounded-xl border border-gray-100"
           >
-            <span className="w-8 h-8 flex items-center justify-center rounded-full bg-amber-500 text-white font-bold text-sm shrink-0">
-              {estacion.orden_paso}
-            </span>
-            <div>
-              <p className="font-medium">{estacion.nombre_estacion}</p>
-              <p className="text-xs text-gray-400">{estacion.tiempo_estimado_minutos} min</p>
-            </div>
-          </li>
+            <CardContent className="flex items-center gap-4 p-4" style={{ paddingBottom: '16px' }}>
+              <span className="w-8 h-8 flex items-center justify-center rounded-full bg-amber-500 text-white font-bold text-sm shrink-0">
+                {estacion.orden_paso}
+              </span>
+              <div>
+                <Typography variant="subtitle1" component="p" className="font-medium">
+                  {estacion.nombre_estacion}
+                </Typography>
+                <Typography variant="caption" component="p" className="text-gray-400">
+                  {estacion.tiempo_estimado_minutos} min
+                </Typography>
+              </div>
+            </CardContent>
+          </Card>
         ))}
       </ol>
     </div>
