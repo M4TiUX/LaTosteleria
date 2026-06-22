@@ -57,7 +57,7 @@ export function ProcesosList() {
                 <Grid item>
                   <Button
                     component={Link}
-                    to={`/procesos/${proceso.id_producto}`}
+                    to={`/Procesos/${proceso.id_producto}`}
                     variant="contained"
                     style={{ backgroundColor: '#f59e0b', color: '#fff', textTransform: 'none' }}
                   >
