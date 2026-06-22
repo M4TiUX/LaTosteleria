@@ -50,6 +50,16 @@ class ProductoModel
 
             if (!empty($vResultado)) {
                 $vResultado = $vResultado[0];
+
+                $vSQLIngredientes = "SELECT
+                                    i.id_ingrediente,
+                                    i.nombre_ingrediente
+                                FROM producto_ingrediente pi
+                                INNER JOIN ingredientes i
+                                    ON pi.ingrediente_id = i.id_ingrediente
+                                WHERE pi.producto_id = $id";
+
+                $vResultado->ingredientes = $this->enlace->ExecuteSQL($vSQLIngredientes);
             }
 
             return $vResultado;
