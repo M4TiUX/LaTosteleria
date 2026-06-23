@@ -29,6 +29,7 @@ import { ListCombo } from "./components/Combo/ListCombo";
 import { DetailCombo } from "./components/Combo/DetailCombo";
 import { ProcesosList } from "./components/Procesos/ProcesosList";
 import { ProcesosDetail } from "./components/Procesos/ProcesosDetail";
+import { TableProduct } from "./components/Producto/TableProduct";
 
 const rutas = createBrowserRouter([
   {
@@ -138,6 +139,10 @@ const rutas = createBrowserRouter([
       {
         path: "/procesos/:id",
         element: <ProcesosDetail />,
+      },
+      {
+        path: "/producto-table",
+        element: <TableProduct />,
       },
     ],
   },

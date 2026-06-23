@@ -68,6 +68,7 @@ export default function Header() {
   //Lista enlaces menu principal
   const navItems = [
     { name: "Productos", link: "/producto",roles:null },
+    { name: "Mantenimiento Productos", link: "/producto-table", roles:null },
     { name: "Combos", link: "/Combo", roles:null },
     { name: "Procesos", link: "/Procesos", roles:null },
     { name: "Mantenimiento Peliculas", link: "/movie-table/", roles:['Administrador'] },
