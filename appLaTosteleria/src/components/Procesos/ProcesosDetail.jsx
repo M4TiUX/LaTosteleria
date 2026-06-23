@@ -10,7 +10,6 @@ export function ProcesosDetail() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Éxito: Usamos el servicio de la línea 3 (recuerda que Axios usa res.data)
     ProcesoServices.getProcesoById(id)
       .then((res) => {
         const data = res.data;
