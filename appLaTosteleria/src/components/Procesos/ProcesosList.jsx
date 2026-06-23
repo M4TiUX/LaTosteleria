@@ -61,7 +61,7 @@ export function ProcesosList() {
                     variant="contained"
                     style={{ backgroundColor: '#f59e0b', color: '#fff', textTransform: 'none' }}
                   >
-                    Ver detalle →
+                    Ver detalle
                   </Button>
                 </Grid>
               </Grid>

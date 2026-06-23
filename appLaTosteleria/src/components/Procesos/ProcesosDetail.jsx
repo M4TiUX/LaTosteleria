@@ -40,7 +40,7 @@ export function ProcesosDetail() {
         className="text-amber-600 hover:underline text-sm mb-4 inline-block"
         style={{ textTransform: 'none', padding: 0 }}
       >
-        ← Volver a procesos
+       Volver a procesos
       </Button>
 
       {/* Éxito: Usamos Typography de MUI */}
