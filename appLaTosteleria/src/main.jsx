@@ -30,6 +30,9 @@ import { DetailCombo } from "./components/Combo/DetailCombo";
 import { ProcesosList } from "./components/Procesos/ProcesosList";
 import { ProcesosDetail } from "./components/Procesos/ProcesosDetail";
 import { TableProduct } from "./components/Producto/TableProduct";
+import { ListMenus } from "./components/Menu/ListMenus";
+import { DetailMenu } from "./components/Menu/DetailMenu";
+import { AvailableMenu } from "./components/Menu/AvailableMenu";
 
 const rutas = createBrowserRouter([
   {
@@ -146,7 +149,125 @@ const rutas = createBrowserRouter([
       },
     ],
   },
+   [
+    {
+      element: <App />,
+      children:[
+        {
+          path:'/',
+          element: <Home />
+        },
+        {
+          path: '*',
+          element: <PageNotFound />
+        },
+        //Grupos de rutas a autorizar
+        //Grupo 1: Administrador
+        //Grupo 2: Cliente
+        //Grupo 3: Administrador y el Cliente
+        {
+          //Grupo 1
+          path:'/',
+          element: <Auth requiredRoles={['Administrador']} />,
+          children:[
+            {
+              path:'/movie-table',
+              element: <TableMovies />
+            },
+            {
+              path:'/movie/crear/',
+              element: <CreateMovie />
+            },
+            {
+              path:'/movie/update/:id',
+              element: <UpdateMovie />
+            },
+          ]
+        },
+        {
+          path:'/movie/',
+          element: <ListMovies />
+        },
+        {
+          path: '/catalog-movies/',
+          element: <CatalogMovies />,
+        },
+        {
+          path:'/movie/:id',
+          element: <DetailMovie />
+        },
+        {
+          path: 'movie/image/',
+          element: <MovieUploadImage />
+        },
+        
+        {
+          path:'/rental',
+          element: <ListRentals />
+        },
+        {
+          path:'/retal/:id',
+          element: <DetailRental />
+        },
+       
+        {
+          path: '/rental/crear/',
+          element: <CreateMovieRental />,
+        },
+        {
+          path: '/rental/graph',
+          element: <GraphRetal />,
+        },
+        {
+          path: '/unauthorized',
+          element: <Unauthorized />
+        },
+        {
+          path: '/user/login',
+          element: <Login />
+        },
+        {
+          path:'/user/logout',
+          element: <Logout />
+        },
+        {
+          path: '/user/create',
+          element: <Signup />
+        },
+        {
+          path: '/producto/',
+          element: <ListProduct/>
+        },
+        {
+          path: '/producto/:id',
+          element: <DetailProduct/>
+        },
+        {
+          path: '/combo/',
+          element: <ListCombo/>
+        },
+        {
+          path: '/combo/:id',
+          element: <DetailCombo/>
+        },
+        {
+          path: '/menu/',
+          element: <ListMenus/>
+        },
+        {
+          path: '/menu/disponible',
+          element: <AvailableMenu/>
+        },
+        {
+          path: '/menu/:id',
+          element: <DetailMenu/>
+        }
+      ]
+    }
+  ]
 ]);
+ 
+
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

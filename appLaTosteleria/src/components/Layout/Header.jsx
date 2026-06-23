@@ -71,6 +71,8 @@ export default function Header() {
     { name: "Mantenimiento Productos", link: "/producto-table", roles:null },
     { name: "Combos", link: "/Combo", roles:null },
     { name: "Procesos", link: "/Procesos", roles:null },
+    { name: "Menús", link: "/menu", roles:null },
+    { name: "Menú disponible", link: "/menu/disponible", roles:null },
     { name: "Mantenimiento Peliculas", link: "/movie-table/", roles:['Administrador'] },
   ];
   //Identificador menu principal
