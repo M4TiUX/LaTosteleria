@@ -5,7 +5,7 @@ const cleanBaseUrl = import.meta.env.VITE_BASE_URL.endsWith("/")
   ? import.meta.env.VITE_BASE_URL
   : import.meta.env.VITE_BASE_URL + "/";
 
-const BASE_URL = cleanBaseUrl + "ProcesoPreparacion";
+const BASE_URL = cleanBaseUrl + "ProcesoPreparacionController";
 
 class ProcesoServices {
   // Obtiene la lista completa de procesos
