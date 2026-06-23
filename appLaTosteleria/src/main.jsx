@@ -33,6 +33,7 @@ import { TableProduct } from "./components/Producto/TableProduct";
 import { ListMenus } from "./components/Menu/ListMenus";
 import { DetailMenu } from "./components/Menu/DetailMenu";
 import { AvailableMenu } from "./components/Menu/AvailableMenu";
+import { SeguimientoPedido } from "./components/Pedido/SeguimientoPedido";
 
 const rutas = createBrowserRouter([
   {
@@ -157,11 +158,13 @@ const rutas = createBrowserRouter([
         path: "*",
         element: <PageNotFound />,
       },
+      {
+        path: "/pedido/seguimiento/:id",
+        element: <SeguimientoPedido />,
+      },
     ],
   },
 ]);
- 
-
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

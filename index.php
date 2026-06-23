@@ -61,6 +61,7 @@ require_once "controllers/ProductoController.php";
 require_once "controllers/ComboController.php";
 require_once "controllers/ProcesoPreparacionController.php";
 require_once "controllers/MenuController.php";
+require_once "controllers/SeguimientoPedidoController.php";
 
 //Enrutador
 require_once "routes/RoutesController.php";
