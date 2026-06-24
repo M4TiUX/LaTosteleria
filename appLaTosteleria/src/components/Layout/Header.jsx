@@ -14,18 +14,20 @@ import AccountCircle from "@mui/icons-material/AccountCircle";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import MoreIcon from "@mui/icons-material/MoreVert";
 //import LiveTvIcon from "@mui/icons-material/LiveTv";
-import BakeryDiningIcon from '@mui/icons-material/BakeryDining';
+import BakeryDiningIcon from "@mui/icons-material/BakeryDining";
 import Tooltip from "@mui/material/Tooltip";
 import { useCart } from "../../hooks/useCart";
 import { UserContext } from "../../context/UserContext";
 
 export default function Header() {
   //Obtener usuario
-  const {user, decodeToken,autorize}= useContext(UserContext)
-  const [userData,setUserData]=useState(decodeToken())
-  useEffect(()=>{setUserData(decodeToken())},[user])
-  
-  const {cart, getCountItems}=useCart()
+  const { user, decodeToken, autorize } = useContext(UserContext);
+  const [userData, setUserData] = useState(decodeToken());
+  useEffect(() => {
+    setUserData(decodeToken());
+  }, [user]);
+
+  const { cart, getCountItems } = useCart();
   //Gestión menu usuario
   const [anchorElUser, setAnchorEl] = useState(null);
   //Gestión menu opciones
@@ -67,13 +69,17 @@ export default function Header() {
   ];
   //Lista enlaces menu principal
   const navItems = [
-    { name: "Productos", link: "/producto",roles:null },
-    { name: "Mantenimiento Productos", link: "/producto-table", roles:null },
-    { name: "Combos", link: "/Combo", roles:null },
-    { name: "Procesos", link: "/Procesos", roles:null },
-    { name: "Menús", link: "/menu", roles:null },
-    { name: "Menú disponible", link: "/menu/disponible", roles:null },
-    { name: "Mantenimiento Peliculas", link: "/movie-table/", roles:['Administrador'] },
+    { name: "Productos", link: "/producto", roles: null },
+    { name: "Mantenimiento Productos", link: "/producto-table", roles: null },
+    { name: "Combos", link: "/Combo", roles: null },
+    { name: "Procesos", link: "/Procesos", roles: null },
+    { name: "Menús", link: "/menu", roles: null },
+    { name: "Menú disponible", link: "/menu/disponible", roles: null },
+    {
+      name: "Mantenimiento Peliculas",
+      link: "/movie-table/",
+      roles: ["Administrador"],
+    },
   ];
   //Identificador menu principal
   const menuIdPrincipal = "menu-appbar";
@@ -83,36 +89,37 @@ export default function Header() {
       {navItems &&
         navItems.map((item, index) => {
           //if(autorize(requiredRoles:['Administrador']))
-        if(userData && item.roles){
-          //Verificar rol
-          if(autorize({requiredRoles:item.roles})){
-            //Rutas con restricción
-            return (<Button
-              key={index}
-              component={Link}
-              to={item.link}
-              color="secondary"
-            >
-              <Typography textAlign="center">{item.name}</Typography>
-            </Button>)
+          if (userData && item.roles) {
+            //Verificar rol
+            if (autorize({ requiredRoles: item.roles })) {
+              //Rutas con restricción
+              return (
+                <Button
+                  key={index}
+                  component={Link}
+                  to={item.link}
+                  color="secondary"
+                >
+                  <Typography textAlign="center">{item.name}</Typography>
+                </Button>
+              );
+            }
+          } else {
+            if (item.roles == null) {
+              //Rutas sin restricción
+              return (
+                <Button
+                  key={index}
+                  component={Link}
+                  to={item.link}
+                  color="secondary"
+                >
+                  <Typography textAlign="center">{item.name}</Typography>
+                </Button>
+              );
+            }
           }
-        }else{
-          if(item.roles==null){
-            //Rutas sin restricción
-            return (<Button
-              key={index}
-              component={Link}
-              to={item.link}
-              color="secondary"
-            >
-              <Typography textAlign="center">{item.name}</Typography>
-            </Button>)
-          }
-        }
-                
-            
-         
-})}
+        })}
     </Box>
   );
   //Menu Principal responsivo
@@ -154,29 +161,33 @@ export default function Header() {
         open={Boolean(anchorElUser)}
         onClose={handleUserMenuClose}
       >
-        {userData &&(
+        {userData && (
           <MenuItem>
             <Typography variant="subtitle1" gutterBottom>
               {userData?.email}
             </Typography>
           </MenuItem>
-       )}
+        )}
 
-        {userItems.map((setting, index) =>  {
-          //Verificar las opciones del usuario 
-          if(setting.login && userData && Object.keys(userData).length >0){
-            return (<MenuItem key={index} component={Link} to={setting.link}>
-              <Typography sx={{ textAlign: 'center' }}>
-                {setting.name}
-              </Typography>
-            </MenuItem>)
-          }else if(!setting.login && Object.keys(userData).length==0){
-            return (<MenuItem key={index} component={Link} to={setting.link}>
-              <Typography sx={{ textAlign: 'center' }}>
-                {setting.name}
-              </Typography>
-            </MenuItem>)
-          }          
+        {userItems.map((setting, index) => {
+          //Verificar las opciones del usuario
+          if (setting.login && userData && Object.keys(userData).length > 0) {
+            return (
+              <MenuItem key={index} component={Link} to={setting.link}>
+                <Typography sx={{ textAlign: "center" }}>
+                  {setting.name}
+                </Typography>
+              </MenuItem>
+            );
+          } else if (!setting.login && Object.keys(userData).length == 0) {
+            return (
+              <MenuItem key={index} component={Link} to={setting.link}>
+                <Typography sx={{ textAlign: "center" }}>
+                  {setting.name}
+                </Typography>
+              </MenuItem>
+            );
+          }
         })}
       </Menu>
     </Box>
@@ -208,7 +219,7 @@ export default function Header() {
             component={Link}
             to="/rental/crear/"
           >
-            <ShoppingCartIcon />
+            <ShoppingCartIcon color="primary" />
           </Badge>
         </IconButton>
         <p>Compras</p>
@@ -284,7 +295,7 @@ export default function Header() {
                 component={Link}
                 to="/rental/crear/"
               >
-                <ShoppingCartIcon />
+                <ShoppingCartIcon color="primary" />
               </Badge>
             </IconButton>
             <IconButton size="large" color="inherit">

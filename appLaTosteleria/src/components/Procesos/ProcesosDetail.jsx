@@ -10,7 +10,6 @@ export function ProcesosDetail() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Éxito: Usamos el servicio de la línea 3 (recuerda que Axios usa res.data)
     ProcesoServices.getProcesoById(id)
       .then((res) => {
         const data = res.data;
@@ -40,7 +39,7 @@ export function ProcesosDetail() {
         className="text-amber-600 hover:underline text-sm mb-4 inline-block"
         style={{ textTransform: 'none', padding: 0 }}
       >
-        ← Volver a procesos
+       Volver a procesos
       </Button>
 
       {/* Éxito: Usamos Typography de MUI */}
