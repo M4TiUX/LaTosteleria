@@ -1,7 +1,15 @@
-import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { Box, Button, Card, CardContent, Grid, Stack, Typography } from '@mui/material';
-import MenuService from '../../services/MenuService';
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Grid,
+  Stack,
+  Typography,
+} from "@mui/material";
+import MenuService from "../../services/MenuService";
 
 export function DetailMenu() {
   const { id } = useParams();
@@ -39,10 +47,11 @@ export function DetailMenu() {
         {menu.nombre_menu}
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
-        Disponibilidad: {menu.fecha_inicio} {menu.hora_inicio} a {menu.fecha_fin} {menu.hora_fin}
+        Disponibilidad: {menu.fecha_inicio} {menu.hora_inicio} a{" "}
+        {menu.fecha_fin} {menu.hora_fin}
       </Typography>
       <Typography variant="body2" sx={{ mb: 3 }}>
-        {menu.activo ? 'Menú activo' : 'Menú inactivo'}
+        {menu.activo ? "Menú activo" : "Menú inactivo"}
       </Typography>
 
       {menu.categorias?.map((category) => (
@@ -56,7 +65,11 @@ export function DetailMenu() {
               <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1 }}>
                 Productos
               </Typography>
-              <Grid container spacing={2} sx={{ mb: category.combos?.length > 0 ? 3 : 0 }}>
+              <Grid
+                container
+                spacing={2}
+                sx={{ mb: category.combos?.length > 0 ? 3 : 0 }}
+              >
                 {category.productos.map((item) => (
                   <Grid item xs={12} sm={6} md={4} key={`producto-${item.id}`}>
                     <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
@@ -68,8 +81,15 @@ export function DetailMenu() {
                           <Typography variant="body2" color="text.secondary">
                             {item.descripcion}
                           </Typography>
-                          <Typography variant="subtitle2" fontWeight={700} color="primary">
-                            ₡ {new Intl.NumberFormat('es-CR', { maximumFractionDigits: 0 }).format(item.precio)}
+                          <Typography
+                            variant="subtitle2"
+                            fontWeight={700}
+                            color="primary"
+                          >
+                            ₡{" "}
+                            {new Intl.NumberFormat("es-CR", {
+                              maximumFractionDigits: 0,
+                            }).format(item.precio)}
                           </Typography>
                         </Stack>
                       </CardContent>
@@ -88,7 +108,13 @@ export function DetailMenu() {
               <Grid container spacing={2}>
                 {category.combos.map((item) => (
                   <Grid item xs={12} sm={6} md={4} key={`combo-${item.id}`}>
-                    <Card sx={{ borderRadius: 3, boxShadow: 2, backgroundColor: '#fff8ef' }}>
+                    <Card
+                      sx={{
+                        borderRadius: 3,
+                        boxShadow: 2,
+                        backgroundColor: "#fff8ef",
+                      }}
+                    >
                       <CardContent>
                         <Stack spacing={1}>
                           <Typography variant="subtitle1" fontWeight={700}>
@@ -97,8 +123,15 @@ export function DetailMenu() {
                           <Typography variant="body2" color="text.secondary">
                             {item.descripcion}
                           </Typography>
-                          <Typography variant="subtitle2" fontWeight={700} color="primary">
-                            ₡ {new Intl.NumberFormat('es-CR', { maximumFractionDigits: 0 }).format(item.precio)}
+                          <Typography
+                            variant="subtitle2"
+                            fontWeight={700}
+                            color="primary"
+                          >
+                            ₡{" "}
+                            {new Intl.NumberFormat("es-CR", {
+                              maximumFractionDigits: 0,
+                            }).format(item.precio)}
                           </Typography>
                         </Stack>
                       </CardContent>

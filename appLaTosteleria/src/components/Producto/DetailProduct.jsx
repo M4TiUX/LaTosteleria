@@ -70,7 +70,10 @@ export function DetailProduct() {
             fontWeight="bold"
             sx={{ mt: 2 }}
           >
-            ₡ {new Intl.NumberFormat('es-CR', { maximumFractionDigits: 0 }).format(producto.precio)}
+            ₡{" "}
+            {new Intl.NumberFormat("es-CR", {
+              maximumFractionDigits: 0,
+            }).format(producto.precio)}
           </Typography>
 
           <Button

@@ -82,7 +82,10 @@ export function ListProduct() {
                     fontWeight="bold"
                     sx={{ mt: 2 }}
                   >
-                    Precio: ₡ {new Intl.NumberFormat('es-CR', { maximumFractionDigits: 0 }).format(item.precio)}
+                    Precio: ₡{" "}
+                    {new Intl.NumberFormat("es-CR", {
+                      maximumFractionDigits: 0,
+                    }).format(item.precio)}
                   </Typography>
 
                   <Button
