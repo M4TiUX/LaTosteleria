@@ -45,7 +45,7 @@ export function TableProduct() {
                 <TableCell>{item.id_producto}</TableCell>
                 <TableCell>{item.nombre_producto}</TableCell>
                 <TableCell>{item.nombre_categoria}</TableCell>
-                <TableCell>₡ {item.precio}</TableCell>
+                <TableCell>₡ {new Intl.NumberFormat('es-CR', { maximumFractionDigits: 0 }).format(item.precio)}</TableCell>
                 <TableCell>
                   <Button
                     variant="contained"

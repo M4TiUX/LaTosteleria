@@ -77,12 +77,12 @@ export function ListProduct() {
                   </Typography>
 
                   <Typography
-                    variant="h4"
+                    variant="body1"
                     color="success.main"
                     fontWeight="bold"
                     sx={{ mt: 2 }}
                   >
-                    Anteriormente: ₡ {item.precio}
+                    Precio: ₡ {new Intl.NumberFormat('es-CR', { maximumFractionDigits: 0 }).format(item.precio)}
                   </Typography>
 
                   <Button

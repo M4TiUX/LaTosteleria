@@ -85,16 +85,16 @@ export default function DetailRental() {
                         }}
                       >
                         <TableCell align="left">{row.title}</TableCell>
-                        <TableCell align="left">{row.price}</TableCell>
+                        <TableCell align="left">¢ {new Intl.NumberFormat('es-CR', { maximumFractionDigits: 0 }).format(row.price)}</TableCell>
                         <TableCell align="left">{row.days}</TableCell>
-                        <TableCell align="left">{row.subtotal}</TableCell>
+                        <TableCell align="left">¢ {new Intl.NumberFormat('es-CR', { maximumFractionDigits: 0 }).format(row.subtotal)}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
               </TableContainer>
               <Typography variant="body1"  align="right" gutterBottom>
-                Total: {data.total}
+                Total: ¢ {new Intl.NumberFormat('es-CR', { maximumFractionDigits: 0 }).format(data.total)}
               </Typography>
             </Grid>
           </Grid>

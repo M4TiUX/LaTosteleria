@@ -69,7 +69,7 @@ export function DetailMenu() {
                             {item.descripcion}
                           </Typography>
                           <Typography variant="subtitle2" fontWeight={700} color="primary">
-                            ₡ {Number(item.precio).toFixed(2)}
+                            ₡ {new Intl.NumberFormat('es-CR', { maximumFractionDigits: 0 }).format(item.precio)}
                           </Typography>
                         </Stack>
                       </CardContent>
@@ -98,7 +98,7 @@ export function DetailMenu() {
                             {item.descripcion}
                           </Typography>
                           <Typography variant="subtitle2" fontWeight={700} color="primary">
-                            ₡ {Number(item.precio).toFixed(2)}
+                            ₡ {new Intl.NumberFormat('es-CR', { maximumFractionDigits: 0 }).format(item.precio)}
                           </Typography>
                         </Stack>
                       </CardContent>

@@ -54,9 +54,9 @@ function CartItem({ item, removeItem }) {
       <StyledTableCell component="th" scope="row">
         {item.title}
       </StyledTableCell>
-      <StyledTableCell>{item.price}</StyledTableCell>
+      <StyledTableCell>¢ {new Intl.NumberFormat('es-CR', { maximumFractionDigits: 0 }).format(item.price)}</StyledTableCell>
       <StyledTableCell>{item.days}</StyledTableCell>
-      <StyledTableCell>&cent;{item.subtotal}</StyledTableCell>
+      <StyledTableCell>¢ {new Intl.NumberFormat('es-CR', { maximumFractionDigits: 0 }).format(item.subtotal)}</StyledTableCell>
       <StyledTableCell align="right">
         <Tooltip title={'Borrar ' + item.title}>
           <IconButton
@@ -123,8 +123,7 @@ export function Cart() {
               </StyledTableCell>
               <StyledTableCell colSpan={2}>
                 <Typography variant="subtitle1" gutterBottom>
-                  {/* Mostrar total */}
-                 &cent;{getTotal(cart)}
+                  ¢ {new Intl.NumberFormat('es-CR', { maximumFractionDigits: 0 }).format(getTotal(cart))}
                 </Typography>
               </StyledTableCell>
             </TableRow>

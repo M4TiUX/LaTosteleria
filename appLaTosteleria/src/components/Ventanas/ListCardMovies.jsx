@@ -56,7 +56,7 @@ export function ListCardMovies({ data, isShopping }) {
                 </Typography>
                 {isShopping && (
                   <Typography variant="h6" align="right" gutterBottom>
-                    &cent;{item.price}
+                  ¢ {new Intl.NumberFormat('es-CR', { maximumFractionDigits: 0 }).format(item.price)}
                   </Typography>
                 )}
               </CardContent>
