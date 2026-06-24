@@ -46,7 +46,10 @@ export function DetailCombo() {
             fontWeight="bold"
             sx={{ mt: 2 }}
           >
-            ₡ {combo.precio_especial}
+            ₡{" "}
+            {new Intl.NumberFormat("es-CR", {
+              maximumFractionDigits: 0,
+            }).format(combo.precio_especial)}
           </Typography>
 
           <Typography

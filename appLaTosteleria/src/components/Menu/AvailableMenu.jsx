@@ -1,15 +1,23 @@
-import { useEffect, useState } from 'react';
-import { Box, Card, CardContent, Chip, Grid, Stack, Typography } from '@mui/material';
-import MenuService from '../../services/MenuService';
+import { useEffect, useState } from "react";
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Grid,
+  Stack,
+  Typography,
+} from "@mui/material";
+import MenuService from "../../services/MenuService";
 
 function MenuItemCard({ item }) {
   return (
     <Card
       sx={{
-        height: '100%',
+        height: "100%",
         borderRadius: 3,
         boxShadow: 2,
-        backgroundColor: '#fff'
+        backgroundColor: "#fff",
       }}
     >
       <CardContent>
@@ -21,7 +29,10 @@ function MenuItemCard({ item }) {
             {item.descripcion}
           </Typography>
           <Typography variant="subtitle2" fontWeight={700} color="primary">
-            ₡ {Number(item.precio).toFixed(2)}
+            ₡{" "}
+            {new Intl.NumberFormat("es-CR", {
+              maximumFractionDigits: 0,
+            }).format(item.precio)}
           </Typography>
         </Stack>
       </CardContent>
@@ -107,12 +118,13 @@ export function AvailableMenu() {
         {menu.nombre_menu}
       </Typography>
       <Chip
-        label={menu.activo ? 'Disponible ahora' : 'No disponible'}
-        color={menu.activo ? 'success' : 'default'}
+        label={menu.activo ? "Disponible ahora" : "No disponible"}
+        color={menu.activo ? "success" : "default"}
         sx={{ mb: 2 }}
       />
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        Disponible del {menu.fecha_inicio} al {menu.fecha_fin} de {menu.hora_inicio} a {menu.hora_fin}.
+        Disponible del {menu.fecha_inicio} al {menu.fecha_fin} de{" "}
+        {menu.hora_inicio} a {menu.hora_fin}.
       </Typography>
 
       {menu.categorias?.map((category) => (

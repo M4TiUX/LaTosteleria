@@ -51,7 +51,10 @@ export function ListCombo() {
                   fontWeight="bold"
                   sx={{ mt: 2 }}
                 >
-                  ₡ {item.precio_especial}
+                  ₡{" "}
+                  {new Intl.NumberFormat("es-CR", {
+                    maximumFractionDigits: 0,
+                  }).format(item.precio_especial)}
                 </Typography>
 
                 <Button
