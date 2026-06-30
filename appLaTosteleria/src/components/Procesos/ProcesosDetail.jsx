@@ -31,7 +31,6 @@ export function ProcesosDetail() {
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-      {/* Éxito: Usamos el Button de MUI asignándole el componente Link */}
       <Button
         component={Link}
         to="/procesos"
@@ -42,7 +41,6 @@ export function ProcesosDetail() {
        Volver a procesos
       </Button>
 
-      {/* Éxito: Usamos Typography de MUI */}
       <Typography variant="h4" component="h1" className="font-bold mb-1 text-2xl">
         {proceso.nombre_producto}
       </Typography>
@@ -54,12 +52,11 @@ export function ProcesosDetail() {
 
       <ol className="space-y-3">
         {proceso.estaciones.map((estacion) => (
-          /* Éxito: Usamos Card y CardContent de MUI para las tarjetas de las estaciones */
           <Card 
             key={estacion.id_estacion} 
             component="li" 
             variant="outlined"
-            className="bg-white shadow rounded-xl border border-gray-100"
+            className=" shadow rounded-xl border border-gray-100"
           >
             <CardContent className="flex items-center gap-4 p-4" style={{ paddingBottom: '16px' }}>
               <span className="w-8 h-8 flex items-center justify-center rounded-full bg-amber-500 text-white font-bold text-sm shrink-0">
@@ -73,7 +70,7 @@ export function ProcesosDetail() {
                   {estacion.tiempo_estimado_minutos} min
                 </Typography>
               </div>
-            </CardContent>
+            </CardContent>.
           </Card>
         ))}
       </ol>
