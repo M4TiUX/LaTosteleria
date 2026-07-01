@@ -85,7 +85,17 @@ export default function Header() {
   const menuIdPrincipal = "menu-appbar";
   //Menu Principal
   const menuPrincipal = (
-    <Box sx={{ display: { xs: "none", sm: "block" } }}>
+    <Box
+      sx={{
+        display: { xs: "none", sm: "flex" },
+        flexGrow: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        gap: 1.5,
+        mx: 2,
+        flexWrap: "wrap",
+      }}
+    >
       {navItems &&
         navItems.map((item, index) => {
           //if(autorize(requiredRoles:['Administrador']))
@@ -99,6 +109,7 @@ export default function Header() {
                   component={Link}
                   to={item.link}
                   color="secondary"
+                  sx={{ px: 1.5, py: 0.8 }}
                 >
                   <Typography textAlign="center">{item.name}</Typography>
                 </Button>
@@ -113,6 +124,7 @@ export default function Header() {
                   component={Link}
                   to={item.link}
                   color="secondary"
+                  sx={{ px: 1.5, py: 0.8 }}
                 >
                   <Typography textAlign="center">{item.name}</Typography>
                 </Button>
@@ -212,14 +224,14 @@ export default function Header() {
       onClose={handleOpcionesMenuClose}
     >
       <MenuItem>
-        <IconButton size="large" color="inherit">
+        <IconButton size="large" color="#EAC28E">
           <Badge
             badgeContent={getCountItems(cart)}
-            color="primary"
+            color="#EAC28E"
             component={Link}
             to="/rental/crear/"
           >
-            <ShoppingCartIcon color="primary" />
+            <ShoppingCartIcon color="#EAC28E" />
           </Badge>
         </IconButton>
         <p>Compras</p>
@@ -242,80 +254,106 @@ export default function Header() {
         color="primaryLight"
         sx={{ backgroundColor: "primaryLight.main" }}
       >
-        <Toolbar>
-          <IconButton
-            size="large"
-            color="inherit"
-            aria-controls={menuIdPrincipal}
-            aria-haspopup="true"
-            sx={{ mr: 2 }}
-            onClick={handleOpenPrincipalMenu}
+        <Toolbar
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            px: { xs: 1, sm: 2 },
+          }}
+        >
+          <Box
+            sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}
           >
-            <MenuIcon />
-          </IconButton>
-          <Menu
-            id={menuIdPrincipal}
-            anchorEl={anchorElPrincipal}
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "left",
-            }}
-            keepMounted
-            transformOrigin={{
-              vertical: "top",
-              horizontal: "left",
-            }}
-            open={Boolean(anchorElPrincipal)}
-            onClose={handleClosePrincipalMenu}
-            sx={{ display: { xs: "block", md: "none" } }}
-          >
-            {menuPrincipalMobile}
-          </Menu>
-          {/* Enlace página inicio */}
-          <Tooltip title="La Tostelería">
             <IconButton
               size="large"
-              edge="end"
-              component="a"
-              href="/"
-              aria-label="La Tostelería"
-              color="primary"
+              color="inherit"
+              aria-controls={menuIdPrincipal}
+              aria-haspopup="true"
+              sx={{ mr: 2 }}
+              onClick={handleOpenPrincipalMenu}
             >
-              <BakeryDiningIcon />
+              <MenuIcon />
             </IconButton>
-          </Tooltip>
+            <Menu
+              id={menuIdPrincipal}
+              anchorEl={anchorElPrincipal}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "left",
+              }}
+              open={Boolean(anchorElPrincipal)}
+              onClose={handleClosePrincipalMenu}
+              sx={{ display: { xs: "block", md: "none" } }}
+            >
+              {menuPrincipalMobile}
+            </Menu>
+            {/* Enlace página inicio */}
+            <Tooltip title="La Tostelería">
+              <IconButton
+                size="large"
+                edge="end"
+                component="a"
+                href="/"
+                aria-label="La Tostelería"
+                color="#EAC28E"
+              >
+                <BakeryDiningIcon sx={{ color: "#EAC28E" }} />
+              </IconButton>
+            </Tooltip>
+          </Box>
           {/* Enlace página inicio */}
           {menuPrincipal}
-          <Box sx={{ flexGrow: 1 }} />
-          <Box sx={{ display: { xs: "none", md: "flex" } }}>
-            <IconButton size="large" color="inherit">
-              <Badge
-                badgeContent={getCountItems(cart)}
-                color="primary"
-                component={Link}
-                to="/rental/crear/"
-              >
-                <ShoppingCartIcon color="primary" />
-              </Badge>
-            </IconButton>
-            <IconButton size="large" color="inherit">
-              <Badge badgeContent={17} color="primary">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
-          </Box>
-          <div>{userMenu}</div>
-          <Box sx={{ display: { xs: "flex", md: "none" } }}>
-            <IconButton
-              size="large"
-              aria-label="show more"
-              aria-controls={menuOpcionesId}
-              aria-haspopup="true"
-              onClick={handleOpcionesMenuOpen}
-              color="inherit"
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-end",
+              flex: 1,
+              minWidth: 0,
+            }}
+          >
+            <Box
+              sx={{ display: { xs: "none", md: "flex" }, alignItems: "center" }}
             >
-              <MoreIcon />
-            </IconButton>
+              <Tooltip title="Mi carrito">
+                <IconButton
+                  size="large"
+                  edge="end"
+                  component={Link}
+                  href="/rental/crear/"
+                  aria-label="Mi carrito"
+                  color="#EAC28E"
+                >
+                  <Badge badgeContent={getCountItems(cart)}>
+                    <ShoppingCartIcon sx={{ color: "#EAC28E" }} />
+                  </Badge>
+                </IconButton>
+              </Tooltip>
+              <IconButton size="large" color="inherit">
+                <Badge badgeContent={17} color="#EAC28E">
+                  <NotificationsIcon />
+                </Badge>
+              </IconButton>
+            </Box>
+            <div>{userMenu}</div>
+            <Box sx={{ display: { xs: "flex", md: "none" } }}>
+              <IconButton
+                size="large"
+                aria-label="show more"
+                aria-controls={menuOpcionesId}
+                aria-haspopup="true"
+                onClick={handleOpcionesMenuOpen}
+                color="inherit"
+              >
+                <MoreIcon />
+              </IconButton>
+            </Box>
           </Box>
         </Toolbar>
       </AppBar>

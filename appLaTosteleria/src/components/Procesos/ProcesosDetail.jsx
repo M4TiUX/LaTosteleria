@@ -56,7 +56,7 @@ export function ProcesosDetail() {
             key={estacion.id_estacion} 
             component="li" 
             variant="outlined"
-            className=" shadow rounded-xl border border-gray-100"
+            className="bg-white shadow rounded-xl border border-gray-100"
           >
             <CardContent className="flex items-center gap-4 p-4" style={{ paddingBottom: '16px' }}>
               <span className="w-8 h-8 flex items-center justify-center rounded-full bg-amber-500 text-white font-bold text-sm shrink-0">
