@@ -60,10 +60,12 @@ export function DetailProduct() {
     return (
       <Box
         sx={{
-          maxWidth: 700,
-          margin: "40px auto",
-          borderRadius: "8px",
-          boxShadow: 6,
+          minHeight: 300,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: 1.5,
         }}
       >
         <CircularProgress />

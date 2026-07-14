@@ -1,7 +1,22 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ComboService from "../../services/ComboService";
-import { Card, CardContent, Typography, Grid, Button, Box } from "@mui/material";
+
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  CircularProgress,
+  Grid,
+  Stack,
+  Typography,
+} from "@mui/material";
+
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import RestaurantMenuOutlinedIcon from "@mui/icons-material/RestaurantMenuOutlined";
 
 export function ListCombo() {
   const [combos, setCombos] = useState([]);
@@ -82,62 +97,35 @@ export function ListCombo() {
             }}
           />
 
-      <Grid container spacing={3}>
-        {data.map((item) => (
-          <Grid item xs={12} sm={6} md={4} key={item.id_combo}>
-            <Card
-              sx={{
-                height: "100%",
-                borderRadius: "8px",
-                boxShadow: 3,
-                transition: "0.3s",
-                "&:hover": {
-                  transform: "translateY(-6px)",
-                  boxShadow: 8,
-                },
-              }}
-            >
-              <CardContent>
-                <Typography variant="h5" fontWeight="bold">
-                  {item.nombre_combo}
-                </Typography>
+          <Typography variant="h4" component="h1" fontWeight="bold">
+            Combos
+          </Typography>
+        </Stack>
 
-                <Typography color="text.secondary" sx={{ mt: 1 }}>
-                  {item.descripcion}
-                </Typography>
+        <Typography color="text.secondary" sx={{ mt: 1 }}>
+          Conozca los combos disponibles en La Tostelería.
+        </Typography>
+      </Box>
 
-                <Box
-                  sx={{
-                    mt: 2,
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: 2,
-                  }}
-                >
-                  <Typography>
-                    Categoría: <strong>{item.nombre_categoria}</strong>
-                  </Typography>
-
-                  <Typography
-                    variant="h5"
-                    color="primary"
-                    fontWeight="bold"
-                    sx={{ textAlign: "right", whiteSpace: "nowrap" }}
-                  >
-                    ₡{" "}
-                    {new Intl.NumberFormat("es-CR", {
-                      maximumFractionDigits: 0,
-                    }).format(item.precio_especial)}
-                  </Typography>
-                </Box>
-
-                <Button
-                  variant="contained"
-                  fullWidth
-                  sx={{ mt: 3, borderRadius: "8px" }}
-                  href={`/combo/${item.id_combo}`}
-                >
+      {combos.length > 0 ? (
+        <Grid container spacing={3}>
+          {combos.map((combo) => (
+            <Grid item xs={12} sm={6} md={4} key={combo.id_combo}>
+              <Card
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  borderRadius: 2,
+                  boxShadow: 3,
+                  transition: "0.3s",
+                  "&:hover": {
+                    transform: "translateY(-6px)",
+                    boxShadow: 8,
+                  },
+                }}
+              >
+                <CardContent sx={{ flexGrow: 1 }}>
                   <Typography
                     variant="h6"
                     component="h2"
@@ -165,6 +153,13 @@ export function ListCombo() {
                   >
                     {combo.descripcion || "Combo sin descripción."}
                   </Typography>
+
+                  {combo.nombre_categoria && (
+                    <Typography variant="body2" sx={{ mt: 2 }}>
+                      Categoría:{" "}
+                      <strong>{combo.nombre_categoria}</strong>
+                    </Typography>
+                  )}
 
                   <Box sx={{ mt: 2 }}>
                     <Typography
