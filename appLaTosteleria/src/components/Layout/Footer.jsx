@@ -21,12 +21,12 @@ export function Footer() {
       <Container>
         <Grid container rowSpacing={1}>
           <Grid size={12}>
-            <Typography align="center" color="white" variant="subtitle1">
+            <Typography align="center" color="#EAC28E" variant="subtitle1">
               La Tostelería
             </Typography>
           </Grid>
           <Grid size={12}>
-            <Typography align="center" color="white" variant="body2">
+            <Typography align="center" color="#EAC28E" variant="body2">
               Todos los derechos reservados
             </Typography>
           </Grid>

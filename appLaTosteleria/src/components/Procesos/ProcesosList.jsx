@@ -26,49 +26,74 @@ export function ProcesosList() {
   }, []);
 
   if (loading) return <p className="text-center mt-10">Cargando procesos...</p>;
-  if (error)   return <p className="text-center mt-10 text-red-500">{error}</p>;
+  if (error) return <p className="text-center mt-10 text-red-500">{error}</p>;
+
+  // Advertencia (opcional) en consola si hay IDs duplicados
+  const ids = procesos.map((p) => p.id_producto);
+  const duplicados = ids.filter((id, index) => ids.indexOf(id) !== index);
+  if (duplicados.length > 0) {
+    console.warn("⚠️ Hay productos con id_producto duplicado:", duplicados);
+  }
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-      <Typography variant="h4" component="h1" className="text-2xl font-bold mb-6">
+      <Typography
+        variant="h4"
+        component="h1"
+        className="text-2xl font-bold mb-6"
+        textAlign="center"
+      >
         Procesos de Preparación
       </Typography>
 
-      <ul className="space-y-4">
-        {procesos.map((proceso) => (
-          <Card 
-            key={proceso.id_producto} 
-            component="li" 
-            variant="outlined"
-            className="bg-white shadow rounded-xl border border-gray-100"
-          >
-            <CardContent style={{ paddingBottom: '16px' }}>
-              <Grid container alignItems="center" justifyContent="space-between">
-                <Grid item>
-                  <Typography variant="h6" component="p" className="font-semibold text-lg leading-tight">
-                    {proceso.nombre_producto}
-                  </Typography>
-                  <Typography variant="body2" className="text-sm text-gray-500 mt-1">
-                    {proceso.total_estaciones}{" "}
-                    {proceso.total_estaciones == 1 ? "estación" : "estaciones"}
-                  </Typography>
-                </Grid>
-                
-                <Grid item>
+      <Grid container spacing={4}>
+        {[...procesos]
+          .sort((a, b) => a.id_producto - b.id_producto)
+          .map((proceso, index) => (
+            <Grid item xs={6} key={`${proceso.id_producto}-${index}`}>
+              <Card
+                variant="outlined"
+                className="bg-white shadow rounded-xl border border-gray-100 h-full"
+              >
+                <CardContent className="flex flex-col items-center text-center gap-3">
+                  <div>
+                    <Typography
+                      variant="h6"
+                      component="p"
+                      className="font-semibold text-lg leading-tight"
+                    >
+                      {proceso.nombre_producto}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      className="text-sm text-gray-500 mt-1"
+                    >
+                      {proceso.total_estaciones}{" "}
+                      {proceso.total_estaciones == 1
+                        ? "estación"
+                        : "estaciones"}
+                    </Typography>
+                  </div>
+
                   <Button
                     component={Link}
                     to={`/Procesos/${proceso.id_producto}`}
                     variant="contained"
-                    style={{ backgroundColor: '#f59e0b', color: '#fff', textTransform: 'none' }}
+                    fullWidth
+                    style={{
+                      backgroundColor: "#f59e0b",
+                      color: "#fff",
+                      textTransform: "none",
+                      marginTop: "auto",
+                    }}
                   >
                     Ver detalle
                   </Button>
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
-        ))}
-      </ul>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+      </Grid>
     </div>
   );
 }
