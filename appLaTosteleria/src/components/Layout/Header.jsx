@@ -13,124 +13,118 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import MoreIcon from "@mui/icons-material/MoreVert";
-//import LiveTvIcon from "@mui/icons-material/LiveTv";
-import BakeryDiningIcon from "@mui/icons-material/BakeryDining";
 import Tooltip from "@mui/material/Tooltip";
 import { useCart } from "../../hooks/useCart";
 import { UserContext } from "../../context/UserContext";
 
 export default function Header() {
-  //Obtener usuario
   const { user, decodeToken, autorize } = useContext(UserContext);
   const [userData, setUserData] = useState(decodeToken());
+
   useEffect(() => {
     setUserData(decodeToken());
   }, [user]);
 
   const { cart, getCountItems } = useCart();
-  //Gestión menu usuario
   const [anchorElUser, setAnchorEl] = useState(null);
-  //Gestión menu opciones
   const [mobileOpcionesAnchorEl, setMobileMoreAnchorEl] = useState(null);
-  //Booleano Menu opciones responsivo
   const isMobileOpcionesMenuOpen = Boolean(mobileOpcionesAnchorEl);
-  //Gestión menu principal
   const [anchorElPrincipal, setAnchorElPrincipal] = useState(null);
-  //Abierto menu usuario
+
   const handleUserMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
-  //Cerrado menu usuario
+
   const handleUserMenuClose = () => {
     setAnchorEl(null);
     handleOpcionesMenuClose();
   };
-  //Abierto menu principal
+
   const handleOpenPrincipalMenu = (event) => {
     setAnchorElPrincipal(event.currentTarget);
   };
-  //Cerrado menu principal
+
   const handleClosePrincipalMenu = () => {
     setAnchorElPrincipal(null);
   };
-  //Abierto menu opciones
+
   const handleOpcionesMenuOpen = (event) => {
     setMobileMoreAnchorEl(event.currentTarget);
   };
-  //Cerrado menu opciones
+
   const handleOpcionesMenuClose = () => {
     setMobileMoreAnchorEl(null);
   };
-  //Lista enlaces menu usuario
+
   const userItems = [
     { name: "Login", link: "/user/login", login: false },
     { name: "Registrarse", link: "/user/create", login: false },
     { name: "Logout", link: "/user/logout", login: true },
   ];
-  //Lista enlaces menu principal
+
   const navItems = [
     { name: "Productos", link: "/producto", roles: null },
     { name: "Mantenimiento Productos", link: "/producto-table", roles: null },
     { name: "Combos", link: "/Combo", roles: null },
     { name: "Procesos", link: "/Procesos", roles: null },
     { name: "Menús", link: "/menu", roles: null },
-    { name: "Menú disponible", link: "/menu/disponible", roles: null },
     {
       name: "Mantenimiento Peliculas",
       link: "/movie-table/",
       roles: ["Administrador"],
     },
   ];
-  //Identificador menu principal
+
   const menuIdPrincipal = "menu-appbar";
-  //Menu Principal
+
   const menuPrincipal = (
-    <Box sx={{ display: { xs: "none", sm: "block" } }}>
-      {navItems &&
-        navItems.map((item, index) => {
-          //if(autorize(requiredRoles:['Administrador']))
-          if (userData && item.roles) {
-            //Verificar rol
-            if (autorize({ requiredRoles: item.roles })) {
-              //Rutas con restricción
-              return (
-                <Button
-                  key={index}
-                  component={Link}
-                  to={item.link}
-                  color="secondary"
-                >
-                  <Typography textAlign="center">{item.name}</Typography>
-                </Button>
-              );
-            }
-          } else {
-            if (item.roles == null) {
-              //Rutas sin restricción
-              return (
-                <Button
-                  key={index}
-                  component={Link}
-                  to={item.link}
-                  color="secondary"
-                >
-                  <Typography textAlign="center">{item.name}</Typography>
-                </Button>
-              );
-            }
-          }
-        })}
+    <Box
+      sx={{
+        display: { xs: "none", lg: "flex" },
+        flex: "1 1 auto",
+        minWidth: 0,
+        justifyContent: "center",
+        alignItems: "center",
+        gap: 1.5,
+        mx: 2,
+        overflowX: "auto",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {navItems.map((item, index) => {
+        if (item.roles && userData && !autorize({ requiredRoles: item.roles })) {
+          return null;
+        }
+
+        if (item.roles == null || userData) {
+          return (
+            <Button
+              key={index}
+              component={Link}
+              to={item.link}
+              color="secondary"
+              sx={{ px: 1.5, py: 0.8, flexShrink: 0 }}
+            >
+              <Typography textAlign="center" noWrap>
+                {item.name}
+              </Typography>
+            </Button>
+          );
+        }
+
+        return null;
+      })}
     </Box>
   );
-  //Menu Principal responsivo
+
   const menuPrincipalMobile = navItems.map((page, index) => (
     <MenuItem key={index} component={Link} to={page.link}>
       <Typography sx={{ textAlign: "center" }}>{page.name}</Typography>
     </MenuItem>
   ));
-  //Identificador menu usuario
+
   const userMenuId = "user-menu";
-  //Menu Usuario
+
   const userMenu = (
     <Box sx={{ flexGrow: 0 }}>
       <IconButton
@@ -170,7 +164,6 @@ export default function Header() {
         )}
 
         {userItems.map((setting, index) => {
-          //Verificar las opciones del usuario
           if (setting.login && userData && Object.keys(userData).length > 0) {
             return (
               <MenuItem key={index} component={Link} to={setting.link}>
@@ -179,7 +172,9 @@ export default function Header() {
                 </Typography>
               </MenuItem>
             );
-          } else if (!setting.login && Object.keys(userData).length == 0) {
+          }
+
+          if (!setting.login && Object.keys(userData).length == 0) {
             return (
               <MenuItem key={index} component={Link} to={setting.link}>
                 <Typography sx={{ textAlign: "center" }}>
@@ -188,13 +183,15 @@ export default function Header() {
               </MenuItem>
             );
           }
+
+          return null;
         })}
       </Menu>
     </Box>
   );
-  //Identificador menu opciones
+
   const menuOpcionesId = "badge-menu-mobile";
-  //Menu opciones responsivo
+
   const menuOpcionesMobile = (
     <Menu
       anchorEl={mobileOpcionesAnchorEl}
@@ -212,14 +209,19 @@ export default function Header() {
       onClose={handleOpcionesMenuClose}
     >
       <MenuItem>
-        <IconButton size="large" color="inherit">
+        <IconButton size="large" sx={{ color: "secondary.main" }}>
           <Badge
             badgeContent={getCountItems(cart)}
-            color="primary"
             component={Link}
             to="/rental/crear/"
+            sx={{
+              "& .MuiBadge-badge": {
+                backgroundColor: "secondary.main",
+                color: "primary.main",
+              },
+            }}
           >
-            <ShoppingCartIcon color="primary" />
+            <ShoppingCartIcon sx={{ color: "secondary.main" }} />
           </Badge>
         </IconButton>
         <p>Compras</p>
@@ -240,82 +242,139 @@ export default function Header() {
       <AppBar
         position="static"
         color="primaryLight"
-        sx={{ backgroundColor: "primaryLight.main" }}
+        sx={{
+          backgroundColor: "primaryLight.main",
+          width: "100%",
+          borderRadius: 0,
+          overflow: "hidden",
+        }}
       >
-        <Toolbar>
-          <IconButton
-            size="large"
-            color="inherit"
-            aria-controls={menuIdPrincipal}
-            aria-haspopup="true"
-            sx={{ mr: 2 }}
-            onClick={handleOpenPrincipalMenu}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Menu
-            id={menuIdPrincipal}
-            anchorEl={anchorElPrincipal}
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "left",
+        <Toolbar
+          sx={{
+            display: "flex",
+            flexWrap: "nowrap",
+            alignItems: "center",
+            flexDirection: "row",
+            gap: { xs: 0.5, lg: 1 },
+            justifyContent: "space-between",
+            px: { xs: 1, sm: 2 },
+            overflow: "hidden",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              flex: "0 0 auto",
+              minWidth: 0,
             }}
-            keepMounted
-            transformOrigin={{
-              vertical: "top",
-              horizontal: "left",
-            }}
-            open={Boolean(anchorElPrincipal)}
-            onClose={handleClosePrincipalMenu}
-            sx={{ display: { xs: "block", md: "none" } }}
           >
-            {menuPrincipalMobile}
-          </Menu>
-          {/* Enlace página inicio */}
-          <Tooltip title="La Tostelería">
             <IconButton
               size="large"
-              edge="end"
-              component="a"
-              href="/"
-              aria-label="La Tostelería"
-              color="primary"
-            >
-              <BakeryDiningIcon />
-            </IconButton>
-          </Tooltip>
-          {/* Enlace página inicio */}
-          {menuPrincipal}
-          <Box sx={{ flexGrow: 1 }} />
-          <Box sx={{ display: { xs: "none", md: "flex" } }}>
-            <IconButton size="large" color="inherit">
-              <Badge
-                badgeContent={getCountItems(cart)}
-                color="primary"
-                component={Link}
-                to="/rental/crear/"
-              >
-                <ShoppingCartIcon color="primary" />
-              </Badge>
-            </IconButton>
-            <IconButton size="large" color="inherit">
-              <Badge badgeContent={17} color="primary">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
-          </Box>
-          <div>{userMenu}</div>
-          <Box sx={{ display: { xs: "flex", md: "none" } }}>
-            <IconButton
-              size="large"
-              aria-label="show more"
-              aria-controls={menuOpcionesId}
-              aria-haspopup="true"
-              onClick={handleOpcionesMenuOpen}
               color="inherit"
+              aria-controls={menuIdPrincipal}
+              aria-haspopup="true"
+              sx={{ mr: 2, display: { xs: "inline-flex", lg: "none" } }}
+              onClick={handleOpenPrincipalMenu}
             >
-              <MoreIcon />
+              <MenuIcon />
             </IconButton>
+            <Menu
+              id={menuIdPrincipal}
+              anchorEl={anchorElPrincipal}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "left",
+              }}
+              open={Boolean(anchorElPrincipal)}
+              onClose={handleClosePrincipalMenu}
+              sx={{ display: { xs: "block", md: "none" } }}
+            >
+              {menuPrincipalMobile}
+            </Menu>
+            <Tooltip title="La Tostelería">
+              <IconButton
+                size="large"
+                edge="end"
+                component="a"
+                href="/"
+                aria-label="La Tostelería"
+                sx={{ p: 0.5, color: "secondary.main" }}
+              >
+                <img
+                  src="/images/LogoLaTosteleria.jpeg"
+                  alt="La Tostelería"
+                  style={{
+                    width: 40,
+                    height: 40,
+                    objectFit: "contain",
+                    display: "block",
+                  }}
+                />
+              </IconButton>
+            </Tooltip>
+          </Box>
+
+          {menuPrincipal}
+
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-end",
+              flex: "0 0 auto",
+              minWidth: 0,
+            }}
+          >
+            <Box
+              sx={{ display: { xs: "none", md: "flex" }, alignItems: "center" }}
+            >
+              <Tooltip title="Mi carrito">
+                <IconButton
+                  size="large"
+                  edge="end"
+                  component={Link}
+                  to="/rental/crear/"
+                  aria-label="Mi carrito"
+                  sx={{ color: "secondary.main" }}
+                >
+                  <Badge
+                    badgeContent={getCountItems(cart)}
+                    sx={{
+                      "& .MuiBadge-badge": {
+                        backgroundColor: "secondary.main",
+                        color: "primary.main",
+                      },
+                    }}
+                  >
+                    <ShoppingCartIcon sx={{ color: "secondary.main" }} />
+                  </Badge>
+                </IconButton>
+              </Tooltip>
+              <IconButton size="large" color="inherit">
+                <Badge badgeContent={17} color="error">
+                  <NotificationsIcon />
+                </Badge>
+              </IconButton>
+            </Box>
+            <div>{userMenu}</div>
+            <Box sx={{ display: { xs: "flex", md: "none" } }}>
+              <IconButton
+                size="large"
+                aria-label="show more"
+                aria-controls={menuOpcionesId}
+                aria-haspopup="true"
+                onClick={handleOpcionesMenuOpen}
+                color="inherit"
+              >
+                <MoreIcon />
+              </IconButton>
+            </Box>
           </Box>
         </Toolbar>
       </AppBar>

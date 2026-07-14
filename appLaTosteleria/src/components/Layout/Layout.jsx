@@ -14,7 +14,13 @@ export function Layout({ children }) {
       <Header /> 
       <Container 
         maxWidth="xl" 
-        style={{ paddingTop: '1rem', paddingBottom: '4.5rem' }} 
+        component="main"
+        sx={{
+          position: 'relative',
+          minHeight: 'calc(100vh - 8rem)',
+          pt: { xs: 2, md: 3 },
+          pb: { xs: 12, md: 14 },
+        }} 
       > 
       <Toaster position='bottom-right' />
         {children} 

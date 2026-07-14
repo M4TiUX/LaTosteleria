@@ -161,6 +161,8 @@ export function DetailCombo() {
           borderRadius: 4,
           boxShadow: 4,
           overflow: "hidden",
+          maxWidth: 700,
+          margin: "auto"
         }}
       >
         <Box

@@ -1,24 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ComboService from "../../services/ComboService";
-
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Grid,
-  Stack,
-  Typography,
-} from "@mui/material";
-
-import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
-import RestaurantMenuOutlinedIcon from "@mui/icons-material/RestaurantMenuOutlined";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { Card, CardContent, Typography, Grid, Button, Box } from "@mui/material";
 
 export function ListCombo() {
   const [combos, setCombos] = useState([]);
@@ -99,118 +82,61 @@ export function ListCombo() {
             }}
           />
 
-          <Typography
-            variant="h4"
-            component="h1"
-            fontWeight="bold"
-            sx={{
-              fontSize: {
-                xs: "1.7rem",
-                sm: "2rem",
-                md: "2.4rem",
-              },
-            }}
-          >
-            Nuestros combos
-          </Typography>
-        </Stack>
-
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{
-            mt: 0.75,
-            maxWidth: 650,
-          }}
-        >
-          Disfruta combinaciones especiales de nuestros productos a un precio
-          preferencial.
-        </Typography>
-      </Box>
-
-      {combos.length > 0 ? (
-        <Grid container spacing={2}>
-          {combos.map((combo) => (
-            <Grid
-              item
-              xs={12}
-              sm={6}
-              md={4}
-              key={combo.id_combo}
+      <Grid container spacing={3}>
+        {data.map((item) => (
+          <Grid item xs={12} sm={6} md={4} key={item.id_combo}>
+            <Card
+              sx={{
+                height: "100%",
+                borderRadius: "8px",
+                boxShadow: 3,
+                transition: "0.3s",
+                "&:hover": {
+                  transform: "translateY(-6px)",
+                  boxShadow: 8,
+                },
+              }}
             >
-              <Card
-                sx={{
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  borderRadius: 3,
-                  overflow: "hidden",
-                  boxShadow: 2,
-                  border: 1,
-                  borderColor: "divider",
-                  transition:
-                    "transform 0.2s ease, box-shadow 0.2s ease",
-                  "&:hover": {
-                    transform: "translateY(-4px)",
-                    boxShadow: 5,
-                  },
-                }}
-              >
+              <CardContent>
+                <Typography variant="h5" fontWeight="bold">
+                  {item.nombre_combo}
+                </Typography>
+
+                <Typography color="text.secondary" sx={{ mt: 1 }}>
+                  {item.descripcion}
+                </Typography>
+
                 <Box
                   sx={{
-                    px: 2,
-                    py: 1.5,
-                    minHeight: 82,
+                    mt: 2,
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
-                    bgcolor: "action.hover",
+                    gap: 2,
                   }}
                 >
-                  <Box
-                    sx={{
-                      width: 46,
-                      height: 46,
-                      borderRadius: "50%",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      bgcolor: "background.paper",
-                      boxShadow: 1,
-                    }}
-                  >
-                    <RestaurantMenuOutlinedIcon
-                      color="primary"
-                      sx={{ fontSize: 25 }}
-                    />
-                  </Box>
+                  <Typography>
+                    Categoría: <strong>{item.nombre_categoria}</strong>
+                  </Typography>
 
-                  <Chip
-                    icon={<LocalOfferOutlinedIcon sx={{ fontSize: 17 }} />}
-                    label={combo.nombre_categoria || "Sin categoría"}
-                    size="small"
-                    sx={{
-                      height: 27,
-                      fontWeight: 600,
-                      bgcolor: "background.paper",
-                      "& .MuiChip-label": {
-                        px: 1,
-                        fontSize: "0.78rem",
-                      },
-                    }}
-                  />
+                  <Typography
+                    variant="h5"
+                    color="primary"
+                    fontWeight="bold"
+                    sx={{ textAlign: "right", whiteSpace: "nowrap" }}
+                  >
+                    ₡{" "}
+                    {new Intl.NumberFormat("es-CR", {
+                      maximumFractionDigits: 0,
+                    }).format(item.precio_especial)}
+                  </Typography>
                 </Box>
 
-                <CardContent
-                  sx={{
-                    flexGrow: 1,
-                    display: "flex",
-                    flexDirection: "column",
-                    p: 2,
-                    "&:last-child": {
-                      pb: 2,
-                    },
-                  }}
+                <Button
+                  variant="contained"
+                  fullWidth
+                  sx={{ mt: 3, borderRadius: "8px" }}
+                  href={`/combo/${item.id_combo}`}
                 >
                   <Typography
                     variant="h6"

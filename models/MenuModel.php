@@ -19,7 +19,14 @@ class MenuModel
                         fecha_fin,
                         hora_inicio,
                         hora_fin,
-                        activo
+                        activo,
+                        CASE
+                            WHEN activo = 1
+                                 AND CURDATE() BETWEEN fecha_inicio AND fecha_fin
+                                 AND CURTIME() BETWEEN hora_inicio AND hora_fin
+                            THEN 1
+                            ELSE 0
+                        END AS disponible
                     FROM menus
                     ORDER BY fecha_inicio DESC, hora_inicio DESC, id_menu DESC";
 
@@ -55,7 +62,14 @@ class MenuModel
                         fecha_fin,
                         hora_inicio,
                         hora_fin,
-                        activo
+                        activo,
+                        CASE
+                            WHEN activo = 1
+                                 AND CURDATE() BETWEEN fecha_inicio AND fecha_fin
+                                 AND CURTIME() BETWEEN hora_inicio AND hora_fin
+                            THEN 1
+                            ELSE 0
+                        END AS disponible
                     FROM menus
                     WHERE activo = 1
                       AND CURDATE() BETWEEN fecha_inicio AND fecha_fin
