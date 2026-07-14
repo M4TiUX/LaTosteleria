@@ -23,7 +23,7 @@ export function ListCombo() {
             <Card
               sx={{
                 height: "100%",
-                borderRadius: 3,
+                borderRadius: "8px",
                 boxShadow: 3,
                 transition: "0.3s",
                 "&:hover": {
@@ -70,7 +70,7 @@ export function ListCombo() {
                 <Button
                   variant="contained"
                   fullWidth
-                  sx={{ mt: 3, borderRadius: 2 }}
+                  sx={{ mt: 3, borderRadius: "8px" }}
                   href={`/combo/${item.id_combo}`}
                 >
                   Ver detalle

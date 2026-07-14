@@ -72,7 +72,7 @@ export function DetailMenu() {
               >
                 {category.productos.map((item) => (
                   <Grid item xs={12} sm={6} md={4} key={`producto-${item.id}`}>
-                    <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
+                    <Card sx={{ borderRadius: "8px", boxShadow: 2 }}>
                       <CardContent>
                         <Stack spacing={1}>
                           <Typography variant="subtitle1" fontWeight={700}>
@@ -110,7 +110,7 @@ export function DetailMenu() {
                   <Grid item xs={12} sm={6} md={4} key={`combo-${item.id}`}>
                     <Card
                       sx={{
-                        borderRadius: 3,
+                        borderRadius: "8px",
                         boxShadow: 2,
                         backgroundColor: "#fff8ef",
                       }}

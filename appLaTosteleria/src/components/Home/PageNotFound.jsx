@@ -13,7 +13,7 @@ export function PageNotFound() {
           <Box
             component="img"
             sx={{
-              borderRadius: '4%',
+              borderRadius: '8px',
               maxWidth: '100%',
               height: 'auto',
             }}

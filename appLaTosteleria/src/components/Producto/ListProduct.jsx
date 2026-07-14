@@ -48,7 +48,7 @@ export function ListProduct() {
               <Card
                 sx={{
                   height: "100%",
-                  borderRadius: 3,
+                  borderRadius: "8px",
                   boxShadow: 3,
                   transition: "0.3s",
                   "&:hover": {
@@ -102,7 +102,7 @@ export function ListProduct() {
                   <Button
                     variant="contained"
                     fullWidth
-                    sx={{ mt: 3, borderRadius: 2 }}
+                    sx={{ mt: 3, borderRadius: "8px" }}
                     href={`/producto/${item.id_producto}`}
                   >
                     Ver detalle

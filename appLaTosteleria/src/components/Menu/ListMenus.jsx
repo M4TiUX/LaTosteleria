@@ -91,7 +91,7 @@ export function ListMenus() {
               <Card
                 sx={{
                   height: '100%',
-                  borderRadius: 4,
+                  borderRadius: '8px',
                   boxShadow: 4,
                   background: 'linear-gradient(180deg, #fffdf8 0%, #fff7ea 100%)'
                 }}
@@ -119,7 +119,7 @@ export function ListMenus() {
                     to={`/menu/${menu.id_menu}`}
                     variant="contained"
                     fullWidth
-                    sx={{ mt: 3 }}
+                    sx={{ mt: 3, borderRadius: '8px' }}
                   >
                     Ver menú
                   </Button>

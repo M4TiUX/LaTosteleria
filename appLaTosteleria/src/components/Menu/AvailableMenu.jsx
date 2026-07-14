@@ -17,7 +17,7 @@ function MenuItemCard({ item }) {
     <Card
       sx={{
         height: "100%",
-        borderRadius: 3,
+        borderRadius: "8px",
         boxShadow: 2,
         backgroundColor: "#fff",
       }}

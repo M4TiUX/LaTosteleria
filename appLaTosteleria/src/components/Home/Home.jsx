@@ -9,7 +9,7 @@ export function Home() {
         variant="h2"
         align="center"
         color="text.primary"
-        sx={{ fontFamily: "Cooper Black" }}
+        sx={{ fontWeight: 700, letterSpacing: "0.04em" }}
         gutterBottom
       >
         La Tostelería
@@ -22,14 +22,14 @@ export function Home() {
           width: "100%",
           maxWidth: 420,
           margin: "24px auto",
-          borderRadius: 16,
+          borderRadius: "8px",
         }}
       />
       <Typography 
       variant="h5" 
       align="center" 
       color="text.primary"
-      sx={{fontFamily:"Cooper Black"}}>
+      sx={{fontWeight:700, letterSpacing: "0.02em"}}>
         Descubre nuestros productos y combos especiales.
       </Typography>
     </Container>

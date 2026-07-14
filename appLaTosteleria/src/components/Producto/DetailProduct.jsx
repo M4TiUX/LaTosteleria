@@ -32,7 +32,7 @@ export function DetailProduct() {
         sx={{
           maxWidth: 700,
           margin: "40px auto",
-          borderRadius: 4,
+          borderRadius: "8px",
           boxShadow: 6,
         }}
       >

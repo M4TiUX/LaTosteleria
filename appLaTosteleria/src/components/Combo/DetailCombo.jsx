@@ -25,7 +25,7 @@ export function DetailCombo() {
         sx={{
           maxWidth: 700,
           margin: "auto",
-          borderRadius: 4,
+          borderRadius: "8px",
           boxShadow: 6,
         }}
       >
