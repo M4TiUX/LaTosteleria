@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import PropTypes from "prop-types";
 import {
   Box,
   Card,
@@ -9,6 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import MenuService from "../../services/MenuService";
+import { formatMenuDate, formatMenuTime, isMenuAvailable } from "./menuUtils";
 
 function MenuItemCard({ item }) {
   return (
@@ -83,15 +85,32 @@ function CategoryBlock({ category }) {
   );
 }
 
+MenuItemCard.propTypes = {
+  item: PropTypes.shape({
+    nombre: PropTypes.string,
+    descripcion: PropTypes.string,
+    precio: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  }).isRequired,
+};
+
+CategoryBlock.propTypes = {
+  category: PropTypes.shape({
+    categoria_nombre: PropTypes.string,
+    productos: PropTypes.array,
+    combos: PropTypes.array,
+  }).isRequired,
+};
+
 export function AvailableMenu() {
-  const [menu, setMenu] = useState(null);
+  const [menus, setMenus] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(null);
+  const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
-    MenuService.getAvailableMenu()
+    MenuService.getMenus()
       .then((response) => {
-        setMenu(response.data);
+        setMenus(response.data ?? []);
         setLoaded(true);
       })
       .catch((err) => {
@@ -99,6 +118,19 @@ export function AvailableMenu() {
         setLoaded(true);
       });
   }, []);
+
+  useEffect(() => {
+    const timerId = setInterval(() => {
+      setNow(new Date());
+    }, 60000);
+
+    return () => clearInterval(timerId);
+  }, []);
+
+  const availableMenus = useMemo(
+    () => menus.filter((menu) => isMenuAvailable(menu, now)),
+    [menus, now],
+  );
 
   if (!loaded) {
     return <p>Cargando menú disponible...</p>;
@@ -108,27 +140,33 @@ export function AvailableMenu() {
     return <p>Error: {error.message}</p>;
   }
 
-  if (!menu) {
+  if (availableMenus.length === 0) {
     return <p>No hay un menú disponible en este momento.</p>;
   }
 
   return (
     <Box>
       <Typography variant="h3" sx={{ mb: 1, fontWeight: 700 }}>
-        {menu.nombre_menu}
+        Menús disponibles ahora
       </Typography>
-      <Chip
-        label={menu.activo ? "Disponible ahora" : "No disponible"}
-        color={menu.activo ? "success" : "default"}
-        sx={{ mb: 2 }}
-      />
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        Disponible del {menu.fecha_inicio} al {menu.fecha_fin} de{" "}
-        {menu.hora_inicio} a {menu.hora_fin}.
+        Estos menús están disponibles según la hora y fecha actual del navegador.
       </Typography>
 
-      {menu.categorias?.map((category) => (
-        <CategoryBlock key={category.categoria_nombre} category={category} />
+      {availableMenus.map((menu) => (
+        <Box key={menu.id_menu} sx={{ mb: 4 }}>
+          <Typography variant="h4" sx={{ mb: 1, fontWeight: 700 }}>
+            {menu.nombre_menu}
+          </Typography>
+          <Chip label="Disponible ahora" color="success" sx={{ mb: 2 }} />
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+            Disponible del {formatMenuDate(menu.fecha_inicio)} {formatMenuTime(menu.hora_inicio)} al {formatMenuDate(menu.fecha_fin)} {formatMenuTime(menu.hora_fin)}.
+          </Typography>
+
+          {menu.categorias?.map((category) => (
+            <CategoryBlock key={category.categoria_nombre} category={category} />
+          ))}
+        </Box>
       ))}
     </Box>
   );

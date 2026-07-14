@@ -4,6 +4,7 @@ import ProductService from "../../services/ProductService";
 import {
   Card,
   CardContent,
+  Box,
   Typography,
   Grid,
   Button,
@@ -72,21 +73,31 @@ export function ListProduct() {
                     {item.descripcion}
                   </Typography>
 
-                  <Typography sx={{ mt: 2 }}>
-                    Categoría: <strong>{item.nombre_categoria}</strong>
-                  </Typography>
-
-                  <Typography
-                    variant="body1"
-                    color="success.main"
-                    fontWeight="bold"
-                    sx={{ mt: 2 }}
+                  <Box
+                    sx={{
+                      mt: 2,
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      gap: 2,
+                    }}
                   >
-                    Precio: ₡{" "}
-                    {new Intl.NumberFormat("es-CR", {
-                      maximumFractionDigits: 0,
-                    }).format(item.precio)}
-                  </Typography>
+                    <Typography>
+                      Categoría: <strong>{item.nombre_categoria}</strong>
+                    </Typography>
+
+                    <Typography
+                      variant="body1"
+                      color="success.main"
+                      fontWeight="bold"
+                      sx={{ textAlign: "right", whiteSpace: "nowrap" }}
+                    >
+                      Precio: ₡{" "}
+                      {new Intl.NumberFormat("es-CR", {
+                        maximumFractionDigits: 0,
+                      }).format(item.precio)}
+                    </Typography>
+                  </Box>
 
                   <Button
                     variant="contained"

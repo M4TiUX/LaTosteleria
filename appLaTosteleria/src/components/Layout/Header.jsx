@@ -74,7 +74,6 @@ export default function Header() {
     { name: "Combos", link: "/Combo", roles: null },
     { name: "Procesos", link: "/Procesos", roles: null },
     { name: "Menús", link: "/menu", roles: null },
-    { name: "Menú disponible", link: "/menu/disponible", roles: null },
     {
       name: "Mantenimiento Peliculas",
       link: "/movie-table/",
@@ -87,13 +86,15 @@ export default function Header() {
   const menuPrincipal = (
     <Box
       sx={{
-        display: { xs: "none", sm: "flex" },
-        flexGrow: 1,
+        display: { xs: "none", lg: "flex" },
+        flex: "1 1 auto",
+        minWidth: 0,
         justifyContent: "center",
         alignItems: "center",
         gap: 1.5,
         mx: 2,
-        flexWrap: "wrap",
+        overflowX: "auto",
+        whiteSpace: "nowrap",
       }}
     >
       {navItems &&
@@ -109,9 +110,11 @@ export default function Header() {
                   component={Link}
                   to={item.link}
                   color="secondary"
-                  sx={{ px: 1.5, py: 0.8 }}
+                    sx={{ px: 1.5, py: 0.8, flexShrink: 0 }}
                 >
-                  <Typography textAlign="center">{item.name}</Typography>
+                    <Typography textAlign="center" noWrap>
+                      {item.name}
+                    </Typography>
                 </Button>
               );
             }
@@ -124,9 +127,11 @@ export default function Header() {
                   component={Link}
                   to={item.link}
                   color="secondary"
-                  sx={{ px: 1.5, py: 0.8 }}
+                    sx={{ px: 1.5, py: 0.8, flexShrink: 0 }}
                 >
-                  <Typography textAlign="center">{item.name}</Typography>
+                    <Typography textAlign="center" noWrap>
+                      {item.name}
+                    </Typography>
                 </Button>
               );
             }
@@ -258,6 +263,8 @@ export default function Header() {
           sx={{
             display: "flex",
             alignItems: "center",
+            flexWrap: "wrap",
+            gap: { xs: 0.5, lg: 1 },
             justifyContent: "space-between",
             px: { xs: 1, sm: 2 },
           }}
@@ -270,7 +277,7 @@ export default function Header() {
               color="inherit"
               aria-controls={menuIdPrincipal}
               aria-haspopup="true"
-              sx={{ mr: 2 }}
+              sx={{ mr: 2, display: { xs: "inline-flex", lg: "none" } }}
               onClick={handleOpenPrincipalMenu}
             >
               <MenuIcon />
@@ -302,8 +309,18 @@ export default function Header() {
                 href="/"
                 aria-label="La Tostelería"
                 color="#EAC28E"
+                sx={{ p: 0.5 }}
               >
-                <BakeryDiningIcon sx={{ color: "#EAC28E" }} />
+                <img
+                  src="/images/LogoLaTosteleria.jpeg"
+                  alt="La Tostelería"
+                  style={{
+                    width: 40,
+                    height: 40,
+                    objectFit: "contain",
+                    display: "block",
+                  }}
+                />
               </IconButton>
             </Tooltip>
           </Box>

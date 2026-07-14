@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import ComboService from "../../services/ComboService";
-import { Card, CardContent, Typography, Grid, Button } from "@mui/material";
+import { Card, CardContent, Typography, Grid, Button, Box } from "@mui/material";
 
 export function ListCombo() {
   const [data, setData] = useState([]);
@@ -41,21 +41,31 @@ export function ListCombo() {
                   {item.descripcion}
                 </Typography>
 
-                <Typography sx={{ mt: 2 }}>
-                  Categoría: <strong>{item.nombre_categoria}</strong>
-                </Typography>
-
-                <Typography
-                  variant="h5"
-                  color="primary"
-                  fontWeight="bold"
-                  sx={{ mt: 2 }}
+                <Box
+                  sx={{
+                    mt: 2,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 2,
+                  }}
                 >
-                  ₡{" "}
-                  {new Intl.NumberFormat("es-CR", {
-                    maximumFractionDigits: 0,
-                  }).format(item.precio_especial)}
-                </Typography>
+                  <Typography>
+                    Categoría: <strong>{item.nombre_categoria}</strong>
+                  </Typography>
+
+                  <Typography
+                    variant="h5"
+                    color="primary"
+                    fontWeight="bold"
+                    sx={{ textAlign: "right", whiteSpace: "nowrap" }}
+                  >
+                    ₡{" "}
+                    {new Intl.NumberFormat("es-CR", {
+                      maximumFractionDigits: 0,
+                    }).format(item.precio_especial)}
+                  </Typography>
+                </Box>
 
                 <Button
                   variant="contained"
