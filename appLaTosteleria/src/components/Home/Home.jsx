@@ -19,7 +19,7 @@ export function Home() {
         alt="Tostada de aguacate"
         style={{
           display: "block",
-          width: "100%",
+          width: "60%",
           maxWidth: 420,
           margin: "24px auto",
           borderRadius: "8px",
