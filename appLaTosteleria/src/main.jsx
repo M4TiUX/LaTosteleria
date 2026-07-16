@@ -23,6 +23,7 @@ import { ListMenus } from "./components/Menu/ListMenus";
 import { DetailMenu } from "./components/Menu/DetailMenu";
 import { AvailableMenu } from "./components/Menu/AvailableMenu";
 import { SeguimientoPedido } from "./components/Pedido/SeguimientoPedido";
+import { CreateProduct } from "./components/Producto/CreateProduct";
 
 const rutas = createBrowserRouter([
   {
@@ -107,6 +108,10 @@ const rutas = createBrowserRouter([
       {
         path: "/pedido/seguimiento/:id",
         element: <SeguimientoPedido />,
+      },
+      {
+        path: "/producto/create",
+        element: <CreateProduct />,
       },
     ],
   },
