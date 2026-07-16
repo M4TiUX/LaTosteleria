@@ -34,13 +34,6 @@ require_once "middleware/AuthMiddleware.php";
 /***--- Agregar todos los modelos*/
 require_once "models/RolModel.php";
 require_once "models/UserModel.php";
-require_once "models/DirectorModel.php";
-require_once "models/ActorModel.php";
-require_once "models/GenreModel.php";
-require_once "models/MovieModel.php";
-require_once "models/ShopRentalModel.php";
-require_once "models/RentalModel.php";
-require_once "models/RentalMovieModel.php";
 require_once "models/ImageModel.php";
 require_once "models/ProductoModel.php";
 require_once "models/ComboModel.php";
@@ -49,13 +42,6 @@ require_once "models/MenuModel.php";
 
 /***--- Agregar todos los controladores*/
 require_once "controllers/UserController.php";
-require_once "controllers/DirectorController.php";
-require_once "controllers/ActorController.php";
-require_once "controllers/GenreController.php";
-require_once "controllers/MovieController.php";
-require_once "controllers/ShopRentalController.php";
-require_once "controllers/InventoryController.php";
-require_once "controllers/RentalController.php";
 require_once "controllers/ImageController.php";
 require_once "controllers/ProductoController.php";
 require_once "controllers/ComboController.php";
