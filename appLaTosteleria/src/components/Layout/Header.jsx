@@ -269,6 +269,27 @@ export default function Header() {
               minWidth: 0,
             }}
           >
+            <Tooltip title="La Tostelería">
+              <IconButton
+                size="large"
+                edge="end"
+                component="a"
+                href="/"
+                aria-label="La Tostelería"
+                sx={{ p: 0.5, color: "secondary.main" }}
+              >
+                <img
+                  src="/images/LogoLaTosteleria.jpeg"
+                  alt="La Tostelería"
+                  style={{
+                    width: 40,
+                    height: 40,
+                    objectFit: "contain",
+                    display: "block",
+                  }}
+                />
+              </IconButton>
+            </Tooltip>
             <IconButton
               size="large"
               color="inherit"
@@ -293,31 +314,11 @@ export default function Header() {
               }}
               open={Boolean(anchorElPrincipal)}
               onClose={handleClosePrincipalMenu}
-              sx={{ display: { xs: "block", md: "none" } }}
+              sx={{ display: { xs: "block", lg: "none" } }}
             >
               {menuPrincipalMobile}
             </Menu>
-            <Tooltip title="La Tostelería">
-              <IconButton
-                size="large"
-                edge="end"
-                component="a"
-                href="/"
-                aria-label="La Tostelería"
-                sx={{ p: 0.5, color: "secondary.main" }}
-              >
-                <img
-                  src="/images/LogoLaTosteleria.jpeg"
-                  alt="La Tostelería"
-                  style={{
-                    width: 40,
-                    height: 40,
-                    objectFit: "contain",
-                    display: "block",
-                  }}
-                />
-              </IconButton>
-            </Tooltip>
+            
           </Box>
 
           {menuPrincipal}
