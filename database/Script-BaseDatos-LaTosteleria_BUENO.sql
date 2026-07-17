@@ -243,7 +243,7 @@ INSERT INTO `estaciones` VALUES (1,'Preparación'),(2,'Cocción'),(3,'Decoració
 INSERT INTO `ingredientes` VALUES (1,'Café espresso'),(2,'Leche'),(3,'Pan artesanal'),(4,'Aguacate'),(5,'Queso crema'),(6,'Galleta'),(7,'Chocolate'),(8,'Harina'),(9,'Azúcar');
 
 -- Datos: menus
-INSERT INTO `menus` VALUES (1,'Menú Desayuno','2026-06-01','2026-12-31','07:00:00','10:30:00',1),(2,'Menú Almuerzo','2026-06-01','2026-12-31','11:00:00','14:00:00',0),(3,'Menú Tarde','2026-06-01','2026-12-31','14:00:00','17:30:00',0),(4,'Menú Especial','2026-06-01','2026-12-31','08:00:00','18:00:00',0);
+INSERT INTO `menus` VALUES (1,'Menú Desayuno','2026-06-01','2026-12-31','07:00:00','10:30:00',1),(2,'Menú Almuerzo','2026-06-01','2026-12-31','11:00:00','14:00:00',1),(3,'Menú Tarde','2026-06-01','2026-12-31','14:00:00','17:30:00',1),(4,'Menú Especial','2026-06-01','2026-12-31','08:00:00','18:00:00',1);
 
 -- Datos: repartidores
 INSERT INTO `repartidores` VALUES (1,'Carlos Ramirez','8888-8888','Motocicleta'),(2,'Ana Mora','8777-7777','Automovil');
@@ -268,6 +268,111 @@ INSERT INTO `procesos_preparacion` VALUES (1,1,1,1,3),(2,2,1,1,4),(3,2,2,2,5),(4
 
 -- Datos: producto_ingrediente
 INSERT INTO `producto_ingrediente` VALUES (1,1),(1,2),(2,3),(2,4),(3,5),(3,6),(4,7),(4,8),(4,9);
+
+/* =====================================================
+   DATOS ADICIONALES
+   ===================================================== */
+
+-- Nuevas categorías
+INSERT INTO categorias (id_categoria,nombre_categoria) VALUES
+(4,'Sandwiches'),
+(5,'Frappés');
+
+-- Nuevas estaciones
+INSERT INTO estaciones (id_estacion,nombre_estacion) VALUES
+(4,'Empaque'),
+(5,'Bebidas Frías');
+
+-- Nuevos ingredientes
+INSERT INTO ingredientes VALUES
+(10,'Jamón'),
+(11,'Queso Mozzarella'),
+(12,'Tomate'),
+(13,'Albahaca'),
+(14,'Pollo'),
+(15,'Mantequilla'),
+(16,'Canela'),
+(17,'Helado de Vainilla'),
+(18,'Caramelo'),
+(19,'Fresas');
+
+-- Nuevos menús
+INSERT INTO menus VALUES
+(5,'Menú Frappés','2026-06-01','2026-12-31','12:00:00','18:00:00',0),
+(6,'Menú Fin de Semana','2026-06-01','2026-12-31','08:00:00','16:00:00',0);
+
+-- Nuevos repartidores
+INSERT INTO repartidores VALUES
+(3,'Luis Hernández','8666-1111','Motocicleta'),
+(4,'María Gómez','8555-2222','Bicicleta');
+
+-- Nuevo rol
+INSERT INTO roles VALUES
+(3,'Empleado');
+
+-- Nuevos productos
+INSERT INTO productos VALUES
+(5,1,'Cappuccino','Café espresso con espuma de leche',2000.00,'cappuccino.jpg'),
+(6,1,'Chocolate Caliente','Chocolate caliente artesanal',2200.00,'chocolate-caliente.jpg'),
+(7,2,'Tostada Caprese','Pan artesanal con tomate, mozzarella y albahaca',3500.00,'caprese.jpg'),
+(8,2,'Sándwich de Pollo','Pan artesanal con pollo y queso',4200.00,'sandwich-pollo.jpg'),
+(9,3,'Pie de Manzana','Pie artesanal con canela',2800.00,'pie-manzana.jpg'),
+(10,5,'Frappé de Caramelo','Frappé con caramelo y crema batida',3200.00,'frappe-caramelo.jpg');
+
+-- Nuevos combos
+INSERT INTO combos VALUES
+(5,1,'Combo Cappuccino','Cappuccino con cheesecake',4200.00),
+(6,2,'Combo Caprese','Tostada Caprese y café latte',5000.00),
+(7,5,'Combo Frappé Dulce','Frappé de Caramelo y Brownie',4500.00);
+
+-- Relación combos-productos
+INSERT INTO combo_producto VALUES
+(5,5,1),
+(5,3,1),
+(6,7,1),
+(6,1,1),
+(7,10,1),
+(7,4,1);
+
+-- Nuevos elementos de menú
+INSERT INTO menu_items VALUES
+(10,5,10,NULL),
+(11,5,NULL,7),
+(12,6,5,NULL),
+(13,6,7,NULL),
+(14,6,8,NULL),
+(15,6,NULL,6);
+
+-- Procesos de preparación
+INSERT INTO procesos_preparacion VALUES
+(7,5,1,1,3),
+(8,6,1,1,5),
+(9,7,1,1,4),
+(10,7,2,2,5),
+(11,8,1,1,5),
+(12,8,2,2,6),
+(13,9,1,1,8),
+(14,10,5,1,6);
+
+-- Relación producto-ingrediente
+INSERT INTO producto_ingrediente VALUES
+(5,1),
+(5,2),
+(6,7),
+(6,2),
+(7,3),
+(7,11),
+(7,12),
+(7,13),
+(8,3),
+(8,14),
+(8,11),
+(9,8),
+(9,9),
+(9,16),
+(10,2),
+(10,17),
+(10,18);
 
 SET FOREIGN_KEY_CHECKS = 1;
 
