@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -18,12 +18,8 @@ import { useCart } from "../../hooks/useCart";
 import { UserContext } from "../../context/UserContext";
 
 export default function Header() {
-  const { user, decodeToken, autorize } = useContext(UserContext);
-  const [userData, setUserData] = useState(decodeToken());
-
-  useEffect(() => {
-    setUserData(decodeToken());
-  }, [user]);
+  const { decodeToken, autorize } = useContext(UserContext);
+  const userData = decodeToken();
 
   const { cart, getCountItems } = useCart();
   const [anchorElUser, setAnchorEl] = useState(null);
@@ -68,6 +64,7 @@ export default function Header() {
     { name: "Combos", link: "/Combo", roles: null },
     { name: "Procesos", link: "/Procesos", roles: null },
     { name: "Menús", link: "/menu", roles: null },
+    { name: "Mantenimiento Menús", link: "/menu/mantenimiento", roles: ["Administrador"] },
     {
       name: "Mantenimiento Peliculas",
       link: "/movie-table/",
@@ -92,7 +89,7 @@ export default function Header() {
       }}
     >
       {navItems.map((item, index) => {
-        if (item.roles && userData && !autorize({ requiredRoles: item.roles })) {
+        if (item.roles && userData && !autorize(item.roles)) {
           return null;
         }
 
@@ -118,9 +115,13 @@ export default function Header() {
   );
 
   const menuPrincipalMobile = navItems.map((page, index) => (
-    <MenuItem key={index} component={Link} to={page.link}>
-      <Typography sx={{ textAlign: "center" }}>{page.name}</Typography>
-    </MenuItem>
+    (page.roles && userData && !autorize(page.roles)) ? null : (
+      page.roles == null || userData ? (
+        <MenuItem key={index} component={Link} to={page.link}>
+          <Typography sx={{ textAlign: "center" }}>{page.name}</Typography>
+        </MenuItem>
+      ) : null
+    )
   ));
 
   const userMenuId = "user-menu";

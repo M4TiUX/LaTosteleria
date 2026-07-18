@@ -36,7 +36,7 @@ export default function UserProvider({ children }) {
   };
 
   //requiredRoles=['Administrador','Cliente']
-  const autorize = ({ requiredRoles }) => {
+  const autorize = (requiredRoles = []) => {
     const userData = decodeToken();
     if (userData && requiredRoles) {
       console.log(
