@@ -24,6 +24,8 @@ import { DetailMenu } from "./components/Menu/DetailMenu";
 import { AvailableMenu } from "./components/Menu/AvailableMenu";
 import { SeguimientoPedido } from "./components/Pedido/SeguimientoPedido";
 import { CreateProduct } from "./components/Producto/CreateProduct";
+import { UpdateProduct } from "./components/Producto/UpdateProduct";
+import { ToastContainer } from "react-toastify";
 
 const rutas = createBrowserRouter([
   {
@@ -41,9 +43,7 @@ const rutas = createBrowserRouter([
         //Grupo 1
         path: "/",
         element: <Auth requiredRoles={["Administrador"]} />,
-        children: [
-          
-        ],
+        children: [],
       },
       {
         path: "/unauthorized",
@@ -113,6 +113,10 @@ const rutas = createBrowserRouter([
         path: "/producto/create",
         element: <CreateProduct />,
       },
+      {
+        path: "/producto/update/:id",
+        element: <UpdateProduct />,
+      },
     ],
   },
 ]);
@@ -121,6 +125,17 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <UserProvider>
       <RouterProvider router={rutas} />
+
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="colored"
+      />
     </UserProvider>
   </StrictMode>,
 );
