@@ -1,53 +1,63 @@
 <?php
-class RolModel{
-    public $enlace;
-    public function __construct() {
-        
-        $this->enlace=new MySqlConnect();
-       
-    }
-    public function all(){
-        try {
-            //Consulta sql
-			$vSql = "SELECT * FROM rol;";
-			
-            //Ejecutar la consulta
-			$vResultado = $this->enlace->ExecuteSQL ( $vSql);
-				
-			// Retornar el objeto
-			return $vResultado;
-		} catch ( Exception $e ) {
-			die ( $e->getMessage () );
-		}
-    }
+class RolModel
+{
+	public $enlace;
 
-    public function get($id){
-        try {
-            //Consulta sql
-			$vSql = "SELECT * FROM rol where id=$id";
-			
-            //Ejecutar la consulta
-			$vResultado = $this->enlace->ExecuteSQL ( $vSql);
-			// Retornar el objeto
-			return $vResultado[0];
-		} catch ( Exception $e ) {
-			die ( $e->getMessage () );
+	public function __construct()
+	{
+		$this->enlace = new MySqlConnect();
+	}
+
+	public function all()
+	{
+		try {
+			$vSql = "SELECT
+						id_rol AS id,
+						nombre_rol AS name
+					FROM roles
+					ORDER BY nombre_rol ASC";
+
+			return $this->enlace->ExecuteSQL($vSql);
+		} catch (Exception $e) {
+			handleException($e);
 		}
-    }
-    public function getRolUser($idUser){
-        try {
-            //Consulta sql
-			$vSql = "SELECT r.id,r.name
-            FROM rol r,user u 
-            where r.id=u.rol_id and u.id=$idUser";
-			
-            //Ejecutar la consulta
-			$vResultado = $this->enlace->ExecuteSQL ( $vSql);
-			// Retornar el objeto
-			return $vResultado[0];
-		} catch ( Exception $e ) {
-			die ( $e->getMessage () );
+	}
+
+	public function get($id)
+	{
+		try {
+			$id = (int) $id;
+			$vSql = "SELECT
+						id_rol AS id,
+						nombre_rol AS name
+					FROM roles
+					WHERE id_rol = $id";
+
+			$vResultado = $this->enlace->ExecuteSQL($vSql);
+
+			return !empty($vResultado) ? $vResultado[0] : null;
+		} catch (Exception $e) {
+			handleException($e);
 		}
-    }
-	
+	}
+
+	public function getRolUser($idUser)
+	{
+		try {
+			$idUser = (int) $idUser;
+			$vSql = "SELECT
+						r.id_rol AS id,
+						r.nombre_rol AS name
+					FROM roles r
+					INNER JOIN usuarios u
+						ON r.id_rol = u.rol_id
+					WHERE u.id_usuario = $idUser";
+
+			$vResultado = $this->enlace->ExecuteSQL($vSql);
+
+			return !empty($vResultado) ? $vResultado[0] : null;
+		} catch (Exception $e) {
+			handleException($e);
+		}
+	}
 }

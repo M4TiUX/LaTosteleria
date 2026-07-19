@@ -22,6 +22,9 @@ import { TableProduct } from "./components/Producto/TableProduct";
 import { ListMenus } from "./components/Menu/ListMenus";
 import { DetailMenu } from "./components/Menu/DetailMenu";
 import { AvailableMenu } from "./components/Menu/AvailableMenu";
+import { CreateMenu } from "./components/Menu/CreateMenu";
+import { EditMenu } from "./components/Menu/EditMenu";
+import { MenuMaintenance } from "./components/Menu/MenuMaintenance";
 import { SeguimientoPedido } from "./components/Pedido/SeguimientoPedido";
 import { CreateProduct } from "./components/Producto/CreateProduct";
 import { UpdateProduct } from "./components/Producto/UpdateProduct";
@@ -40,10 +43,21 @@ const rutas = createBrowserRouter([
       //Grupo 2: Cliente
       //Grupo 3: Administrador y el Cliente
       {
-        //Grupo 1
-        path: "/",
         element: <Auth requiredRoles={["Administrador"]} />,
-        children: [],
+        children: [
+          {
+            path: "/menu/mantenimiento",
+            element: <MenuMaintenance />,
+          },
+          {
+            path: "/menu/mantenimiento/crear",
+            element: <CreateMenu />,
+          },
+          {
+            path: "/menu/mantenimiento/editar/:id",
+            element: <EditMenu />,
+          },
+        ],
       },
       {
         path: "/unauthorized",

@@ -251,6 +251,13 @@ INSERT INTO `repartidores` VALUES (1,'Carlos Ramirez','8888-8888','Motocicleta')
 -- Datos: roles
 INSERT INTO `roles` VALUES (1,'Administrador'),(2,'Cliente');
 
+-- Datos: usuarios
+-- Credenciales iniciales del administrador:
+-- correo: admin@latosteleria.com
+-- contrasena: Admin123!
+INSERT INTO `usuarios` VALUES
+(1,1,'Administrador General','admin@latosteleria.com','$2y$10$8txu.MMIP0sB2AG.jPgGSuTM/j/mu9QyOscvjPMG4tsNPmmVOtSdu',NULL,NULL);
+
 -- Datos: combos
 INSERT INTO `combos` VALUES (1,1,'Combo Desayuno Tostelero','Incluye café latte, tostada de aguacate y cheesecake.',6500.00),(2,1,'Combo Dulce Café','Incluye café latte y cheesecake.',4000.00),(3,2,'Combo Merienda','Incluye café latte y brownie de chocolate',2800.00),(4,3,'Combo Postres','Incluye cheesecake y brownie',3500.00);
 
