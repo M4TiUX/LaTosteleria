@@ -44,10 +44,23 @@ export function UpdateProduct() {
     try {
       setGuardando(true);
 
-      const response = await ProductService.updateProduct({
-        id_producto: Number(id),
-        ...datos,
+      const formData = new FormData();
+
+      formData.append("id_producto", Number(id));
+      formData.append("nombre_producto", datos.nombre_producto);
+      formData.append("descripcion", datos.descripcion);
+      formData.append("precio", datos.precio);
+      formData.append("categoria_id", datos.categoria_id);
+
+      datos.ingredientes.forEach((ingredienteId) => {
+        formData.append("ingredientes[]", ingredienteId);
       });
+
+      if (datos.archivoImagen) {
+        formData.append("imagen", datos.archivoImagen);
+      }
+
+      const response = await ProductService.updateProduct(formData);
 
       toast.success(
         response.data.message || "Producto actualizado correctamente.",

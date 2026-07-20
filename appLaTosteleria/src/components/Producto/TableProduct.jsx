@@ -1,19 +1,35 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import ProductService from "../../services/ProductService";
+
 import {
+  Box,
+  Button,
+  Chip,
+  Container,
+  InputAdornment,
+  MenuItem,
+  Paper,
+  Select,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
+  TextField,
   Typography,
-  Button,
 } from "@mui/material";
+
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+import EditIcon from "@mui/icons-material/Edit";
+import SearchIcon from "@mui/icons-material/Search";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 export function TableProduct() {
   const [data, setData] = useState([]);
+  const [busqueda, setBusqueda] = useState("");
+  const [categoria, setCategoria] = useState("");
 
   useEffect(() => {
     ProductService.getProducts()
@@ -21,59 +37,303 @@ export function TableProduct() {
       .catch((error) => console.log(error));
   }, []);
 
+  const productosFiltrados = data.filter((item) => {
+    const coincideBusqueda = item.nombre_producto
+      .toLowerCase()
+      .includes(busqueda.toLowerCase());
+
+    const coincideCategoria =
+      categoria === "" || item.nombre_categoria === categoria;
+
+    return coincideBusqueda && coincideCategoria;
+  });
+
+  const categorias = [
+    ...new Set(data.map((item) => item.nombre_categoria)),
+  ];
+
   return (
-    <>
-      <Typography variant="h3" sx={{ mb: 4 }}>
-        Mantenimiento de Productos
-      </Typography>
+    <Container maxWidth="xl" sx={{ py: 5 }}>
+      {/* Encabezado */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 2,
+          mb: 4,
+        }}
+      >
+        <Box>
+          <Typography
+            variant="h3"
+            sx={{
+              fontWeight: 700,
+              color: "#4a1714",
+            }}
+          >
+            Mantenimiento de Productos
+          </Typography>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>
-                <strong>ID</strong>
-              </TableCell>
-              <TableCell>
-                <strong>Producto</strong>
-              </TableCell>
-              <TableCell>
-                <strong>Categoría</strong>
-              </TableCell>
-              <TableCell>
-                <strong>Precio</strong>
-              </TableCell>
-              <TableCell>
-                <strong>Acciones</strong>
-              </TableCell>
-            </TableRow>
-          </TableHead>
+          <Typography
+            variant="body1"
+            sx={{
+              color: "text.secondary",
+              mt: 1,
+            }}
+          >
+            Administra los productos disponibles en el sistema
+          </Typography>
+        </Box>
 
-          <TableBody>
-            {data.map((item) => (
-              <TableRow key={item.id_producto}>
-                <TableCell>{item.id_producto}</TableCell>
-                <TableCell>{item.nombre_producto}</TableCell>
-                <TableCell>{item.nombre_categoria}</TableCell>
+        <Button
+          component={Link}
+          to="/producto/create"
+          variant="contained"
+          startIcon={<AddCircleIcon />}
+          sx={{
+            backgroundColor: "#9b1209",
+            px: 3,
+            py: 1.5,
+            borderRadius: 2,
+            textTransform: "none",
+            fontSize: "1rem",
+            fontWeight: 600,
+
+            "&:hover": {
+              backgroundColor: "#7d0e07",
+            },
+          }}
+        >
+          Nuevo Producto
+        </Button>
+      </Box>
+
+      {/* Contenedor principal */}
+      <Paper
+        elevation={4}
+        sx={{
+          p: 3,
+          borderRadius: 4,
+        }}
+      >
+        {/* Filtros */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 2,
+            mb: 3,
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              gap: 2,
+              flexWrap: "wrap",
+            }}
+          >
+            <TextField
+              placeholder="Buscar producto..."
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              size="small"
+              sx={{ width: 300 }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <Select
+              value={categoria}
+              onChange={(e) => setCategoria(e.target.value)}
+              displayEmpty
+              size="small"
+              sx={{ width: 250 }}
+            >
+              <MenuItem value="">
+                Todas las categorías
+              </MenuItem>
+
+              {categorias.map((cat) => (
+                <MenuItem key={cat} value={cat}>
+                  {cat}
+                </MenuItem>
+              ))}
+            </Select>
+          </Box>
+
+          <Chip
+            label={`Total: ${productosFiltrados.length} productos`}
+            sx={{
+              fontSize: "0.95rem",
+              px: 1,
+            }}
+          />
+        </Box>
+
+        {/* Tabla */}
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow
+                sx={{
+                  backgroundColor: "#faf4f2",
+                }}
+              >
                 <TableCell>
-                  ₡{" "}
-                  {new Intl.NumberFormat("es-CR", {
-                    maximumFractionDigits: 0,
-                  }).format(item.precio)}
+                  <strong>ID</strong>
                 </TableCell>
+
                 <TableCell>
-                  <Button
-                    variant="contained"
-                    href={`/producto/${item.id_producto}`}
-                  >
-                    Detalle
-                  </Button>
+                  <strong>Imagen</strong>
+                </TableCell>
+
+                <TableCell>
+                  <strong>Producto</strong>
+                </TableCell>
+
+                <TableCell>
+                  <strong>Categoría</strong>
+                </TableCell>
+
+                <TableCell>
+                  <strong>Precio</strong>
+                </TableCell>
+
+                <TableCell align="center">
+                  <strong>Acciones</strong>
                 </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </>
+            </TableHead>
+
+            <TableBody>
+              {productosFiltrados.map((item) => (
+                <TableRow
+                  key={item.id_producto}
+                  hover
+                  sx={{
+                    "&:last-child td, &:last-child th": {
+                      border: 0,
+                    },
+                  }}
+                >
+                  <TableCell>
+                    {item.id_producto}
+                  </TableCell>
+
+                  <TableCell>
+                    <Box
+                      component="img"
+                      src={`/images/${item.imagen}`}
+                      alt={item.nombre_producto}
+                      sx={{
+                        width: 70,
+                        height: 70,
+                        objectFit: "cover",
+                        borderRadius: 2,
+                        border: "1px solid",
+                        borderColor: "divider",
+                      }}
+                    />
+                  </TableCell>
+
+                  <TableCell>
+                    <Typography fontWeight={600}>
+                      {item.nombre_producto}
+                    </Typography>
+                  </TableCell>
+
+                  <TableCell>
+                    <Chip
+                      label={item.nombre_categoria}
+                      size="small"
+                      variant="outlined"
+                      sx={{
+                        borderRadius: 2,
+                      }}
+                    />
+                  </TableCell>
+
+                  <TableCell>
+                    <Typography fontWeight={600}>
+                      ₡{" "}
+                      {new Intl.NumberFormat("es-CR", {
+                        maximumFractionDigits: 0,
+                      }).format(item.precio)}
+                    </Typography>
+                  </TableCell>
+
+                  <TableCell align="center">
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        gap: 1,
+                      }}
+                    >
+                      <Button
+                        component={Link}
+                        to={`/producto/${item.id_producto}`}
+                        variant="contained"
+                        startIcon={<VisibilityIcon />}
+                        size="small"
+                        sx={{
+                          textTransform: "none",
+                          borderRadius: 2,
+                        }}
+                      >
+                        Detalle
+                      </Button>
+
+                      <Button
+                        component={Link}
+                        to={`/producto/update/${item.id_producto}`}
+                        variant="outlined"
+                        startIcon={<EditIcon />}
+                        size="small"
+                        sx={{
+                          textTransform: "none",
+                          borderRadius: 2,
+                          borderColor: "#b71c1c",
+                          color: "#b71c1c",
+
+                          "&:hover": {
+                            borderColor: "#8e0000",
+                            backgroundColor: "#fff4f4",
+                          },
+                        }}
+                      >
+                        Editar
+                      </Button>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              ))}
+
+              {productosFiltrados.length === 0 && (
+                <TableRow>
+                  <TableCell
+                    colSpan={6}
+                    align="center"
+                    sx={{ py: 5 }}
+                  >
+                    <Typography color="text.secondary">
+                      No se encontraron productos
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+    </Container>
   );
 }

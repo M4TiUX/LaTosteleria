@@ -15,22 +15,38 @@ export function CreateProduct() {
     try {
       setGuardando(true);
 
-      const response = await ProductService.createProduct(producto);
+      const formData = new FormData();
 
-      toast.success(response.data.message || "Producto registrado correctamente.");
+      formData.append("nombre_producto", producto.nombre_producto);
+      formData.append("descripcion", producto.descripcion);
+      formData.append("precio", producto.precio);
+      formData.append("categoria_id", producto.categoria_id);
+
+      producto.ingredientes.forEach((ingredienteId) => {
+        formData.append("ingredientes[]", ingredienteId);
+      });
+
+      if (producto.archivoImagen) {
+        formData.append("imagen", producto.archivoImagen);
+      }
+
+      const response = await ProductService.createProduct(formData);
+
+      toast.success(
+        response.data.message || "Producto registrado correctamente.",
+      );
 
       navigate("/producto");
     } catch (error) {
       console.error("Error al guardar el producto:", error);
 
       if (error.response) {
-
-        toast.error(error.response?.data.message || "Ocurrió un error al registrar el producto.");
-        
+        toast.error(
+          error.response?.data.message ||
+            "Ocurrió un error al registrar el producto.",
+        );
       } else {
-
-        toast.error(error.response?.data.message || "No fue posible comunicarse con el servidor.");
-
+        toast.error("No fue posible comunicarse con el servidor.");
       }
     } finally {
       setGuardando(false);

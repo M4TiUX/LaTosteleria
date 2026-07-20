@@ -11,12 +11,12 @@ class ProductService {
     return axios.get(`${BASE_URL}/${productId}`);
   }
 
-  createProduct(product) {
-    return axios.post(`${BASE_URL}/create`, product);
+  createProduct(formData) {
+    return axios.post(`${BASE_URL}/create`, formData);
   }
 
-  updateProduct(product) {
-    return axios.put(`${BASE_URL}/update`, product);
+  updateProduct(formData) {
+    return axios.post(`${BASE_URL}/update`, formData);
   }
 }
 

@@ -66,7 +66,10 @@ export default function ProductForm({
 
   const [nombreImagen, setNombreImagen] = useState(defaultValues?.imagen || "");
 
-  const [vistaPrevia, setVistaPrevia] = useState(defaultValues?.imagen || null);
+  const [vistaPrevia, setVistaPrevia] = useState(
+    defaultValues?.imagen ? `/images/${defaultValues.imagen}` : null,
+  );
+  const [archivoImagen, setArchivoImagen] = useState(null);
 
   const valoresIniciales = {
     nombre_producto: "",
@@ -132,17 +135,12 @@ export default function ProductForm({
 
     const urlTemporal = URL.createObjectURL(archivo);
 
+    // Guardar el archivo real
+    setArchivoImagen(archivo);
+
+    // Mostrar información y vista previa
     setNombreImagen(archivo.name);
     setVistaPrevia(urlTemporal);
-
-    /*
-     * Por ahora se guarda únicamente el nombre del archivo,
-     * porque el backend recibe el campo imagen como texto.
-     */
-    setValue("imagen", archivo.name, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
   };
 
   const enviarFormulario = (datos) => {
@@ -150,6 +148,7 @@ export default function ProductForm({
       ...datos,
       precio: Number(datos.precio),
       categoria_id: Number(datos.categoria_id),
+      archivoImagen: archivoImagen,
     });
   };
 
