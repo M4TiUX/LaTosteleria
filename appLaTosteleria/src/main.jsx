@@ -6,17 +6,6 @@ import { createBrowserRouter } from "react-router-dom";
 import { Home } from "./components/Home/Home";
 import { RouterProvider } from "react-router";
 import { PageNotFound } from "./components/Home/PageNotFound";
-import { ListMovies } from "./components/Ventanas/ListMovies";
-import { DetailMovie } from "./components/Ventanas/DetailMovie";
-import ListRentals from "./components/Rental/ListRentals";
-import DetailRental from "./components/Rental/DetailRental";
-import TableMovies from "./components/Ventanas/TableMovies";
-import { CreateMovie } from "./components/Ventanas/CreateMovie";
-import { UpdateMovie } from "./components/Ventanas/UpdateMovie";
-import { CatalogMovies } from "./components/Ventanas/CatalogMovies";
-import { MovieUploadImage } from "./components/Ventanas/MovieUploadImage";
-import { CreateMovieRental } from "./components/Rental/CreateMovieRental";
-import { GraphRetal } from "./components/Rental/GraphRental";
 import UserProvider from "./components/User/UserProvider";
 import { Unauthorized } from "./components/User/Unauthorized";
 import { Login } from "./components/User/Login";
@@ -33,7 +22,16 @@ import { TableProduct } from "./components/Producto/TableProduct";
 import { ListMenus } from "./components/Menu/ListMenus";
 import { DetailMenu } from "./components/Menu/DetailMenu";
 import { AvailableMenu } from "./components/Menu/AvailableMenu";
+import { CreateMenu } from "./components/Menu/CreateMenu";
+import { EditMenu } from "./components/Menu/EditMenu";
+import { MenuMaintenance } from "./components/Menu/MenuMaintenance";
 import { SeguimientoPedido } from "./components/Pedido/SeguimientoPedido";
+import { CreateProduct } from "./components/Producto/CreateProduct";
+import { UpdateProduct } from "./components/Producto/UpdateProduct";
+import { ToastContainer } from "react-toastify";
+import { TableCombo } from "./components/Combo/TableCombo";
+import { CreateCombo } from "./components/Combo/CreateCombo";
+import { UpdateCombo } from "./components/Combo/UpdateCombo";
 
 const rutas = createBrowserRouter([
   {
@@ -48,55 +46,21 @@ const rutas = createBrowserRouter([
       //Grupo 2: Cliente
       //Grupo 3: Administrador y el Cliente
       {
-        //Grupo 1
-        path: "/",
         element: <Auth requiredRoles={["Administrador"]} />,
         children: [
           {
-            path: "/movie-table",
-            element: <TableMovies />,
+            path: "/menu/mantenimiento",
+            element: <MenuMaintenance />,
           },
           {
-            path: "/movie/crear/",
-            element: <CreateMovie />,
+            path: "/menu/mantenimiento/crear",
+            element: <CreateMenu />,
           },
           {
-            path: "/movie/update/:id",
-            element: <UpdateMovie />,
+            path: "/menu/mantenimiento/editar/:id",
+            element: <EditMenu />,
           },
         ],
-      },
-      {
-        path: "/movie/",
-        element: <ListMovies />,
-      },
-      {
-        path: "/catalog-movies/",
-        element: <CatalogMovies />,
-      },
-      {
-        path: "/movie/:id",
-        element: <DetailMovie />,
-      },
-      {
-        path: "movie/image/",
-        element: <MovieUploadImage />,
-      },
-      {
-        path: "/rental",
-        element: <ListRentals />,
-      },
-      {
-        path: "/retal/:id",
-        element: <DetailRental />,
-      },
-      {
-        path: "/rental/crear/",
-        element: <CreateMovieRental />,
-      },
-      {
-        path: "/rental/graph",
-        element: <GraphRetal />,
       },
       {
         path: "/unauthorized",
@@ -162,6 +126,26 @@ const rutas = createBrowserRouter([
         path: "/pedido/seguimiento/:id",
         element: <SeguimientoPedido />,
       },
+      {
+        path: "/producto/create",
+        element: <CreateProduct />,
+      },
+      {
+        path: "/producto/update/:id",
+        element: <UpdateProduct />,
+      },
+      {
+        path: "/combo-table",
+        element: <TableCombo />,
+      },
+      {
+        path: "/combo/create",
+        element: <CreateCombo />,
+      },
+      {
+        path: "/combo/update/:id",
+        element: <UpdateCombo />,
+      },
     ],
   },
 ]);
@@ -170,6 +154,17 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <UserProvider>
       <RouterProvider router={rutas} />
+
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="colored"
+      />
     </UserProvider>
   </StrictMode>,
 );

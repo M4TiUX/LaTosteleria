@@ -1,8 +1,9 @@
 import { useContext } from 'react';
+import PropTypes from 'prop-types';
 import { useLocation, Navigate, Outlet } from 'react-router-dom';
 import { UserContext } from '../../context/UserContext';
 
-export function Auth(requiredRoles) {
+export function Auth({ requiredRoles }) {
   const location = useLocation();
   const { user, autorize } = useContext(UserContext);
   let render = null;
@@ -15,3 +16,7 @@ export function Auth(requiredRoles) {
 
   return <div>{render}</div>;
 }
+
+Auth.propTypes = {
+  requiredRoles: PropTypes.arrayOf(PropTypes.string).isRequired,
+};

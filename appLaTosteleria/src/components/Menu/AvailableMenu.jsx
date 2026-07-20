@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import {
   Box,
+  Button,
   Card,
   CardContent,
   Chip,
@@ -9,8 +10,9 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { Link } from "react-router-dom";
 import MenuService from "../../services/MenuService";
-import { formatMenuDate, formatMenuTime, isMenuAvailable } from "./menuUtils";
+import { formatMenuDate, formatMenuTime } from "./menuUtils";
 
 function MenuItemCard({ item }) {
   return (
@@ -102,15 +104,14 @@ CategoryBlock.propTypes = {
 };
 
 export function AvailableMenu() {
-  const [menus, setMenus] = useState([]);
+  const [menu, setMenu] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(null);
-  const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
-    MenuService.getMenus()
+    MenuService.getAvailableMenu()
       .then((response) => {
-        setMenus(response.data ?? []);
+        setMenu(response.data ?? null);
         setLoaded(true);
       })
       .catch((err) => {
@@ -118,19 +119,6 @@ export function AvailableMenu() {
         setLoaded(true);
       });
   }, []);
-
-  useEffect(() => {
-    const timerId = setInterval(() => {
-      setNow(new Date());
-    }, 60000);
-
-    return () => clearInterval(timerId);
-  }, []);
-
-  const availableMenus = useMemo(
-    () => menus.filter((menu) => isMenuAvailable(menu, now)),
-    [menus, now],
-  );
 
   if (!loaded) {
     return <p>Cargando menú disponible...</p>;
@@ -140,7 +128,7 @@ export function AvailableMenu() {
     return <p>Error: {error.message}</p>;
   }
 
-  if (availableMenus.length === 0) {
+  if (!menu) {
     return <p>No hay un menú disponible en este momento.</p>;
   }
 
@@ -150,24 +138,26 @@ export function AvailableMenu() {
         Menús disponibles ahora
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        Estos menús están disponibles según la hora y fecha actual del navegador.
+        El sistema muestra un único menú disponible según la fecha y hora actual.
       </Typography>
 
-      {availableMenus.map((menu) => (
-        <Box key={menu.id_menu} sx={{ mb: 4 }}>
-          <Typography variant="h4" sx={{ mb: 1, fontWeight: 700 }}>
-            {menu.nombre_menu}
-          </Typography>
-          <Chip label="Disponible ahora" color="success" sx={{ mb: 2 }} />
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-            Disponible del {formatMenuDate(menu.fecha_inicio)} {formatMenuTime(menu.hora_inicio)} al {formatMenuDate(menu.fecha_fin)} {formatMenuTime(menu.hora_fin)}.
-          </Typography>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" sx={{ mb: 1, fontWeight: 700 }}>
+          {menu.nombre_menu}
+        </Typography>
+        <Chip label="Disponible ahora" color="success" sx={{ mb: 2 }} />
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+          Disponible del {formatMenuDate(menu.fecha_inicio)} {formatMenuTime(menu.hora_inicio)} al {formatMenuDate(menu.fecha_fin)} {formatMenuTime(menu.hora_fin)}.
+        </Typography>
 
-          {menu.categorias?.map((category) => (
-            <CategoryBlock key={category.categoria_nombre} category={category} />
-          ))}
-        </Box>
-      ))}
+        <Button component={Link} to={`/menu/${menu.id_menu}`} variant="outlined" sx={{ mb: 3 }}>
+          Ver detalle completo
+        </Button>
+
+        {menu.categorias?.map((category) => (
+          <CategoryBlock key={category.categoria_nombre} category={category} />
+        ))}
+      </Box>
     </Box>
   );
 }

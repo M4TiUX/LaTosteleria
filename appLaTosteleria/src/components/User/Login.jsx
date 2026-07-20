@@ -8,7 +8,6 @@ import Button from '@mui/material/Button';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useNavigate } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
 import toast from 'react-hot-toast';
 import UserService from '../../services/UserService';
 import { UserContext } from '../../context/UserContext';
@@ -84,7 +83,6 @@ export function Login() {
   if (error) return <p>Error: {error.message}</p>;
   return (
     <>
-      <Toaster />
       <form onSubmit={handleSubmit(onSubmit, onError)} noValidate>
         <Grid container spacing={1}>
           <Grid size={12} sm={12}>

@@ -22,7 +22,7 @@ export function Layout({ children }) {
           pb: { xs: 12, md: 14 },
         }} 
       > 
-      <Toaster position='bottom-right' />
+      <Toaster position='top-center' />
         {children} 
       </Container> 
       <Footer /> 
