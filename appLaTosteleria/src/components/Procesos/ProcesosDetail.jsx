@@ -46,7 +46,7 @@ export function ProcesosDetail() {
           textTransform: "none",
           padding: 0,
           color: "#d97706",
-          "&:hover": { textDecoration: "underline", backgroundColor: "primary.light", p: 1 , color: "primary.contrastText" },
+          "&:hover": { textDecoration: "underline", backgroundColor: "primary.light", p: 1 , color: "primary.contrastText" }
         }}
       >
         Volver a procesos

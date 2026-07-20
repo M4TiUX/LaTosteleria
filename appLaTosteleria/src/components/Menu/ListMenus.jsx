@@ -58,9 +58,22 @@ export function ListMenus() {
 
   return (
     <Box>
-      <Typography variant="h3" sx={{ mb: 1, fontWeight: 700 }}>
-        Menús registrados
-      </Typography>
+      <Stack
+        direction={{ xs: 'column', md: 'row' }}
+        alignItems={{ xs: 'flex-start', md: 'center' }}
+        justifyContent="space-between"
+        spacing={2}
+        sx={{ mb: 2 }}
+      >
+        <Box>
+          <Typography variant="h3" sx={{ mb: 1, fontWeight: 700 }}>
+            Menús registrados
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Consulta los menús registrados por fecha y horario.
+          </Typography>
+        </Box>
+      </Stack>
 
       <Box
         sx={{
@@ -114,15 +127,17 @@ export function ListMenus() {
                       Fin: {formatMenuDate(menu.fecha_fin)} {formatMenuTime(menu.hora_fin)}
                     </Typography>
                   </Stack>
-                  <Button
-                    component={Link}
-                    to={`/menu/${menu.id_menu}`}
-                    variant="contained"
-                    fullWidth
-                    sx={{ mt: 3, borderRadius: '8px' }}
-                  >
-                    Ver menú
-                  </Button>
+                  <Stack direction="row" spacing={1.5} sx={{ mt: 3 }}>
+                    <Button
+                      component={Link}
+                      to={`/menu/${menu.id_menu}`}
+                      variant="contained"
+                      fullWidth
+                      sx={{ borderRadius: '8px' }}
+                    >
+                      Ver menú
+                    </Button>
+                  </Stack>
                 </CardContent>
               </Card>
             </Grid>

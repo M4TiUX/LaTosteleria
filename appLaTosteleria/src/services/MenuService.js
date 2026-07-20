@@ -14,6 +14,14 @@ class MenuService {
   getAvailableMenu() {
     return axios.get(`${BASE_URL}/available`);
   }
+
+  createMenu(menu) {
+    return axios.post(`${BASE_URL}/create`, menu);
+  }
+
+  updateMenu(menu) {
+    return axios.put(`${BASE_URL}/update`, menu);
+  }
 }
 
 export default new MenuService();

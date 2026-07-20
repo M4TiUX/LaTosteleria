@@ -5,11 +5,13 @@ import {
   Button,
   Card,
   CardContent,
+  Chip,
   Grid,
   Stack,
   Typography,
 } from "@mui/material";
 import MenuService from "../../services/MenuService";
+import { formatMenuDate, formatMenuTime } from "./menuUtils";
 
 export function DetailMenu() {
   const { id } = useParams();
@@ -43,16 +45,32 @@ export function DetailMenu() {
 
   return (
     <Box>
-      <Typography variant="h3" sx={{ mb: 1, fontWeight: 700 }}>
-        {menu.nombre_menu}
-      </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
-        Disponibilidad: {menu.fecha_inicio} {menu.hora_inicio} a{" "}
-        {menu.fecha_fin} {menu.hora_fin}
-      </Typography>
-      <Typography variant="body2" sx={{ mb: 3 }}>
-        {menu.activo ? "Menú activo" : "Menú inactivo"}
-      </Typography>
+      <Stack
+        direction={{ xs: "column", md: "row" }}
+        justifyContent="space-between"
+        spacing={2}
+        sx={{ mb: 3 }}
+      >
+        <Box>
+          <Typography variant="h3" sx={{ mb: 1, fontWeight: 700 }}>
+            {menu.nombre_menu}
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+            Disponible del {formatMenuDate(menu.fecha_inicio)} {formatMenuTime(menu.hora_inicio)} al {formatMenuDate(menu.fecha_fin)} {formatMenuTime(menu.hora_fin)}.
+          </Typography>
+          <Chip
+            label={Number(menu.activo) === 1 ? "Menú activo" : "Menú inactivo"}
+            color={Number(menu.activo) === 1 ? "success" : "default"}
+            size="small"
+          />
+        </Box>
+
+        <Stack direction="row" spacing={1.5} alignItems="flex-start">
+          <Button component={Link} to="/menu" variant="outlined">
+            Volver al listado
+          </Button>
+        </Stack>
+      </Stack>
 
       {menu.categorias?.map((category) => (
         <Box key={category.categoria_nombre} sx={{ mb: 4 }}>
@@ -144,9 +162,6 @@ export function DetailMenu() {
         </Box>
       ))}
 
-      <Button component={Link} to="/menu" variant="contained" sx={{ mt: 2 }}>
-        Volver al listado
-      </Button>
     </Box>
   );
 }

@@ -26,17 +26,21 @@ export function ListProduct() {
         console.log("Estructura de la respuesta:", response.data);
 
         if (Array.isArray(response.data)) {
-          setProductos(response.data);
-        } else if (
-          response.data &&
-          Array.isArray(response.data.data)
-        ) {
-          setProductos(response.data.data);
-        } else if (
-          response.data &&
-          Array.isArray(response.data.productos)
-        ) {
-          setProductos(response.data.productos);
+          setProductos(
+            response.data.filter((producto) => Number(producto.activo) === 1),
+          );
+        } else if (response.data && Array.isArray(response.data.data)) {
+          setProductos(
+            response.data.data.filter(
+              (producto) => Number(producto.activo) === 1,
+            ),
+          );
+        } else if (response.data && Array.isArray(response.data.productos)) {
+          setProductos(
+            response.data.productos.filter(
+              (producto) => Number(producto.activo) === 1,
+            ),
+          );
         } else {
           setProductos([]);
           setError("La API no devolvió una lista válida de productos.");
@@ -73,9 +77,7 @@ export function ListProduct() {
       >
         <CircularProgress />
 
-        <Typography color="text.secondary">
-          Cargando productos...
-        </Typography>
+        <Typography color="text.secondary">Cargando productos...</Typography>
       </Box>
     );
   }
@@ -129,14 +131,7 @@ export function ListProduct() {
       {productos.length > 0 ? (
         <Grid container spacing={3}>
           {productos.map((producto) => (
-            <Grid
-              item
-              xs={12}
-              sm={6}
-              md={4}
-              lg={3}
-              key={producto.id_producto}
-            >
+            <Grid item xs={12} sm={6} md={4} lg={3} key={producto.id_producto}>
               <Card
                 sx={{
                   height: "100%",
@@ -145,8 +140,7 @@ export function ListProduct() {
                   borderRadius: 4,
                   overflow: "hidden",
                   boxShadow: 3,
-                  transition:
-                    "transform 0.3s ease, box-shadow 0.3s ease",
+                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
                   "&:hover": {
                     transform: "translateY(-8px)",
                     boxShadow: 10,
@@ -174,9 +168,7 @@ export function ListProduct() {
                   />
 
                   <Chip
-                    label={
-                      producto.nombre_categoria || "Sin categoría"
-                    }
+                    label={producto.nombre_categoria || "Sin categoría"}
                     size="small"
                     sx={{
                       position: "absolute",
