@@ -69,10 +69,10 @@ CREATE TABLE `combos` (
   `nombre_combo` varchar(100) NOT NULL,
   `descripcion` text DEFAULT NULL,
   `precio_especial` decimal(10,2) NOT NULL,
+  `activo` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`id_combo`),
   KEY `fk_combos_categorias` (`categoria_id`),
-  CONSTRAINT `fk_combos_categorias` FOREIGN KEY (`categoria_id`) REFERENCES `categorias` (`id_categoria`) ON UPDATE CASCADE,
-  `activo` TINYINT(1) NOT NULL DEFAULT 1
+  CONSTRAINT `fk_combos_categorias` FOREIGN KEY (`categoria_id`) REFERENCES `categorias` (`id_categoria`) ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tabla: productos
@@ -83,11 +83,11 @@ CREATE TABLE `productos` (
   `descripcion` text DEFAULT NULL,
   `precio` decimal(10,2) NOT NULL,
   `imagen` varchar(255) DEFAULT NULL,
+  `activo` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`id_producto`),
   UNIQUE KEY `uk_productos_nombre` (`nombre_producto`),
   KEY `fk_productos_categorias` (`categoria_id`),
-  CONSTRAINT `fk_productos_categorias` FOREIGN KEY (`categoria_id`) REFERENCES `categorias` (`id_categoria`) ON UPDATE CASCADE,
-  `activo` TINYINT(1) NOT NULL DEFAULT 1
+  CONSTRAINT `fk_productos_categorias` FOREIGN KEY (`categoria_id`) REFERENCES `categorias` (`id_categoria`) ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tabla: usuarios
@@ -261,10 +261,10 @@ INSERT INTO `usuarios` VALUES
 (1,1,'Administrador General','admin@latosteleria.com','$2y$10$8txu.MMIP0sB2AG.jPgGSuTM/j/mu9QyOscvjPMG4tsNPmmVOtSdu',NULL,NULL);
 
 -- Datos: combos
-INSERT INTO `combos` VALUES (1,1,'Combo Desayuno Tostelero','Incluye café latte, tostada de aguacate y cheesecake.',6500.00),(2,1,'Combo Dulce Café','Incluye café latte y cheesecake.',4000.00),(3,2,'Combo Merienda','Incluye café latte y brownie de chocolate',2800.00),(4,3,'Combo Postres','Incluye cheesecake y brownie',3500.00);
+INSERT INTO `combos` VALUES (1,1,'Combo Desayuno Tostelero','Incluye café latte, tostada de aguacate y cheesecake.',6500.00,1),(2,1,'Combo Dulce Café','Incluye café latte y cheesecake.',4000.00,1),(3,2,'Combo Merienda','Incluye café latte y brownie de chocolate',2800.00,1),(4,3,'Combo Postres','Incluye cheesecake y brownie',3500.00,1);
 
 -- Datos: productos
-INSERT INTO `productos` VALUES (1,1,'Café Latte','Café con leche espumada',1800.00,'cafe-latte.jpg'),(2,2,'Tostada de Aguacate','Tostada artesanal con aguacate fresco',3200.00,'tostada-aguacate.jpg'),(3,3,'Cheesecake','Postre frío con base de galleta',2500.00,'cheesecake.jpg'),(4,3,'Brownie Chocolate','Brownie artesanal de chocolate con textura suave',1500.00,'brownie.jpg');
+INSERT INTO `productos` VALUES (1,1,'Café Latte','Café con leche espumada',1800.00,'cafe-latte.jpg',1),(2,2,'Tostada de Aguacate','Tostada artesanal con aguacate fresco',3200.00,'tostada-aguacate.jpg',1),(3,3,'Cheesecake','Postre frío con base de galleta',2500.00,'cheesecake.jpg',1),(4,3,'Brownie Chocolate','Brownie artesanal de chocolate con textura suave',1500.00,'brownie.jpg',1);
 
 -- Datos: combo_producto
 INSERT INTO `combo_producto` VALUES (1,1,1),(1,2,1),(1,3,1),(2,1,1),(2,3,1),(3,1,1),(3,4,1),(4,3,1),(4,4,1);
@@ -321,18 +321,18 @@ INSERT INTO roles VALUES
 
 -- Nuevos productos
 INSERT INTO productos VALUES
-(5,1,'Cappuccino','Café espresso con espuma de leche',2000.00,'cappuccino.jpg'),
-(6,1,'Chocolate Caliente','Chocolate caliente artesanal',2200.00,'chocolate-caliente.jpg'),
-(7,2,'Tostada Caprese','Pan artesanal con tomate, mozzarella y albahaca',3500.00,'caprese.jpg'),
-(8,2,'Sándwich de Pollo','Pan artesanal con pollo y queso',4200.00,'sandwich-pollo.jpg'),
-(9,3,'Pie de Manzana','Pie artesanal con canela',2800.00,'pie-manzana.jpg'),
-(10,5,'Frappé de Caramelo','Frappé con caramelo y crema batida',3200.00,'frappe-caramelo.jpg');
+(5,1,'Cappuccino','Café espresso con espuma de leche',2000.00,'cappuccino.jpg',1),
+(6,1,'Chocolate Caliente','Chocolate caliente artesanal',2200.00,'chocolate-caliente.jpg',1),
+(7,2,'Tostada Caprese','Pan artesanal con tomate, mozzarella y albahaca',3500.00,'caprese.jpg',1),
+(8,2,'Sándwich de Pollo','Pan artesanal con pollo y queso',4200.00,'sandwich-pollo.jpg',1),
+(9,3,'Pie de Manzana','Pie artesanal con canela',2800.00,'pie-manzana.jpg',1),
+(10,5,'Frappé de Caramelo','Frappé con caramelo y crema batida',3200.00,'frappe-caramelo.jpg',1);
 
 -- Nuevos combos
 INSERT INTO combos VALUES
-(5,1,'Combo Cappuccino','Cappuccino con cheesecake',4200.00),
-(6,2,'Combo Caprese','Tostada Caprese y café latte',5000.00),
-(7,5,'Combo Frappé Dulce','Frappé de Caramelo y Brownie',4500.00);
+(5,1,'Combo Cappuccino','Cappuccino con cheesecake',4200.00,1),
+(6,2,'Combo Caprese','Tostada Caprese y café latte',5000.00,1),
+(7,5,'Combo Frappé Dulce','Frappé de Caramelo y Brownie',4500.00,1);
 
 -- Relación combos-productos
 INSERT INTO combo_producto VALUES
