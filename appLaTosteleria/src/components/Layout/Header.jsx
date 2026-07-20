@@ -65,11 +65,6 @@ export default function Header() {
     { name: "Procesos", link: "/Procesos", roles: null },
     { name: "Menús", link: "/menu", roles: null },
     { name: "Mantenimiento Menús", link: "/menu/mantenimiento", roles: ["Administrador"] },
-    {
-      name: "Mantenimiento Peliculas",
-      link: "/movie-table/",
-      roles: ["Administrador"],
-    },
   ];
 
   const menuIdPrincipal = "menu-appbar";

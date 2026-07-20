@@ -203,13 +203,19 @@ export function MenuMaintenance() {
                       <Chip label={status.label} color={status.color} size="small" />
                     </TableCell>
                     <TableCell align="right">
-                      <Stack direction="row" spacing={1} justifyContent="flex-end">
+                      <Stack
+                        direction="column"
+                        spacing={1}
+                        alignItems="flex-end"
+                        sx={{ minWidth: 150 }}
+                      >
                         <Button
                           component={Link}
                           to={`/menu/${menu.id_menu}`}
                           variant="outlined"
                           size="small"
                           startIcon={<VisibilityOutlinedIcon />}
+                          sx={{ width: "100%" }}
                         >
                           Ver
                         </Button>
@@ -219,6 +225,7 @@ export function MenuMaintenance() {
                           variant="contained"
                           size="small"
                           startIcon={<EditOutlinedIcon />}
+                          sx={{ width: "100%" }}
                         >
                           Editar
                         </Button>
@@ -229,6 +236,7 @@ export function MenuMaintenance() {
                           disabled={processingId === Number(menu.id_menu)}
                           startIcon={Number(menu.activo) === 1 ? <BlockOutlinedIcon /> : <CheckCircleOutlinedIcon />}
                           onClick={() => handleToggleActive(menu)}
+                          sx={{ width: "100%" }}
                         >
                           {processingId === Number(menu.id_menu)
                             ? "Guardando..."
