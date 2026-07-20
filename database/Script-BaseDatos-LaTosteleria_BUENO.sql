@@ -71,7 +71,8 @@ CREATE TABLE `combos` (
   `precio_especial` decimal(10,2) NOT NULL,
   PRIMARY KEY (`id_combo`),
   KEY `fk_combos_categorias` (`categoria_id`),
-  CONSTRAINT `fk_combos_categorias` FOREIGN KEY (`categoria_id`) REFERENCES `categorias` (`id_categoria`) ON UPDATE CASCADE
+  CONSTRAINT `fk_combos_categorias` FOREIGN KEY (`categoria_id`) REFERENCES `categorias` (`id_categoria`) ON UPDATE CASCADE,
+  `activo` TINYINT(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tabla: productos
@@ -85,7 +86,8 @@ CREATE TABLE `productos` (
   PRIMARY KEY (`id_producto`),
   UNIQUE KEY `uk_productos_nombre` (`nombre_producto`),
   KEY `fk_productos_categorias` (`categoria_id`),
-  CONSTRAINT `fk_productos_categorias` FOREIGN KEY (`categoria_id`) REFERENCES `categorias` (`id_categoria`) ON UPDATE CASCADE
+  CONSTRAINT `fk_productos_categorias` FOREIGN KEY (`categoria_id`) REFERENCES `categorias` (`id_categoria`) ON UPDATE CASCADE,
+  `activo` TINYINT(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tabla: usuarios
