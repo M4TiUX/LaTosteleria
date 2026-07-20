@@ -25,6 +25,8 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import EditIcon from "@mui/icons-material/Edit";
 import SearchIcon from "@mui/icons-material/Search";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import BlockIcon from "@mui/icons-material/Block";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 export function TableProduct() {
   const [data, setData] = useState([]);
@@ -37,6 +39,28 @@ export function TableProduct() {
       .catch((error) => console.log(error));
   }, []);
 
+  const cambiarEstado = async (item) => {
+    try {
+      const nuevoEstado = Number(item.activo) === 1 ? 0 : 1;
+
+      await ProductService.changeStatus({
+        id_producto: item.id_producto,
+        activo: nuevoEstado,
+      });
+
+      // Actualizar la tabla sin recargar la página
+      setData((productosActuales) =>
+        productosActuales.map((producto) =>
+          producto.id_producto === item.id_producto
+            ? { ...producto, activo: nuevoEstado }
+            : producto,
+        ),
+      );
+    } catch (error) {
+      console.error("Error al cambiar el estado del producto:", error);
+    }
+  };
+
   const productosFiltrados = data.filter((item) => {
     const coincideBusqueda = item.nombre_producto
       .toLowerCase()
@@ -48,9 +72,7 @@ export function TableProduct() {
     return coincideBusqueda && coincideCategoria;
   });
 
-  const categorias = [
-    ...new Set(data.map((item) => item.nombre_categoria)),
-  ];
+  const categorias = [...new Set(data.map((item) => item.nombre_categoria))];
 
   return (
     <Container maxWidth="xl" sx={{ py: 5 }}>
@@ -157,9 +179,7 @@ export function TableProduct() {
               size="small"
               sx={{ width: 250 }}
             >
-              <MenuItem value="">
-                Todas las categorías
-              </MenuItem>
+              <MenuItem value="">Todas las categorías</MenuItem>
 
               {categorias.map((cat) => (
                 <MenuItem key={cat} value={cat}>
@@ -208,6 +228,10 @@ export function TableProduct() {
                 </TableCell>
 
                 <TableCell align="center">
+                  <strong>Estado</strong>
+                </TableCell>
+
+                <TableCell align="center">
                   <strong>Acciones</strong>
                 </TableCell>
               </TableRow>
@@ -224,9 +248,7 @@ export function TableProduct() {
                     },
                   }}
                 >
-                  <TableCell>
-                    {item.id_producto}
-                  </TableCell>
+                  <TableCell>{item.id_producto}</TableCell>
 
                   <TableCell>
                     <Box
@@ -271,6 +293,19 @@ export function TableProduct() {
                   </TableCell>
 
                   <TableCell align="center">
+                    <Chip
+                      label={
+                        Number(item.activo) === 1 ? "Activo" : "Inhabilitado"
+                      }
+                      color={Number(item.activo) === 1 ? "success" : "default"}
+                      size="small"
+                      sx={{
+                        fontWeight: 600,
+                      }}
+                    />
+                  </TableCell>
+
+                  <TableCell align="center">
                     <Box
                       sx={{
                         display: "flex",
@@ -312,6 +347,28 @@ export function TableProduct() {
                       >
                         Editar
                       </Button>
+
+                      <Button
+                        onClick={() => cambiarEstado(item)}
+                        variant="outlined"
+                        startIcon={
+                          Number(item.activo) === 1 ? (
+                            <BlockIcon />
+                          ) : (
+                            <CheckCircleIcon />
+                          )
+                        }
+                        size="small"
+                        color={Number(item.activo) === 1 ? "error" : "success"}
+                        sx={{
+                          textTransform: "none",
+                          borderRadius: 2,
+                        }}
+                      >
+                        {Number(item.activo) === 1
+                          ? "Inhabilitar"
+                          : "Habilitar"}
+                      </Button>
                     </Box>
                   </TableCell>
                 </TableRow>
@@ -319,11 +376,7 @@ export function TableProduct() {
 
               {productosFiltrados.length === 0 && (
                 <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    align="center"
-                    sx={{ py: 5 }}
-                  >
+                  <TableCell colSpan={7} align="center" sx={{ py: 5 }}>
                     <Typography color="text.secondary">
                       No se encontraron productos
                     </Typography>

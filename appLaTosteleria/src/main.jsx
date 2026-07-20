@@ -29,6 +29,9 @@ import { SeguimientoPedido } from "./components/Pedido/SeguimientoPedido";
 import { CreateProduct } from "./components/Producto/CreateProduct";
 import { UpdateProduct } from "./components/Producto/UpdateProduct";
 import { ToastContainer } from "react-toastify";
+import { TableCombo } from "./components/Combo/TableCombo";
+import { CreateCombo } from "./components/Combo/CreateCombo";
+import { UpdateCombo } from "./components/Combo/UpdateCombo";
 
 const rutas = createBrowserRouter([
   {
@@ -130,6 +133,18 @@ const rutas = createBrowserRouter([
       {
         path: "/producto/update/:id",
         element: <UpdateProduct />,
+      },
+      {
+        path: "/combo-table",
+        element: <TableCombo />,
+      },
+      {
+        path: "/combo/create",
+        element: <CreateCombo />,
+      },
+      {
+        path: "/combo/update/:id",
+        element: <UpdateCombo />,
       },
     ],
   },

@@ -286,4 +286,37 @@ class ProductoModel
             handleException($e);
         }
     }
+
+    /**
+     * Habilitar o inhabilitar producto.
+     */
+    public function changeStatus($producto)
+    {
+        try {
+            $idProducto = (int) $producto->id_producto;
+            $activo = (int) $producto->activo;
+
+            if ($idProducto <= 0) {
+                throw new Exception(
+                    "El identificador del producto no es válido."
+                );
+            }
+
+            if ($activo !== 0 && $activo !== 1) {
+                throw new Exception(
+                    "El estado del producto no es válido."
+                );
+            }
+
+            $sql = "UPDATE productos
+                SET activo = $activo
+                WHERE id_producto = $idProducto";
+
+            $this->enlace->executeSQL_DML($sql);
+
+            return $this->get($idProducto);
+        } catch (Exception $e) {
+            handleException($e);
+        }
+    }
 }

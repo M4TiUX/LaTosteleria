@@ -17,6 +17,7 @@ import {
 
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import RestaurantMenuOutlinedIcon from "@mui/icons-material/RestaurantMenuOutlined";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 export function ListCombo() {
   const [combos, setCombos] = useState([]);
@@ -27,11 +28,17 @@ export function ListCombo() {
     ComboService.getCombos()
       .then((response) => {
         if (Array.isArray(response.data)) {
-          setCombos(response.data);
+          setCombos(
+            response.data.filter((combo) => Number(combo.activo) === 1),
+          );
         } else if (response.data && Array.isArray(response.data.data)) {
-          setCombos(response.data.data);
+          setCombos(
+            response.data.data.filter((combo) => Number(combo.activo) === 1),
+          );
         } else if (response.data && Array.isArray(response.data.combos)) {
-          setCombos(response.data.combos);
+          setCombos(
+            response.data.combos.filter((combo) => Number(combo.activo) === 1),
+          );
         } else {
           setCombos([]);
           setError("La API no devolvió una lista válida de combos.");
@@ -85,26 +92,53 @@ export function ListCombo() {
 
   return (
     <Box sx={{ py: 2 }}>
-      <Box sx={{ mb: 3 }}>
-        <Stack direction="row" spacing={1} alignItems="center">
-          <RestaurantMenuOutlinedIcon
-            color="primary"
-            sx={{
-              fontSize: {
-                xs: 28,
-                md: 34,
-              },
-            }}
-          />
+      <Box
+        sx={{
+          mb: 3,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 2,
+        }}
+      >
+        <Box>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <RestaurantMenuOutlinedIcon
+              color="primary"
+              sx={{
+                fontSize: {
+                  xs: 28,
+                  md: 34,
+                },
+              }}
+            />
 
-          <Typography variant="h4" component="h1" fontWeight="bold">
-            Combos
+            <Typography variant="h4" component="h1" fontWeight="bold">
+              Combos
+            </Typography>
+          </Stack>
+
+          <Typography color="text.secondary" sx={{ mt: 1 }}>
+            Conozca los combos disponibles en La Tostelería.
           </Typography>
-        </Stack>
+        </Box>
 
-        <Typography color="text.secondary" sx={{ mt: 1 }}>
-          Conozca los combos disponibles en La Tostelería.
-        </Typography>
+        <Button
+          component={Link}
+          to="/combo-table"
+          variant="contained"
+          startIcon={<SettingsIcon />}
+          sx={{
+            px: 3,
+            py: 1.2,
+            borderRadius: 2,
+            textTransform: "none",
+            fontWeight: "bold",
+          }}
+        >
+          Mantenimiento de Combos
+        </Button>
       </Box>
 
       {combos.length > 0 ? (
@@ -156,8 +190,7 @@ export function ListCombo() {
 
                   {combo.nombre_categoria && (
                     <Typography variant="body2" sx={{ mt: 2 }}>
-                      Categoría:{" "}
-                      <strong>{combo.nombre_categoria}</strong>
+                      Categoría: <strong>{combo.nombre_categoria}</strong>
                     </Typography>
                   )}
 

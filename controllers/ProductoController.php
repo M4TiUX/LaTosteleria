@@ -200,4 +200,23 @@ class producto
             handleException($e);
         }
     }
+
+    // PUT cambiar estado del producto
+    public function changeStatus()
+    {
+        try {
+            $request = new Request();
+            $response = new Response();
+
+            $inputJSON = $request->getJSON();
+
+            $producto = new ProductoModel();
+
+            $result = $producto->changeStatus($inputJSON);
+
+            $response->toJSON($result);
+        } catch (Exception $e) {
+            handleException($e);
+        }
+    }
 }

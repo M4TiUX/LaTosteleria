@@ -18,6 +18,10 @@ class ProductService {
   updateProduct(formData) {
     return axios.post(`${BASE_URL}/update`, formData);
   }
+
+  changeStatus(product) {
+    return axios.put(`${BASE_URL}/changeStatus`, product);
+  }
 }
 
 export default new ProductService();
