@@ -64,6 +64,7 @@ export default function Header() {
     { name: "Combos", link: "/Combo", roles: null },
     { name: "Procesos", link: "/Procesos", roles: null },
     { name: "Menús", link: "/menu", roles: null },
+    { name: "Pedidos", link: "/pedido", roles: null },
     { name: "Mantenimiento Menús", link: "/menu/mantenimiento", roles: ["Administrador"] },
   ];
 
@@ -209,7 +210,7 @@ export default function Header() {
           <Badge
             badgeContent={getCountItems(cart)}
             component={Link}
-            to="/rental/crear/"
+            to="/pedido/crear"
             sx={{
               "& .MuiBadge-badge": {
                 backgroundColor: "secondary.main",
@@ -220,7 +221,7 @@ export default function Header() {
             <ShoppingCartIcon sx={{ color: "secondary.main" }} />
           </Badge>
         </IconButton>
-        <p>Compras</p>
+        <p>Nuevo pedido</p>
       </MenuItem>
       <MenuItem>
         <IconButton size="large" color="inherit">
@@ -336,7 +337,7 @@ export default function Header() {
                   size="large"
                   edge="end"
                   component={Link}
-                  to="/rental/crear/"
+                  to="/pedido/crear"
                   aria-label="Mi carrito"
                   sx={{ color: "secondary.main" }}
                 >

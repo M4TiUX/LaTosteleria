@@ -32,6 +32,8 @@ import { ToastContainer } from "react-toastify";
 import { TableCombo } from "./components/Combo/TableCombo";
 import { CreateCombo } from "./components/Combo/CreateCombo";
 import { UpdateCombo } from "./components/Combo/UpdateCombo";
+import { ListPedidos } from "./components/Pedido/ListPedidos";
+import { CreatePedido } from "./components/Pedido/CreatePedido";
 
 const rutas = createBrowserRouter([
   {
@@ -117,6 +119,14 @@ const rutas = createBrowserRouter([
       {
         path: "/menu/:id",
         element: <DetailMenu />,
+      },
+      {
+        path: "/pedido",
+        element: <ListPedidos />,
+      },
+      {
+        path: "/pedido/crear",
+        element: <CreatePedido />,
       },
       {
         path: "*",

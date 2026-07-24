@@ -19,20 +19,28 @@ CartProvider.propTypes = {
 };
 export function CartProvider({ children }) {
   const [state, dispatch] = useReducer(cartReducer, cartInitialState);
+  const getLabel = (item) => item.title || item.name || item.nombre || 'El elemento';
+
   const addItem = (movie) =>{
     dispatch({
       type: CART_ACTION.ADD_ITEM,
       payload: movie,
     });
-    toast.success(`${movie.title} fue añadido al carrito`
+    toast.success(`${getLabel(movie)} fue añadido al pedido`
     )
+  }
+  const decreaseItem = (movie) =>{
+    dispatch({
+      type: CART_ACTION.DECREASE_ITEM,
+      payload: movie,
+    });
   }
   const removeItem = (movie) =>{
     dispatch({
       type: CART_ACTION.REMOVE_ITEM,
       payload: movie,
     });
-    toast(`${movie.title} fue eliminado del alquiler`,
+    toast(`${getLabel(movie)} fue eliminado del pedido`,
       {
         icon: <RemoveShoppingCartIcon color='warning' />
       }
@@ -42,7 +50,7 @@ export function CartProvider({ children }) {
     dispatch({
       type: CART_ACTION.CLEAN_CART,
     });
-    toast(`El alquiler fue reiniciado`,
+    toast(`El pedido fue reiniciado`,
       {
         icon: <DeleteIcon color='warning' />
       }
@@ -53,6 +61,7 @@ export function CartProvider({ children }) {
       value={{
         cart: state,
         addItem,
+        decreaseItem,
         removeItem,
         cleanCart,
         getTotal,

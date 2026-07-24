@@ -1,16 +1,39 @@
 <?php
 
-class SeguimientoPedidoController {
+class seguimientoPedido
+{
+    public function get($id)
+    {
+        try {
+            $response = new Response();
+            $seguimientoModel = new SeguimientoPedidoModel();
 
-    public function show($id){
+            $result = $seguimientoModel->getTracking((int) $id);
 
-        $json = array(
-            "status" => 200,
-            "pedido" => $id,
-            "estado" => "En preparación"
-        );
+            if ($result === null) {
+                $response->status(404)->toJSON([
+                    'message' => 'No se encontro el pedido solicitado.'
+                ]);
+                return;
+            }
 
-        echo json_encode($json);
+            $response->toJSON($result);
+        } catch (Exception $e) {
+            handleException($e);
+        }
     }
 
+    public function createDemo()
+    {
+        try {
+            $response = new Response();
+            $seguimientoModel = new SeguimientoPedidoModel();
+
+            $result = $seguimientoModel->createDemoOrder();
+
+            $response->status(201)->toJSON($result);
+        } catch (Exception $e) {
+            handleException($e);
+        }
+    }
 }

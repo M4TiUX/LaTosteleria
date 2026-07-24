@@ -35,6 +35,8 @@ require_once "models/ProcesoPreparacionModel.php";
 require_once "models/MenuModel.php";
 require_once "models/CategoriaModel.php";
 require_once "models/IngredienteModel.php";
+require_once "models/SeguimientoPedidoModel.php";
+require_once "models/PedidoModel.php";
 
 /***--- Agregar todos los controladores*/
 require_once "controllers/UserController.php";
@@ -46,6 +48,7 @@ require_once "controllers/MenuController.php";
 require_once "controllers/SeguimientoPedidoController.php";
 require_once "controllers/CategoriaController.php";
 require_once "controllers/IngredienteController.php";
+require_once "controllers/PedidoController.php";
 
 //Enrutador
 require_once "routes/RoutesController.php";

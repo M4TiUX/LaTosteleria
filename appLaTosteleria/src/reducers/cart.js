@@ -2,6 +2,7 @@
 export const cartInitialState = JSON.parse(localStorage.getItem('cart')) || [];
 export const CART_ACTION = {
   ADD_ITEM: 'ADD_ITEM',
+  DECREASE_ITEM: 'DECREASE_ITEM',
   REMOVE_ITEM: 'REMOVE_ITEM',
   CLEAN_CART: 'CLEAN_CART',
 };
@@ -10,7 +11,9 @@ export const updateLocalStorage = (state) => {
   localStorage.setItem('cart', JSON.stringify(state));
 };
 // Función para calcular el subtotal de cada ítem
-const calculateSubtotal = (item) => item.price * item.days;
+const getItemQuantity = (item) => item.quantity ?? item.days ?? 1;
+
+const calculateSubtotal = (item) => item.price * getItemQuantity(item);
 
 // Función para calcular el total del carrito
 const calculateTotal = (cart) =>
@@ -34,33 +37,56 @@ export const cartReducer = (state, action) => {
       if (movieInCart >= 0) {
         //structuredClone: copia a profundidad
         const newState = structuredClone(state);
-        //Aumentar días de alquiler
-        newState[movieInCart].days += 1;
+        newState[movieInCart].quantity = getItemQuantity(newState[movieInCart]) + 1;
         // Calcula y actualiza el subtotal
         newState[movieInCart].subtotal = calculateSubtotal(
           newState[movieInCart],
         );
-        updateLocalStorage(state);
+        updateLocalStorage(newState);
         return newState;
       }
-      //Nueva pelicula en la compra
+      //Nuevo item en la compra
       const newState = [
         ...state,
         {
           ...actionPayload,
-          days: 1,
-          subtotal: calculateSubtotal({ ...actionPayload, days: 1 }),
+          quantity: 1,
+          subtotal: calculateSubtotal({ ...actionPayload, quantity: 1 }),
         },
       ];
       updateLocalStorage(newState);
       
       return newState;
     }
+    case CART_ACTION.DECREASE_ITEM: {
+      const { id } = actionPayload;
+      const itemIndex = state.findIndex((item) => item.id === id);
+
+      if (itemIndex < 0) {
+        return state;
+      }
+
+      const currentItem = state[itemIndex];
+      const currentQuantity = getItemQuantity(currentItem);
+
+      if (currentQuantity <= 1) {
+        const newState = state.filter((item) => item.id !== id);
+        updateLocalStorage(newState);
+        return newState;
+      }
+
+      const newState = structuredClone(state);
+      newState[itemIndex].quantity = currentQuantity - 1;
+      newState[itemIndex].subtotal = calculateSubtotal(newState[itemIndex]);
+      updateLocalStorage(newState);
+
+      return newState;
+    }
     //Eliminar item de la compra
     case CART_ACTION.REMOVE_ITEM: {
       const { id } = actionPayload;
       const newState = state.filter((item) => item.id !== id);
-      updateLocalStorage(state);
+      updateLocalStorage(newState);
       return newState;
     }
     //Eliminar el carrito completo
@@ -76,5 +102,5 @@ export const getTotal = (state) => {
   return calculateTotal(state);
 };
 export const getCountItems = (state) => {
-  return state.reduce((acc) => acc + 1, 0);
+  return state.reduce((acc, item) => acc + getItemQuantity(item), 0);
 };
