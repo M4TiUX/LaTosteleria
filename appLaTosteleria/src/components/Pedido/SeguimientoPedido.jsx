@@ -168,13 +168,17 @@ export function SeguimientoPedido() {
                   </Typography>
                 </Box>
 
-                <Chip label={tracking.estado_actual} color={tracking.progreso === 100 ? "success" : "warning"} />
+                <Chip 
+                  label={tracking.estado_actual} 
+                  color={tracking.progreso === 100 ? "success" : "warning"} 
+                />
+
               </Stack>
 
               <Box>
                 <Typography sx={{ mb: 1 }}>Progreso: {tracking.progreso}%</Typography>
                 <LinearProgress variant="determinate" value={tracking.progreso} sx={{ height: 10, borderRadius: 999 }} />
-              </Box>
+              </Box>  
 
               <Alert severity={tracking.progreso === 100 ? "success" : "info"}>
                 {tracking.comentario_actual}
