@@ -245,7 +245,7 @@ export function SeguimientoPedido() {
               </Box>
 
               <Typography color="text.secondary">
-                Si necesitas otro pedido de prueba, usa el boton "Crear demo"
+                Si necesitas otro pedido de prueba, usa el boton Crear demo
                 desde un pedido inexistente o cambia la ruta manualmente.
               </Typography>
             </Stack>

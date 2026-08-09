@@ -149,6 +149,7 @@ CREATE TABLE `pedidos` (
   `cliente_id` int(11) NOT NULL,
   `estado_id` int(11) NOT NULL,
   `metodo_entrega` enum('Domicilio','Tienda') NOT NULL,
+  `observaciones` text DEFAULT NULL,
   `subtotal` decimal(10,2) NOT NULL,
   `impuestos` decimal(10,2) NOT NULL,
   `total` decimal(10,2) NOT NULL,
@@ -158,6 +159,7 @@ CREATE TABLE `pedidos` (
   KEY `fk_pedidos_usuarios` (`cliente_id`),
   CONSTRAINT `fk_pedidos_usuarios` FOREIGN KEY (`cliente_id`) REFERENCES `usuarios` (`id_usuario`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 
 -- Tabla: procesos_preparacion
 CREATE TABLE `procesos_preparacion` (
@@ -257,8 +259,12 @@ INSERT INTO `roles` VALUES (1,'Administrador'),(2,'Cliente');
 -- Credenciales iniciales del administrador:
 -- correo: admin@latosteleria.com
 -- contrasena: Admin123!
+-- Credenciales iniciales del cliente:
+-- correo: cliente@latosteleria.com
+-- contrasena: Cliente123!
 INSERT INTO `usuarios` VALUES
-(1,1,'Administrador General','admin@latosteleria.com','$2y$10$8txu.MMIP0sB2AG.jPgGSuTM/j/mu9QyOscvjPMG4tsNPmmVOtSdu',NULL,NULL);
+(1,1,'Administrador General','admin@latosteleria.com','$2y$10$ZKc.NCagjTWKETLuR71YtOkAEX9ybXBQJ7gyAhJnq4dW2P4xxrPxO',NULL,NULL),
+(2,2,'Cliente Demo','cliente@latosteleria.com','$2y$10$soR8dBLDIblltcguYhhKLOy9cxCWUV3y21G.eGSUFDZpXkgthnDGS',NULL,NULL);
 
 -- Datos: combos
 INSERT INTO `combos` VALUES (1,1,'Combo Desayuno Tostelero','Incluye café latte, tostada de aguacate y cheesecake.',6500.00,1),(2,1,'Combo Dulce Café','Incluye café latte y cheesecake.',4000.00,1),(3,2,'Combo Merienda','Incluye café latte y brownie de chocolate',2800.00,1),(4,3,'Combo Postres','Incluye cheesecake y brownie',3500.00,1);
@@ -318,6 +324,12 @@ INSERT INTO repartidores VALUES
 -- Nuevo rol
 INSERT INTO roles VALUES
 (3,'Empleado');
+
+-- Usuario para el rol Empleado
+-- correo: empleado@latosteleria.com
+-- contrasena: Empleado123!
+INSERT INTO usuarios VALUES
+(3,3,'Empleado Demo','empleado@latosteleria.com','$2y$10$z9DtusWwAIFjhPLR3YgqruXBPOiVuYxU/VtsqjEoWVwWcV2YuC.Eq',NULL,NULL);
 
 -- Nuevos productos
 INSERT INTO productos VALUES

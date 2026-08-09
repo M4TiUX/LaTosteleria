@@ -15,8 +15,7 @@ import {
   MenuItem,
   Select,
   Stack,
-  ToggleButton,
-  ToggleButtonGroup,
+  TextField,
   Typography,
 } from "@mui/material";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
@@ -73,11 +72,13 @@ export function CreatePedido() {
   const { decodeToken } = useContext(UserContext);
   const userData = decodeToken();
   const { cart, addItem, decreaseItem, removeItem, cleanCart, getTotal, getCountItems } = useCart();
+  const isAuthenticated = Boolean(userData?.id);
 
   const [menus, setMenus] = useState([]);
   const [selectedMenuId, setSelectedMenuId] = useState("");
   const [selectedMenu, setSelectedMenu] = useState(null);
-  const [deliveryMethod, setDeliveryMethod] = useState("Tienda");
+  const [orderNotes, setOrderNotes] = useState("");
+  const [itemNotes, setItemNotes] = useState({});
   const [loadingMenus, setLoadingMenus] = useState(true);
   const [loadingMenuDetail, setLoadingMenuDetail] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -119,6 +120,7 @@ export function CreatePedido() {
       .then((response) => {
         setSelectedMenu(response.data ?? null);
         cleanCart();
+        setItemNotes({});
       })
       .catch((requestError) => {
         setError(
@@ -139,10 +141,31 @@ export function CreatePedido() {
     return new Map(cart.map((item) => [item.id, item]));
   }, [cart]);
 
-  const taxAmount = useMemo(() => Math.round(getTotal(cart) * 0.13), [cart, getTotal]);
-  const totalAmount = useMemo(() => getTotal(cart) + taxAmount, [cart, getTotal, taxAmount]);
+  const subtotalAmount = useMemo(() => getTotal(cart), [cart, getTotal]);
+  const taxAmount = 0;
+  const totalAmount = subtotalAmount;
+
+  useEffect(() => {
+    setItemNotes((previousNotes) => {
+      const cartIds = new Set(cart.map((item) => item.id));
+      const nextNotes = {};
+
+      Object.entries(previousNotes).forEach(([itemId, note]) => {
+        if (cartIds.has(itemId)) {
+          nextNotes[itemId] = note;
+        }
+      });
+
+      return nextNotes;
+    });
+  }, [cart]);
 
   const handleSubmit = async () => {
+    if (!isAuthenticated) {
+      setError("Debe iniciar sesion para registrar un pedido.");
+      return;
+    }
+
     if (!selectedMenuId) {
       setError("Debe seleccionar un menu antes de crear el pedido.");
       return;
@@ -158,13 +181,15 @@ export function CreatePedido() {
       setError(null);
 
       const payload = {
-        cliente_id: userData?.id ?? null,
+        cliente_id: Number(userData?.id),
         menu_id: Number(selectedMenuId),
-        metodo_entrega: deliveryMethod,
+        metodo_entrega: "Tienda",
+        observaciones: orderNotes,
         items: cart.map((item) => ({
           item_type: item.itemType,
           item_id: item.itemId,
           cantidad: item.quantity,
+          observaciones: itemNotes[item.id] ?? "",
         })),
       };
 
@@ -247,21 +272,23 @@ export function CreatePedido() {
                     <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
                       Metodo de entrega
                     </Typography>
-                    <ToggleButtonGroup
-                      value={deliveryMethod}
-                      exclusive
-                      onChange={(_, value) => {
-                        if (value) {
-                          setDeliveryMethod(value);
-                        }
-                      }}
-                      fullWidth
-                    >
-                      <ToggleButton value="Tienda">Tienda</ToggleButton>
-                      <ToggleButton value="Domicilio">Domicilio</ToggleButton>
-                    </ToggleButtonGroup>
+                    <Alert severity="info" sx={{ alignItems: "center" }}>
+                      Retiro en tienda
+                    </Alert>
                   </Box>
                 </Stack>
+
+                <TextField
+                  label="Observaciones del pedido"
+                  placeholder="Ejemplo: sin cebolla, empacar por separado, retirar a nombre de Ana"
+                  value={orderNotes}
+                  onChange={(event) => setOrderNotes(event.target.value)}
+                  fullWidth
+                  multiline
+                  minRows={3}
+                  inputProps={{ maxLength: 500 }}
+                  helperText={`${orderNotes.length}/500 caracteres`}
+                />
 
                 {selectedMenu && (
                   <Box>
@@ -384,11 +411,38 @@ export function CreatePedido() {
                             color="error"
                             variant="text"
                             startIcon={<DeleteOutlineOutlinedIcon />}
-                            onClick={() => removeItem(item)}
+                            onClick={() => {
+                              removeItem(item);
+                              setItemNotes((previousNotes) => {
+                                const nextNotes = { ...previousNotes };
+                                delete nextNotes[item.id];
+                                return nextNotes;
+                              });
+                            }}
                           >
                             Eliminar
                           </Button>
                         </Stack>
+
+                        <TextField
+                          size="small"
+                          fullWidth
+                          multiline
+                          minRows={2}
+                          sx={{ mt: 1.5 }}
+                          label={`Observacion para ${item.itemType}`}
+                          placeholder="Indicaciones para este producto o combo"
+                          value={itemNotes[item.id] ?? ""}
+                          onChange={(event) => {
+                            const note = event.target.value;
+                            setItemNotes((previousNotes) => ({
+                              ...previousNotes,
+                              [item.id]: note,
+                            }));
+                          }}
+                          inputProps={{ maxLength: 300 }}
+                          helperText={`${(itemNotes[item.id] ?? "").length}/300 caracteres`}
+                        />
                       </Box>
                     ))}
                   </Stack>
@@ -399,7 +453,7 @@ export function CreatePedido() {
                 <Stack spacing={1}>
                   <Stack direction="row" justifyContent="space-between">
                     <Typography color="text.secondary">Subtotal</Typography>
-                    <Typography>{formatCurrency(getTotal(cart))}</Typography>
+                    <Typography>{formatCurrency(subtotalAmount)}</Typography>
                   </Stack>
                   <Stack direction="row" justifyContent="space-between">
                     <Typography color="text.secondary">Impuestos</Typography>
@@ -416,7 +470,7 @@ export function CreatePedido() {
                   size="large"
                   startIcon={<ShoppingBagOutlinedIcon />}
                   onClick={handleSubmit}
-                  disabled={submitting || cart.length === 0}
+                  disabled={submitting || cart.length === 0 || !isAuthenticated}
                 >
                   {submitting ? "Registrando pedido..." : "Confirmar pedido"}
                 </Button>
@@ -426,9 +480,9 @@ export function CreatePedido() {
                 </Button>
 
                 {!userData?.id && (
-                  <Typography color="text.secondary" variant="body2">
-                    No hay una sesion activa. El pedido se registrara con el cliente por defecto del sistema.
-                  </Typography>
+                  <Alert severity="warning">
+                    Debe iniciar sesion para registrar el pedido. Ya no se usa un cliente por defecto del sistema.
+                  </Alert>
                 )}
               </Stack>
             </CardContent>

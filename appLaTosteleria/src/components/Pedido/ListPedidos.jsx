@@ -1,5 +1,6 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+
 import {
   Alert,
   Box,
@@ -18,9 +19,11 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+
 import AddShoppingCartOutlinedIcon from "@mui/icons-material/AddShoppingCartOutlined";
 import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
+
 import PedidoService from "../../services/PedidoService";
 import { UserContext } from "../../context/UserContext";
 
@@ -65,28 +68,81 @@ function parseDateFilter(value) {
   }
 
   const date = new Date(`${value}T00:00:00`);
+
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
 export function ListPedidos() {
+  // ==========================================
+  // USUARIO Y ROL
+  // ==========================================
+
   const { decodeToken } = useContext(UserContext);
+
   const userData = decodeToken();
+
+  const roleName = userData?.rol?.name ?? "";
+
+  const isCliente = roleName === "Cliente";
+
+  const isEmpleado = roleName === "Empleado";
+
+  const isAdministrador = roleName === "Administrador";
+
+  // ==========================================
+  // ESTADOS
+  // ==========================================
+
   const [orders, setOrders] = useState([]);
+
   const [loading, setLoading] = useState(true);
+
   const [error, setError] = useState(null);
+
   const [statusFilter, setStatusFilter] = useState("TODOS");
+
   const [startDateFilter, setStartDateFilter] = useState("");
+
   const [endDateFilter, setEndDateFilter] = useState("");
 
+  // ==========================================
+  // CARGAR PEDIDOS SEGÚN EL ROL
+  // ==========================================
+
   useEffect(() => {
-    PedidoService.getOrders(userData?.id)
+    if (!roleName) {
+      setOrders([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    /*
+      Cliente:
+      Se envía su ID para obtener
+      únicamente sus pedidos.
+
+      Empleado / Administrador:
+      No se envía cliente_id para
+      obtener todos los pedidos.
+    */
+
+    const request = isCliente
+      ? PedidoService.getOrders(userData?.id)
+      : PedidoService.getOrders();
+
+    request
       .then((response) => {
         setOrders(Array.isArray(response.data) ? response.data : []);
+
         setError(null);
       })
       .catch((requestError) => {
         setError(
           requestError?.response?.data?.message ??
+            requestError?.response?.data?.result ??
             requestError?.message ??
             "No fue posible cargar el historial de pedidos.",
         );
@@ -94,13 +150,39 @@ export function ListPedidos() {
       .finally(() => {
         setLoading(false);
       });
-  }, [userData?.id]);
+  }, [isCliente, roleName, userData?.id]);
+
+  // ==========================================
+  // TÍTULO SEGÚN ROL
+  // ==========================================
 
   const title = useMemo(() => {
-    return userData?.name
-      ? `Pedidos de ${userData.name}`
-      : "Historial de pedidos";
-  }, [userData?.name]);
+    if (isCliente) {
+      return "Mis pedidos";
+    }
+
+    if (isEmpleado || isAdministrador) {
+      return "Administración de pedidos";
+    }
+
+    return "Historial de pedidos";
+  }, [isCliente, isEmpleado, isAdministrador]);
+
+  const description = useMemo(() => {
+    if (isCliente) {
+      return "Consulta tus pedidos registrados y accede al seguimiento de cada uno.";
+    }
+
+    if (isEmpleado || isAdministrador) {
+      return "Consulta los pedidos registrados por los clientes y utiliza los filtros para localizar la información.";
+    }
+
+    return "Consulta los pedidos registrados.";
+  }, [isCliente, isEmpleado, isAdministrador]);
+
+  // ==========================================
+  // ESTADOS DISPONIBLES PARA FILTRAR
+  // ==========================================
 
   const statusOptions = useMemo(() => {
     const statuses = new Set();
@@ -114,13 +196,19 @@ export function ListPedidos() {
     return ["TODOS", ...Array.from(statuses)];
   }, [orders]);
 
+  // ==========================================
+  // FILTRADO
+  // ==========================================
+
   const filteredOrders = useMemo(() => {
     const startDate = parseDateFilter(startDateFilter);
+
     const endDate = parseDateFilter(endDateFilter);
 
     return orders.filter((order) => {
       const stateValue = String(order.estado_actual ?? "");
 
+      // Filtro por estado
       if (
         statusFilter !== "TODOS" &&
         stateValue.toLowerCase() !== statusFilter.toLowerCase()
@@ -134,12 +222,15 @@ export function ListPedidos() {
         return false;
       }
 
+      // Fecha inicial
       if (startDate && orderDate < startDate) {
         return false;
       }
 
+      // Fecha final
       if (endDate) {
         const inclusiveEnd = new Date(endDate);
+
         inclusiveEnd.setHours(23, 59, 59, 999);
 
         if (orderDate > inclusiveEnd) {
@@ -151,25 +242,45 @@ export function ListPedidos() {
     });
   }, [orders, statusFilter, startDateFilter, endDateFilter]);
 
+  // ==========================================
+  // LIMPIAR FILTROS
+  // ==========================================
+
   const clearFilters = () => {
     setStatusFilter("TODOS");
     setStartDateFilter("");
     setEndDateFilter("");
   };
 
+  // ==========================================
+  // CARGANDO
+  // ==========================================
+
   if (loading) {
     return (
       <Stack spacing={2} alignItems="center" sx={{ py: 8 }}>
         <CircularProgress />
+
         <Typography>Cargando pedidos...</Typography>
       </Stack>
     );
   }
 
+  // ==========================================
+  // VISTA
+  // ==========================================
+
   return (
     <Stack spacing={3}>
+      {/* ======================================
+          ENCABEZADO
+      ====================================== */}
+
       <Stack
-        direction={{ xs: "column", md: "row" }}
+        direction={{
+          xs: "column",
+          md: "row",
+        }}
         justifyContent="space-between"
         spacing={2}
       >
@@ -177,24 +288,40 @@ export function ListPedidos() {
           <Typography variant="h4" fontWeight={700} sx={{ mb: 1 }}>
             {title}
           </Typography>
-          <Typography color="text.secondary">
-            Consulta los pedidos registrados y accede al seguimiento automatico de cada uno.
-          </Typography>
+
+          <Typography color="text.secondary">{description}</Typography>
         </Box>
 
-        <Button
-          component={Link}
-          to="/pedido/crear"
-          variant="contained"
-          startIcon={<AddShoppingCartOutlinedIcon />}
-        >
-          Nuevo pedido
-        </Button>
+        {/* Nuevo pedido solamente para Cliente */}
+
+        {isCliente && (
+          <Button
+            component={Link}
+            to="/pedido/crear"
+            variant="contained"
+            startIcon={<AddShoppingCartOutlinedIcon />}
+          >
+            Nuevo pedido
+          </Button>
+        )}
       </Stack>
+
+      {/* ======================================
+          ERROR
+      ====================================== */}
 
       {error && <Alert severity="error">{error}</Alert>}
 
-      <Card sx={{ borderRadius: 3, boxShadow: 1 }}>
+      {/* ======================================
+          FILTROS
+      ====================================== */}
+
+      <Card
+        sx={{
+          borderRadius: 3,
+          boxShadow: 1,
+        }}
+      >
         <CardContent>
           <Stack spacing={2}>
             <Typography variant="h6" fontWeight={700}>
@@ -202,14 +329,21 @@ export function ListPedidos() {
             </Typography>
 
             <Grid container spacing={2}>
+              {/* Estado */}
+
               <Grid item xs={12} md={4}>
                 <FormControl fullWidth>
-                  <InputLabel id="pedido-status-filter-label">Estado</InputLabel>
+                  <InputLabel id="pedido-status-filter-label">
+                    Estado
+                  </InputLabel>
+
                   <Select
                     labelId="pedido-status-filter-label"
                     value={statusFilter}
                     label="Estado"
-                    onChange={(event) => setStatusFilter(String(event.target.value))}
+                    onChange={(event) =>
+                      setStatusFilter(String(event.target.value))
+                    }
                   >
                     {statusOptions.map((status) => (
                       <MenuItem key={status} value={status}>
@@ -220,6 +354,8 @@ export function ListPedidos() {
                 </FormControl>
               </Grid>
 
+              {/* Fecha inicial */}
+
               <Grid item xs={12} md={3}>
                 <TextField
                   label="Fecha inicial"
@@ -227,9 +363,13 @@ export function ListPedidos() {
                   fullWidth
                   value={startDateFilter}
                   onChange={(event) => setStartDateFilter(event.target.value)}
-                  InputLabelProps={{ shrink: true }}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
                 />
               </Grid>
+
+              {/* Fecha final */}
 
               <Grid item xs={12} md={3}>
                 <TextField
@@ -238,12 +378,23 @@ export function ListPedidos() {
                   fullWidth
                   value={endDateFilter}
                   onChange={(event) => setEndDateFilter(event.target.value)}
-                  InputLabelProps={{ shrink: true }}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
                 />
               </Grid>
 
+              {/* Limpiar */}
+
               <Grid item xs={12} md={2}>
-                <Button variant="outlined" fullWidth sx={{ height: "100%" }} onClick={clearFilters}>
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  sx={{
+                    height: "100%",
+                  }}
+                  onClick={clearFilters}
+                >
                   Limpiar
                 </Button>
               </Grid>
@@ -256,6 +407,10 @@ export function ListPedidos() {
         </CardContent>
       </Card>
 
+      {/* ======================================
+          SIN RESULTADOS
+      ====================================== */}
+
       {filteredOrders.length === 0 ? (
         <Card>
           <CardContent>
@@ -263,82 +418,186 @@ export function ListPedidos() {
               <Typography variant="h6" fontWeight={700}>
                 No hay pedidos que coincidan con los filtros actuales.
               </Typography>
+
               <Typography color="text.secondary">
-                Ajusta el estado o el rango de fechas, o crea un nuevo pedido para generar mas historial.
+                Ajusta el estado o el rango de fechas para consultar otros
+                pedidos.
               </Typography>
-              <Button component={Link} to="/pedido/crear" variant="outlined">
-                Crear pedido
-              </Button>
+
+              {/* Crear pedido solo para Cliente */}
+
+              {isCliente && (
+                <Button component={Link} to="/pedido/crear" variant="outlined">
+                  Crear pedido
+                </Button>
+              )}
             </Stack>
           </CardContent>
         </Card>
       ) : (
+        // ======================================
+        // LISTADO
+        // ======================================
+
         <Grid container spacing={3}>
           {filteredOrders.map((order) => (
             <Grid item xs={12} md={6} key={order.id_pedido}>
-              <Card sx={{ height: "100%", borderRadius: 3, boxShadow: 3 }}>
+              <Card
+                sx={{
+                  height: "100%",
+                  borderRadius: 3,
+                  boxShadow: 3,
+                }}
+              >
                 <CardContent>
                   <Stack spacing={2}>
-                    <Stack direction="row" justifyContent="space-between" spacing={2}>
+                    {/* Pedido y estado */}
+
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      spacing={2}
+                    >
                       <Box>
                         <Typography variant="h6" fontWeight={700}>
                           Pedido #{order.id_pedido}
                         </Typography>
+
                         <Typography color="text.secondary">
                           {order.cliente_nombre} · {order.cliente_correo}
                         </Typography>
                       </Box>
+
                       <Chip
                         label={order.estado_actual ?? "Sin seguimiento"}
-                        color={String(order.estado_actual).toLowerCase() === "entregado" ? "success" : "warning"}
+                        color={
+                          String(order.estado_actual).toLowerCase() ===
+                          "entregado"
+                            ? "success"
+                            : "warning"
+                        }
                         size="small"
                       />
                     </Stack>
 
-                    <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                    {/* Entrega e items */}
+
+                    <Stack
+                      direction={{
+                        xs: "column",
+                        sm: "row",
+                      }}
+                      spacing={2}
+                    >
                       <Stack direction="row" spacing={1} alignItems="center">
-                        <LocalShippingOutlinedIcon fontSize="small" color="action" />
-                        <Typography color="text.secondary">{order.metodo_entrega}</Typography>
+                        <LocalShippingOutlinedIcon
+                          fontSize="small"
+                          color="action"
+                        />
+
+                        <Typography color="text.secondary">
+                          {order.metodo_entrega}
+                        </Typography>
                       </Stack>
+
                       <Stack direction="row" spacing={1} alignItems="center">
-                        <ReceiptLongOutlinedIcon fontSize="small" color="action" />
-                        <Typography color="text.secondary">{order.total_items} items</Typography>
+                        <ReceiptLongOutlinedIcon
+                          fontSize="small"
+                          color="action"
+                        />
+
+                        <Typography color="text.secondary">
+                          {order.total_items} items
+                        </Typography>
                       </Stack>
                     </Stack>
+
+                    {/* Fechas */}
 
                     <Typography color="text.secondary">
                       Creado: {formatDateTime(order.fecha_creacion)}
                     </Typography>
+
                     <Typography color="text.secondary">
-                      Ultimo movimiento: {formatDateTime(order.fecha_ultimo_estado)}
+                      Último movimiento:{" "}
+                      {formatDateTime(order.fecha_ultimo_estado)}
                     </Typography>
+
+                    {/* Total */}
+
                     <Typography variant="h6" color="primary" fontWeight={700}>
                       {formatCurrency(order.total)}
                     </Typography>
 
                     <Divider />
 
+                    {/* Items */}
+
                     <Stack spacing={1}>
                       {order.items?.slice(0, 3).map((item) => (
-                        <Typography key={item.id_detalle} color="text.secondary">
+                        <Typography
+                          key={item.id_detalle}
+                          color="text.secondary"
+                        >
                           {item.cantidad}x {item.nombre}
                         </Typography>
                       ))}
+
                       {(order.items?.length ?? 0) > 3 && (
                         <Typography color="text.secondary">
-                          y {(order.items?.length ?? 0) - 3} elementos mas...
+                          y {(order.items?.length ?? 0) - 3} elementos más...
                         </Typography>
                       )}
                     </Stack>
 
-                    <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
-                      <Button component={Link} to={`/pedido/seguimiento/${order.id_pedido}`} variant="contained" fullWidth>
-                        Ver seguimiento
-                      </Button>
-                      <Button component={Link} to="/pedido/crear" variant="outlined" fullWidth>
-                        Repetir pedido
-                      </Button>
-                    </Stack>
+                    <Button
+                      component={Link}
+                      to={`/pedido/detalle/${order.id_pedido}`}
+                      variant="outlined"
+                      fullWidth
+                    >
+                      Ver detalle
+                    </Button>
+
+                    {/* ==================================
+                          ACCIONES DEL CLIENTE
+                      ================================== */}
+
+                    {isCliente && (
+                      <Stack
+                        direction={{
+                          xs: "column",
+                          sm: "row",
+                        }}
+                        spacing={1.5}
+                      >
+                        <Button
+                          component={Link}
+                          to={`/pedido/seguimiento/${order.id_pedido}`}
+                          variant="contained"
+                          fullWidth
+                        >
+                          Ver seguimiento
+                        </Button>
+
+                        <Button
+                          component={Link}
+                          to="/pedido/crear"
+                          variant="outlined"
+                          fullWidth
+                        >
+                          Repetir pedido
+                        </Button>
+                      </Stack>
+                    )}
+
+                    {/* 
+                        Por ahora Administrador y Empleado
+                        solamente consultan el historial.
+
+                        En el siguiente paso agregaremos
+                        aquí el botón "Ver detalle".
+                      */}
                   </Stack>
                 </CardContent>
               </Card>

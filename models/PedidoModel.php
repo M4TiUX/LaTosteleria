@@ -25,6 +25,7 @@ class PedidoModel
                     u.nombre AS cliente_nombre,
                     u.correo AS cliente_correo,
                     p.metodo_entrega,
+                    p.observaciones,
                     p.subtotal,
                     p.impuestos,
                     p.total,
@@ -86,6 +87,7 @@ class PedidoModel
                     u.nombre AS cliente_nombre,
                     u.correo AS cliente_correo,
                     p.metodo_entrega,
+                    p.observaciones,
                     p.subtotal,
                     p.impuestos,
                     p.total,
@@ -181,16 +183,13 @@ class PedidoModel
 
             $clienteId = isset($pedido->cliente_id) ? (int) $pedido->cliente_id : 0;
             if ($clienteId <= 0) {
-                $clienteId = $this->getDefaultClientId();
+                throw new Exception('Debe iniciar sesion para registrar un pedido.');
             }
 
-            if ($clienteId <= 0) {
-                throw new Exception('No existe un cliente valido para registrar el pedido.');
-            }
-
-            $metodoEntrega = isset($pedido->metodo_entrega)
-                ? $this->normalizarMetodoEntrega($pedido->metodo_entrega)
-                : 'Tienda';
+            $metodoEntrega = 'Tienda';
+            $observaciones = isset($pedido->observaciones)
+                ? $this->sanitizeObservation($pedido->observaciones)
+                : null;
 
             $validatedItems = $this->validateItems($items);
 
@@ -199,9 +198,11 @@ class PedidoModel
                 $subtotal += $item['unit_price'] * $item['cantidad'];
             }
 
-            $impuestos = round($subtotal * 0.13, 2);
+            $subtotal = round($subtotal, 2);
+            $impuestos = 0.00;
             $total = round($subtotal + $impuestos, 2);
             $fechaCreacion = $this->escape(date('Y-m-d H:i:s'));
+            $observacionesSql = $observaciones === null ? 'NULL' : "'" . $this->escape($observaciones) . "'";
 
             $estado = $this->getInitialEstado();
             $estadoId = isset($estado->id_estado) ? (int) $estado->id_estado : 1;
@@ -209,9 +210,13 @@ class PedidoModel
             $repartidorId = $this->asignarRepartidor();
 
             $sql = "INSERT INTO pedidos
-                (cliente_id, estado_id, metodo_entrega, subtotal, impuestos, total, costo_envio, fecha_creacion)
+                (cliente_id, estado_id, metodo_entrega, observaciones, subtotal, impuestos, total, costo_envio, fecha_creacion)
                 VALUES
+<<<<<<< HEAD
                 ($clienteId, $estadoId, '$metodoEntrega', $subtotal, $impuestos, $total, 0.00, '$fechaCreacion')";
+=======
+                ($clienteId, 1, '$metodoEntrega', $observacionesSql, $subtotal, $impuestos, $total, 0.00, '$fechaCreacion')";
+>>>>>>> b3ada1788635360c0ac0684501106c9681b0e97a
 
             $pedidoId = $this->enlace->executeSQL_DML_last($sql);
 
@@ -223,12 +228,14 @@ class PedidoModel
                 $productoId = $item['item_type'] === 'producto' ? (int) $item['item_id'] : 'NULL';
                 $comboId = $item['item_type'] === 'combo' ? (int) $item['item_id'] : 'NULL';
                 $cantidad = (int) $item['cantidad'];
-                $observacion = $this->escape('Pedido creado desde el menú seleccionado en la aplicación.');
+                $observacionDetalle = $item['observaciones'] === null
+                    ? 'NULL'
+                    : "'" . $this->escape($item['observaciones']) . "'";
 
                 $detailSql = "INSERT INTO detalle_pedido
                     (pedido_id, producto_id, combo_id, cantidad, observaciones)
                     VALUES
-                    ($pedidoId, $productoId, $comboId, $cantidad, '$observacion')";
+                    ($pedidoId, $productoId, $comboId, $cantidad, $observacionDetalle)";
 
                 $this->enlace->executeSQL_DML($detailSql);
             }
@@ -257,6 +264,7 @@ class PedidoModel
         $sql = "SELECT
                 dp.id_detalle,
                 dp.cantidad,
+                dp.observaciones,
                 CASE
                     WHEN dp.producto_id IS NOT NULL THEN 'producto'
                     ELSE 'combo'
@@ -286,6 +294,9 @@ class PedidoModel
             $itemType = isset($item->item_type) ? strtolower(trim((string) $item->item_type)) : '';
             $itemId = isset($item->item_id) ? (int) $item->item_id : 0;
             $cantidad = isset($item->cantidad) ? (int) $item->cantidad : 0;
+            $observaciones = isset($item->observaciones)
+                ? $this->sanitizeDetailObservation($item->observaciones)
+                : null;
 
             if (($itemType !== 'producto' && $itemType !== 'combo') || $itemId <= 0 || $cantidad <= 0) {
                 throw new Exception('Existe un elemento invalido dentro del pedido.');
@@ -308,6 +319,7 @@ class PedidoModel
                 'item_id' => $itemId,
                 'cantidad' => $cantidad,
                 'unit_price' => $unitPrice,
+                'observaciones' => $observaciones,
             ];
         }
 
@@ -354,31 +366,26 @@ class PedidoModel
         return (int) $combo->activo === 1 ? $combo : null;
     }
 
-    private function getDefaultClientId()
+    private function sanitizeObservation($observacion)
     {
-        $sql = "SELECT id_usuario
-            FROM usuarios
-            ORDER BY id_usuario ASC
-            LIMIT 1";
+        $observacion = trim((string) $observacion);
 
-        $result = $this->enlace->executeSQL($sql);
-
-        if (!is_array($result) || empty($result)) {
-            return 0;
+        if ($observacion === '') {
+            return null;
         }
 
-        return (int) $result[0]->id_usuario;
+        return mb_substr($observacion, 0, 500);
     }
 
-    private function normalizarMetodoEntrega($metodo)
+    private function sanitizeDetailObservation($observacion)
     {
-        $metodo = strtolower(trim((string) $metodo));
+        $observacion = trim((string) $observacion);
 
-        if ($metodo === 'domicilio') {
-            return 'Domicilio';
+        if ($observacion === '') {
+            return null;
         }
 
-        return 'Tienda';
+        return mb_substr($observacion, 0, 300);
     }
 
     private function escape($value)
