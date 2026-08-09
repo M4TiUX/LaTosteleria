@@ -53,4 +53,55 @@ class pedido
             handleException($e);
         }
     }
+
+    // appLaTosteleria/controllers/PedidoController.php
+
+    public function getUbicacionRepartidor($idPedido)
+    {
+        try {
+            $response = new Response();
+            $pedidoModel = new PedidoModel();
+            $repartidorModel = new RepartidorModel();
+
+            // Obtener el repartidor_id del pedido
+            $repartidorId = $pedidoModel->getRepartidorId((int) $idPedido);
+            if (!$repartidorId) {
+                $response->status(404)->toJSON(['error' => 'Pedido no tiene repartidor asignado']);
+                return;
+            }
+
+            // Obtener ubicación del repartidor
+            $ubicacion = $repartidorModel->getUbicacionRepartidor($repartidorId);
+            if (!$ubicacion || !isset($ubicacion->latitud) || !isset($ubicacion->longitud)) {
+                $response->status(404)->toJSON(['error' => 'Ubicación no disponible']);
+                return;
+            }
+
+            $response->toJSON($ubicacion);
+        } catch (Exception $e) {
+            handleException($e);
+        }
+    }
+
+    public function actualizarEstado($idPedido)
+    {
+        try {
+            $request = new Request();
+            $response = new Response();
+            $pedidoModel = new PedidoModel();
+
+            $data = $request->getJSON();
+            $nuevoEstadoId = $data['estado_id'] ?? null;
+
+            if (!$nuevoEstadoId) {
+                $response->status(400)->toJSON(['error' => 'Estado requerido']);
+                return;
+            }
+
+            $result = $pedidoModel->updateEstado((int) $idPedido, (int) $nuevoEstadoId);
+            $response->toJSON(['success' => $result]);
+        } catch (Exception $e) {
+            handleException($e);
+        }
+    }
 }

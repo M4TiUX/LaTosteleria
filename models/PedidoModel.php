@@ -111,6 +111,62 @@ class PedidoModel
         }
     }
 
+    public function getRepartidorId($pedidoId)
+    {
+        $pedidoId = (int) $pedidoId;
+        if ($pedidoId <= 0) {
+            return null;
+        }
+
+        $sql = "SELECT repartidor_id
+            FROM seguimiento_pedido
+            WHERE pedido_id = $pedidoId
+            ORDER BY id_seguimiento DESC
+            LIMIT 1";
+
+        $result = $this->enlace->executeSQL($sql);
+
+        if (!is_array($result) || empty($result)) {
+            return null;
+        }
+
+        return isset($result[0]->repartidor_id) ? (int) $result[0]->repartidor_id : null;
+    }
+
+    public function updateEstado($pedidoId, $estadoId)
+    {
+        $pedidoId = (int) $pedidoId;
+        $estadoId = (int) $estadoId;
+
+        if ($pedidoId <= 0 || $estadoId <= 0) {
+            return false;
+        }
+
+        $estado = $this->getEstadoById($estadoId);
+        if ($estado === null) {
+            return false;
+        }
+
+        $sql = "UPDATE pedidos
+            SET estado_id = $estadoId
+            WHERE id_pedido = $pedidoId";
+
+        $this->enlace->executeSQL_DML($sql);
+
+        $repartidorId = $this->getRepartidorId($pedidoId);
+        $estadoNombre = $this->escape($estado->nombre_estado);
+        $fechaActual = $this->escape(date('Y-m-d H:i:s'));
+
+        $trackingSql = "INSERT INTO seguimiento_pedido
+            (pedido_id, repartidor_id, estado_nombre, fecha_hora, comentario)
+            VALUES
+            ($pedidoId, $repartidorId, '$estadoNombre', '$fechaActual', 'Estado actualizado desde la API')";
+
+        $this->enlace->executeSQL_DML($trackingSql);
+
+        return true;
+    }
+
     public function create($pedido)
     {
         try {
@@ -147,10 +203,15 @@ class PedidoModel
             $total = round($subtotal + $impuestos, 2);
             $fechaCreacion = $this->escape(date('Y-m-d H:i:s'));
 
+            $estado = $this->getInitialEstado();
+            $estadoId = isset($estado->id_estado) ? (int) $estado->id_estado : 1;
+            $estadoNombre = isset($estado->nombre_estado) ? $estado->nombre_estado : 'Pendiente';
+            $repartidorId = $this->asignarRepartidor();
+
             $sql = "INSERT INTO pedidos
                 (cliente_id, estado_id, metodo_entrega, subtotal, impuestos, total, costo_envio, fecha_creacion)
                 VALUES
-                ($clienteId, 1, '$metodoEntrega', $subtotal, $impuestos, $total, 0.00, '$fechaCreacion')";
+                ($clienteId, $estadoId, '$metodoEntrega', $subtotal, $impuestos, $total, 0.00, '$fechaCreacion')";
 
             $pedidoId = $this->enlace->executeSQL_DML_last($sql);
 
@@ -172,10 +233,12 @@ class PedidoModel
                 $this->enlace->executeSQL_DML($detailSql);
             }
 
+            $this->createPaymentRecord($pedidoId, $pedido, $total);
+
             $trackingSql = "INSERT INTO seguimiento_pedido
-                (pedido_id, estado_nombre, fecha_hora, comentario)
+                (pedido_id, repartidor_id, estado_nombre, fecha_hora, comentario)
                 VALUES
-                ($pedidoId, 'Recibido', '$fechaCreacion', 'Pedido creado y enviado a seguimiento automatico.')";
+                ($pedidoId, $repartidorId, '$estadoNombre', '$fechaCreacion', 'Pedido creado y enviado a seguimiento automatico.')";
 
             $this->enlace->executeSQL_DML($trackingSql);
 
@@ -321,5 +384,71 @@ class PedidoModel
     private function escape($value)
     {
         return addslashes(trim((string) $value));
+    }
+
+    private function getInitialEstado()
+    {
+        return $this->getEstadoById(1);
+    }
+
+    private function getEstadoById($estadoId)
+    {
+        $estadoId = (int) $estadoId;
+        if ($estadoId <= 0) {
+            return null;
+        }
+
+        $sql = "SELECT id_estado, nombre_estado
+            FROM estados
+            WHERE id_estado = $estadoId
+            LIMIT 1";
+
+        $result = $this->enlace->executeSQL($sql);
+
+        if (!is_array($result) || empty($result)) {
+            return null;
+        }
+
+        return $result[0];
+    }
+
+    private function asignarRepartidor()
+    {
+        $sql = "SELECT id_repartidor
+            FROM repartidores
+            ORDER BY id_repartidor ASC
+            LIMIT 1";
+
+        $result = $this->enlace->executeSQL($sql);
+
+        if (!is_array($result) || empty($result)) {
+            return null;
+        }
+
+        return (int) $result[0]->id_repartidor;
+    }
+
+    private function createPaymentRecord($pedidoId, $pedido, $total)
+    {
+        $metodoPago = isset($pedido->metodo_pago) ? strtolower(trim((string) $pedido->metodo_pago)) : 'efectivo';
+        $metodoPago = $metodoPago === 'tarjeta' ? 'Tarjeta' : 'Efectivo';
+
+        $monto = round((float) $total, 2);
+        $fechaPago = $this->escape(date('Y-m-d H:i:s'));
+        $ultimosCuatro = isset($pedido->ultimos_cuatro_digitos)
+            ? $this->escape((string) $pedido->ultimos_cuatro_digitos)
+            : null;
+        $marcaTarjeta = isset($pedido->marca_tarjeta)
+            ? $this->escape((string) $pedido->marca_tarjeta)
+            : null;
+        $montoRecibido = isset($pedido->monto_recibido) ? round((float) $pedido->monto_recibido, 2) : null;
+        $vuelto = isset($pedido->vuelto) ? round((float) $pedido->vuelto, 2) : null;
+
+        $sql = "INSERT INTO pagos_simulados
+            (pedido_id, metodo_pago, monto, fecha_pago, ultimos_cuatro_digitos, marca_tarjeta, monto_recibido, vuelto)
+            VALUES
+            ($pedidoId, '$metodoPago', $monto, '$fechaPago', '$ultimosCuatro', '$marcaTarjeta', $montoRecibido, $vuelto)";
+
+        $this->enlace->executeSQL_DML($sql);
     }
 }

@@ -4,19 +4,22 @@ class RoutesController
     private $authMiddleware;
     private $protectedRoutes = [];
 
-    public function __construct() {
+    public function __construct()
+    {
         // $this->authMiddleware = new AuthMiddleware();
         // $this->registerRoutes();
         $this->routes();
     }
 
-    private function registerRoutes() {
+    private function registerRoutes()
+    {
         // Registrar rutas protegidas
         //---------------------  Metodo,path (en minuscula),controlador, accion, array de nombres de roles
         $this->addProtectedRoute('GET', '/apimovie/actor', 'actor', 'index', ['Administrador']);
     }
 
-    public function routes() {
+    public function routes()
+    {
         $method = $_SERVER['REQUEST_METHOD'];
         $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $path = strtolower($requestPath ?? '');
@@ -25,14 +28,14 @@ class RoutesController
         if ($this->isProtectedRoute($method, $path)) {
             $route = $this->protectedRoutes["$method:$path"];
             //Verifica los roles autorizados con los del usuario del token
-            if(!$this->authMiddleware->handle($route['requiredRole'])){
+            if (!$this->authMiddleware->handle($route['requiredRole'])) {
                 return;
             }
-           
-        } 
+        }
     }
 
-    private function addProtectedRoute($method, $path, $controllerName, $action, $requiredRole) {
+    private function addProtectedRoute($method, $path, $controllerName, $action, $requiredRole)
+    {
         $this->protectedRoutes["$method:$path"] = [
             'controller' => $controllerName,
             'action' => $action,
@@ -40,9 +43,55 @@ class RoutesController
         ];
     }
 
-    private function isProtectedRoute($method, $path) {
+    private function isProtectedRoute($method, $path)
+    {
         return isset($this->protectedRoutes["$method:$path"]);
     }
+
+    private function resolveCustomRoute($requestPath)
+    {
+        $segments = array_values(array_filter(explode('/', strtolower($requestPath ?? ''))));
+        if (empty($segments) || $segments[0] !== 'api') {
+            return null;
+        }
+
+        if (count($segments) >= 2 && $segments[1] === 'pedido') {
+            if (count($segments) >= 5 && $segments[3] === 'repartidor' && $segments[4] === 'ubicacion') {
+                return [
+                    'controller' => 'pedido',
+                    'action' => 'getUbicacionRepartidor',
+                    'params' => [(int) $segments[2]],
+                ];
+            }
+
+            if (count($segments) >= 4 && $segments[3] === 'estado') {
+                return [
+                    'controller' => 'pedido',
+                    'action' => 'actualizarEstado',
+                    'params' => [(int) $segments[2]],
+                ];
+            }
+        }
+
+        if (count($segments) >= 3 && $segments[1] === 'repartidor' && $segments[2] === 'ubicacion') {
+            return [
+                'controller' => 'RepartidorController',
+                'action' => 'actualizarUbicacion',
+                'params' => [],
+            ];
+        }
+
+        if (count($segments) >= 3 && $segments[1] === 'repartidor' && count($segments) >= 4) {
+            return [
+                'controller' => 'RepartidorController',
+                'action' => 'getUbicacion',
+                'params' => [(int) $segments[2]],
+            ];
+        }
+
+        return null;
+    }
+
     public function index()
     {
         //include "routes/routes.php";
@@ -52,7 +101,7 @@ class RoutesController
             //Gestion de imagenes
             if (strpos($requestPath, '/uploads/') === 0) {
                 $filePath = __DIR__ . $requestPath;
-                
+
                 // Verificar si el archivo existe
                 if (file_exists($filePath)) {
                     header('Content-Type: ' . mime_content_type($filePath));
@@ -63,13 +112,40 @@ class RoutesController
                     echo 'Archivo no encontrado.';
                 }
             }
-             //FIN Gestion de imagenes
-             //Solicitud preflight
-             if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+            //FIN Gestion de imagenes
+            //Solicitud preflight
+            if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
                 // Terminar la solicitud de preflight
                 http_response_code(200);
                 exit();
             }
+            $customRoute = $this->resolveCustomRoute($requestPath);
+            if ($customRoute !== null) {
+                $controller = $customRoute['controller'];
+                $action = $customRoute['action'];
+                $params = $customRoute['params'];
+
+                if (class_exists($controller)) {
+                    $response = new $controller();
+                    if (method_exists($response, $action)) {
+                        call_user_func_array([$response, $action], $params);
+                    } else {
+                        $json = [
+                            'status' => 404,
+                            'result' => 'Acción no encontrada'
+                        ];
+                        echo json_encode($json, http_response_code($json['status']));
+                    }
+                } else {
+                    $json = [
+                        'status' => 404,
+                        'result' => 'Controlador no encontrado'
+                    ];
+                    echo json_encode($json, http_response_code($json['status']));
+                }
+                return;
+            }
+
             $routesArray = explode("/", $requestPath);
             // Eliminar elementos vacíos del array
             $routesArray = array_filter($routesArray);
@@ -88,13 +164,16 @@ class RoutesController
                 $action = $routesArray[3] ?? null;
                 $param1 = $routesArray[4] ?? null;
                 $param2 = $routesArray[5] ?? null;
+                $param3 = $routesArray[6] ?? null;
                 if ($controller) {
                     try {
                         if (class_exists($controller)) {
                             $response = new $controller();
                             switch ($_SERVER['REQUEST_METHOD']) {
                                 case 'GET':
-                                    if ($param1 && $param2) {
+                                    if ($param1 && $param2 && $param3) {
+                                        $response->$action($param1, $param2, $param3);
+                                    } elseif ($param1 && $param2) {
                                         $response->$action($param1, $param2);
                                     } elseif ($param1 && !isset($action)) {
                                         $response->get($param1);
