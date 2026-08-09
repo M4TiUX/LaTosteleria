@@ -212,7 +212,7 @@ class PedidoModel
             $sql = "INSERT INTO pedidos
                 (cliente_id, estado_id, metodo_entrega, observaciones, subtotal, impuestos, total, costo_envio, fecha_creacion)
                 VALUES
-                ($clienteId, $estadoId, '$metodoEntrega', $subtotal, $impuestos, $total, 0.00, '$fechaCreacion')";
+                ($clienteId, 1, '$metodoEntrega', $observacionesSql, $subtotal, $impuestos, $total, 0.00, '$fechaCreacion')";
 
             $pedidoId = $this->enlace->executeSQL_DML_last($sql);
 
