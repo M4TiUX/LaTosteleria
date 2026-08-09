@@ -1,206 +1,704 @@
 <?php
+
 class RoutesController
 {
     private $authMiddleware;
-    private $protectedRoutes = [];
 
-    public function __construct() {
-        // $this->authMiddleware = new AuthMiddleware();
-        // $this->registerRoutes();
-        $this->routes();
+    public function __construct()
+    {
+        $this->authMiddleware =
+            new AuthMiddleware();
     }
 
-    private function registerRoutes() {
-        // Registrar rutas protegidas
-        //---------------------  Metodo,path (en minuscula),controlador, accion, array de nombres de roles
-        $this->addProtectedRoute('GET', '/apimovie/actor', 'actor', 'index', ['Administrador']);
-    }
+    // =========================================================
+    // DETERMINAR SEGURIDAD DE LA RUTA
+    // =========================================================
 
-    public function routes() {
-        $method = $_SERVER['REQUEST_METHOD'];
-        $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        $path = strtolower($requestPath ?? '');
+    private function authorizeRoute(
+        $method,
+        $controller,
+        $action = null,
+        $param1 = null
+    ) {
+        $controller =
+            strtolower(
+                (string) $controller
+            );
 
-        // Si la ruta es protegida, aplicar autenticación
-        if ($this->isProtectedRoute($method, $path)) {
-            $route = $this->protectedRoutes["$method:$path"];
-            //Verifica los roles autorizados con los del usuario del token
-            if(!$this->authMiddleware->handle($route['requiredRole'])){
-                return;
+        $action =
+            strtolower(
+                (string) $action
+            );
+
+        // =====================================================
+        // PEDIDOS
+        // =====================================================
+
+        if ($controller === 'pedido') {
+
+            // -----------------------------------------------
+            // CONSULTAR PEDIDOS
+            // GET /pedido
+            // GET /pedido/8
+            // GET /pedido/...
+            // -----------------------------------------------
+
+            if ($method === 'GET') {
+
+                return $this
+                    ->authMiddleware
+                    ->handle([
+                        'Administrador',
+                        'Empleado',
+                        'Cliente'
+                    ]);
             }
-           
-        } 
-    }
 
-    private function addProtectedRoute($method, $path, $controllerName, $action, $requiredRole) {
-        $this->protectedRoutes["$method:$path"] = [
-            'controller' => $controllerName,
-            'action' => $action,
-            'requiredRole' => $requiredRole
+            // -----------------------------------------------
+            // CREAR PEDIDO
+            // -----------------------------------------------
+
+            if ($method === 'POST') {
+
+                return $this
+                    ->authMiddleware
+                    ->handle([
+                        'Administrador',
+                        'Empleado',
+                        'Cliente'
+                    ]);
+            }
+
+            // -----------------------------------------------
+            // ACTUALIZAR ESTADO
+            // SOLO ADMIN / EMPLEADO
+            // -----------------------------------------------
+
+            if (
+                $method === 'PUT' ||
+                $method === 'PATCH'
+            ) {
+
+                return $this
+                    ->authMiddleware
+                    ->handle([
+                        'Administrador',
+                        'Empleado'
+                    ]);
+            }
+
+            // -----------------------------------------------
+            // ELIMINAR
+            // -----------------------------------------------
+
+            if ($method === 'DELETE') {
+
+                return $this
+                    ->authMiddleware
+                    ->handle([
+                        'Administrador'
+                    ]);
+            }
+        }
+
+        // =====================================================
+        // MANTENIMIENTOS ADMINISTRATIVOS
+        // =====================================================
+
+        $adminControllers = [
+            'producto',
+            'categoria',
+            'combo',
+            'menu',
+            'estacion',
+            'procesopreparacion'
         ];
+
+        if (
+            in_array(
+                $controller,
+                $adminControllers,
+                true
+            )
+        ) {
+            /*
+             * Por ahora protegemos únicamente
+             * las operaciones que modifican datos.
+             *
+             * Los GET pueden seguir siendo públicos
+             * porque el menú necesita consultar
+             * productos, combos, categorías, etc.
+             */
+
+            if (
+                $method === 'POST' ||
+                $method === 'PUT' ||
+                $method === 'PATCH' ||
+                $method === 'DELETE'
+            ) {
+
+                return $this
+                    ->authMiddleware
+                    ->handle([
+                        'Administrador'
+                    ]);
+            }
+        }
+
+        /*
+         * Ruta sin protección adicional.
+         */
+        return true;
     }
 
-    private function isProtectedRoute($method, $path) {
-        return isset($this->protectedRoutes["$method:$path"]);
+    // =========================================================
+    // OBTENER USUARIO AUTENTICADO
+    // =========================================================
+
+    public function getAuthenticatedUser()
+    {
+        return $this
+            ->authMiddleware
+            ->getAuthenticatedUser();
     }
+
+    // =========================================================
+    // ENRUTAMIENTO PRINCIPAL
+    // =========================================================
+
     public function index()
     {
-        //include "routes/routes.php";
-        if (isset($_SERVER['REQUEST_URI']) && !empty($_SERVER['REQUEST_URI'])) {
-            $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-            $requestPath = $requestPath ?: '/';
-            //Gestion de imagenes
-            if (strpos($requestPath, '/uploads/') === 0) {
-                $filePath = __DIR__ . $requestPath;
-                
-                // Verificar si el archivo existe
-                if (file_exists($filePath)) {
-                    header('Content-Type: ' . mime_content_type($filePath));
-                    readfile($filePath);
+        if (
+            isset($_SERVER['REQUEST_URI']) &&
+            !empty($_SERVER['REQUEST_URI'])
+        ) {
+
+            $requestPath =
+                parse_url(
+                    $_SERVER['REQUEST_URI'],
+                    PHP_URL_PATH
+                );
+
+            $requestPath =
+                $requestPath ?: '/';
+
+            // =================================================
+            // GESTIÓN DE IMÁGENES
+            // =================================================
+
+            if (
+                strpos(
+                    $requestPath,
+                    '/uploads/'
+                ) === 0
+            ) {
+
+                $filePath =
+                    __DIR__ .
+                    $requestPath;
+
+                if (
+                    file_exists(
+                        $filePath
+                    )
+                ) {
+
+                    header(
+                        'Content-Type: ' .
+                        mime_content_type(
+                            $filePath
+                        )
+                    );
+
+                    readfile(
+                        $filePath
+                    );
+
                     exit;
+
                 } else {
-                    http_response_code(404);
-                    echo 'Archivo no encontrado.';
+
+                    http_response_code(
+                        404
+                    );
+
+                    echo
+                        'Archivo no encontrado.';
+
+                    return;
                 }
             }
-             //FIN Gestion de imagenes
-             //Solicitud preflight
-             if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-                // Terminar la solicitud de preflight
-                http_response_code(200);
+
+            // =================================================
+            // PREFLIGHT CORS
+            // =================================================
+
+            if (
+                $_SERVER[
+                    'REQUEST_METHOD'
+                ] === 'OPTIONS'
+            ) {
+
+                http_response_code(
+                    200
+                );
+
                 exit();
             }
-            $routesArray = explode("/", $requestPath);
-            // Eliminar elementos vacíos del array
-            $routesArray = array_filter($routesArray);
 
-            if (count($routesArray) < 2) {
-                $json = array(
-                    'status' => 404,
-                    'result' => 'Controlador no especificado'
+            // =================================================
+            // PROCESAR URL
+            // =================================================
+
+            $routesArray =
+                explode(
+                    '/',
+                    $requestPath
                 );
-                echo json_encode($json, http_response_code($json["status"]));
+
+            $routesArray =
+                array_filter(
+                    $routesArray
+                );
+
+            if (
+                count(
+                    $routesArray
+                ) < 2
+            ) {
+
+                $json = [
+                    'status' => 404,
+                    'result' =>
+                        'Controlador no especificado'
+                ];
+
+                echo json_encode(
+                    $json,
+                    http_response_code(
+                        $json['status']
+                    )
+                );
+
                 return;
             }
 
-            if (isset($_SERVER['REQUEST_METHOD'])) {
-                $controller = $routesArray[2] ?? null;
-                $action = $routesArray[3] ?? null;
-                $param1 = $routesArray[4] ?? null;
-                $param2 = $routesArray[5] ?? null;
-                if ($controller) {
-                    try {
-                        if (class_exists($controller)) {
-                            $response = new $controller();
-                            switch ($_SERVER['REQUEST_METHOD']) {
-                                case 'GET':
-                                    if ($param1 && $param2) {
-                                        $response->$action($param1, $param2);
-                                    } elseif ($param1 && !isset($action)) {
-                                        $response->get($param1);
-                                    } elseif ($param1 && isset($action)) {
-                                        $response->$action($param1);
-                                    } elseif (!isset($action)) {
-                                        $response->index();
-                                    } elseif ($action) {
-                                        if (method_exists($controller, $action)) {
-                                            $response->$action();
-                                        } elseif (count($routesArray) == 3) {
-                                            $response->get($action);
-                                        } else {
-                                            $json = array(
-                                                'status' => 404,
-                                                'result' => 'Acción no encontrada'
-                                            );
-                                            echo json_encode($json, http_response_code($json["status"]));
-                                        }
-                                    } else {
-                                        // Llamar a la acción index si no hay acción ni parámetro
-                                        $response->index();
-                                    }
-                                    break;
+            if (
+                isset(
+                    $_SERVER[
+                        'REQUEST_METHOD'
+                    ]
+                )
+            ) {
 
-                                case 'POST':
-                                    if ($action) {
-                                        if (method_exists($controller, $action)) {
-                                            $response->$action();
-                                        } else {
-                                            $json = array(
-                                                'status' => 404,
-                                                'result' => 'Acción no encontrada'
-                                            );
-                                            echo json_encode($json, http_response_code($json["status"]));
-                                        }
-                                    } else {
-                                        $response->create();
-                                    }
-                                    break;
+                $method =
+                    $_SERVER[
+                        'REQUEST_METHOD'
+                    ];
 
-                                case 'PUT':
-                                case 'PATCH':
-                                    if ($param1) {
-                                        $response->update($param1);
-                                    } elseif ($action) {
-                                        if (method_exists($controller, $action)) {
-                                            $response->$action();
-                                        } else {
-                                            $json = array(
-                                                'status' => 404,
-                                                'result' => 'Acción no encontrada'
-                                            );
-                                            echo json_encode($json, http_response_code($json["status"]));
-                                        }
-                                    } else {
-                                        $response->update();
-                                    }
-                                    break;
+                /*
+                 * Ejemplo:
+                 *
+                 * /apilatosteleria/pedido/update/8
+                 *
+                 * [1] apilatosteleria
+                 * [2] pedido
+                 * [3] update
+                 * [4] 8
+                 */
 
-                                case 'DELETE':
-                                    if ($param1) {
-                                        $response->delete($param1);
-                                    } elseif ($action) {
-                                        if (method_exists($controller, $action)) {
-                                            $response->$action();
-                                        } else {
-                                            $json = array(
-                                                'status' => 404,
-                                                'result' => 'Acción no encontrada'
-                                            );
-                                            echo json_encode($json, http_response_code($json["status"]));
-                                        }
-                                    } else {
-                                        $response->delete();
-                                    }
-                                    break;
+                $controller =
+                    $routesArray[2] ??
+                    null;
 
-                                default:
-                                    $json = array(
-                                        'status' => 405,
-                                        'result' => 'Método HTTP no permitido'
-                                    );
-                                    echo json_encode($json, http_response_code($json["status"]));
-                                    break;
-                            }
-                        } else {
-                            $json = array(
-                                'status' => 404,
-                                'result' => 'Controlador no encontrado'
-                            );
-                            echo json_encode($json, http_response_code($json["status"]));
-                        }
-                    } catch (\Throwable $th) {
-                        $json = array(
-                            'status' => 404,
-                            'result' => $th->getMessage()
-                        );
-                        echo json_encode($json, http_response_code($json["status"]));
-                    }
-                } else {
-                    $json = array(
+                $action =
+                    $routesArray[3] ??
+                    null;
+
+                $param1 =
+                    $routesArray[4] ??
+                    null;
+
+                $param2 =
+                    $routesArray[5] ??
+                    null;
+
+                if (!$controller) {
+
+                    $json = [
                         'status' => 404,
-                        'result' => 'Controlador o acción no especificados'
+                        'result' =>
+                            'Controlador o acción no especificados'
+                    ];
+
+                    echo json_encode(
+                        $json,
+                        http_response_code(
+                            $json['status']
+                        )
                     );
-                    echo json_encode($json, http_response_code($json["status"]));
+
+                    return;
+                }
+
+                // =================================================
+                // SEGURIDAD BACKEND
+                // =================================================
+
+                $this->authorizeRoute(
+                    $method,
+                    $controller,
+                    $action,
+                    $param1
+                );
+
+                // =================================================
+                // CONTROLADOR
+                // =================================================
+
+                try {
+
+                    if (
+                        class_exists(
+                            $controller
+                        )
+                    ) {
+
+                        $response =
+                            new $controller();
+
+                        switch ($method) {
+
+                            // =====================================
+                            // GET
+                            // =====================================
+
+                            case 'GET':
+
+                                if (
+                                    $param1 &&
+                                    $param2
+                                ) {
+
+                                    $response
+                                        ->$action(
+                                            $param1,
+                                            $param2
+                                        );
+
+                                } elseif (
+                                    $param1 &&
+                                    !isset(
+                                        $action
+                                    )
+                                ) {
+
+                                    $response
+                                        ->get(
+                                            $param1
+                                        );
+
+                                } elseif (
+                                    $param1 &&
+                                    isset(
+                                        $action
+                                    )
+                                ) {
+
+                                    $response
+                                        ->$action(
+                                            $param1
+                                        );
+
+                                } elseif (
+                                    !isset(
+                                        $action
+                                    )
+                                ) {
+
+                                    $response
+                                        ->index();
+
+                                } elseif (
+                                    $action
+                                ) {
+
+                                    if (
+                                        method_exists(
+                                            $controller,
+                                            $action
+                                        )
+                                    ) {
+
+                                        $response
+                                            ->$action();
+
+                                    } elseif (
+                                        count(
+                                            $routesArray
+                                        ) == 3
+                                    ) {
+
+                                        $response
+                                            ->get(
+                                                $action
+                                            );
+
+                                    } else {
+
+                                        $json = [
+                                            'status' =>
+                                                404,
+
+                                            'result' =>
+                                                'Acción no encontrada'
+                                        ];
+
+                                        echo json_encode(
+                                            $json,
+                                            http_response_code(
+                                                $json[
+                                                    'status'
+                                                ]
+                                            )
+                                        );
+                                    }
+                                }
+
+                                break;
+
+
+                            // =====================================
+                            // POST
+                            // =====================================
+
+                            case 'POST':
+
+                                if ($action) {
+
+                                    if (
+                                        method_exists(
+                                            $controller,
+                                            $action
+                                        )
+                                    ) {
+
+                                        $response
+                                            ->$action();
+
+                                    } else {
+
+                                        $json = [
+                                            'status' =>
+                                                404,
+
+                                            'result' =>
+                                                'Acción no encontrada'
+                                        ];
+
+                                        echo json_encode(
+                                            $json,
+                                            http_response_code(
+                                                $json[
+                                                    'status'
+                                                ]
+                                            )
+                                        );
+                                    }
+
+                                } else {
+
+                                    $response
+                                        ->create();
+                                }
+
+                                break;
+
+
+                            // =====================================
+                            // PUT / PATCH
+                            // =====================================
+
+                            case 'PUT':
+                            case 'PATCH':
+
+                                if ($param1) {
+
+                                    /*
+                                     * Ejemplo:
+                                     *
+                                     * /pedido/update/8
+                                     *
+                                     * llama:
+                                     * update(8)
+                                     */
+
+                                    $response
+                                        ->update(
+                                            $param1
+                                        );
+
+                                } elseif (
+                                    $action
+                                ) {
+
+                                    if (
+                                        method_exists(
+                                            $controller,
+                                            $action
+                                        )
+                                    ) {
+
+                                        $response
+                                            ->$action();
+
+                                    } else {
+
+                                        $json = [
+                                            'status' =>
+                                                404,
+
+                                            'result' =>
+                                                'Acción no encontrada'
+                                        ];
+
+                                        echo json_encode(
+                                            $json,
+                                            http_response_code(
+                                                $json[
+                                                    'status'
+                                                ]
+                                            )
+                                        );
+                                    }
+
+                                } else {
+
+                                    $response
+                                        ->update();
+                                }
+
+                                break;
+
+
+                            // =====================================
+                            // DELETE
+                            // =====================================
+
+                            case 'DELETE':
+
+                                if ($param1) {
+
+                                    $response
+                                        ->delete(
+                                            $param1
+                                        );
+
+                                } elseif (
+                                    $action
+                                ) {
+
+                                    if (
+                                        method_exists(
+                                            $controller,
+                                            $action
+                                        )
+                                    ) {
+
+                                        $response
+                                            ->$action();
+
+                                    } else {
+
+                                        $json = [
+                                            'status' =>
+                                                404,
+
+                                            'result' =>
+                                                'Acción no encontrada'
+                                        ];
+
+                                        echo json_encode(
+                                            $json,
+                                            http_response_code(
+                                                $json[
+                                                    'status'
+                                                ]
+                                            )
+                                        );
+                                    }
+
+                                } else {
+
+                                    $response
+                                        ->delete();
+                                }
+
+                                break;
+
+
+                            // =====================================
+                            // MÉTODO NO SOPORTADO
+                            // =====================================
+
+                            default:
+
+                                $json = [
+                                    'status' =>
+                                        405,
+
+                                    'result' =>
+                                        'Método HTTP no permitido'
+                                ];
+
+                                echo json_encode(
+                                    $json,
+                                    http_response_code(
+                                        $json[
+                                            'status'
+                                        ]
+                                    )
+                                );
+
+                                break;
+                        }
+
+                    } else {
+
+                        $json = [
+                            'status' => 404,
+                            'result' =>
+                                'Controlador no encontrado'
+                        ];
+
+                        echo json_encode(
+                            $json,
+                            http_response_code(
+                                $json[
+                                    'status'
+                                ]
+                            )
+                        );
+                    }
+
+                } catch (
+                    \Throwable $th
+                ) {
+
+                    $json = [
+                        'status' => 404,
+                        'result' =>
+                            $th->getMessage()
+                    ];
+
+                    echo json_encode(
+                        $json,
+                        http_response_code(
+                            $json[
+                                'status'
+                            ]
+                        )
+                    );
                 }
             }
         }
