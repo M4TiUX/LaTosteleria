@@ -14,7 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import SeguimientoPedidoService from "../../services/SeguimientoPedidoService";
-import MapaSeguimiento from "./MapaSeguimiento";
+
 
 function formatDateTime(value) {
   if (!value) {
