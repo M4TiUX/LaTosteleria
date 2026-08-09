@@ -1,6 +1,5 @@
 -- Base de datos La Tostelería
--- Script limpio para MariaDB 10.4.32 / XAMPP
--- Ejecutar sobre una instalación limpia.
+-- MODIFICADO: Se añadió la tabla 'estados' y la FK en 'pedidos'
 
 CREATE DATABASE IF NOT EXISTS `latosteleria`
   DEFAULT CHARACTER SET utf8mb4
@@ -11,32 +10,34 @@ USE `latosteleria`;
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
--- Creación de tablas en orden de dependencias
+-- =====================================================
+-- CREACIÓN DE TABLAS (en orden de dependencias)
+-- =====================================================
 
 -- Tabla: categorias
 CREATE TABLE `categorias` (
-`id_categoria` int(11) NOT NULL AUTO_INCREMENT,
+  `id_categoria` int(11) NOT NULL AUTO_INCREMENT,
   `nombre_categoria` varchar(100) NOT NULL,
   PRIMARY KEY (`id_categoria`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tabla: estaciones
 CREATE TABLE `estaciones` (
-`id_estacion` int(11) NOT NULL AUTO_INCREMENT,
+  `id_estacion` int(11) NOT NULL AUTO_INCREMENT,
   `nombre_estacion` varchar(100) NOT NULL,
   PRIMARY KEY (`id_estacion`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tabla: ingredientes
 CREATE TABLE `ingredientes` (
-`id_ingrediente` int(11) NOT NULL AUTO_INCREMENT,
+  `id_ingrediente` int(11) NOT NULL AUTO_INCREMENT,
   `nombre_ingrediente` varchar(100) NOT NULL,
   PRIMARY KEY (`id_ingrediente`)
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tabla: menus
 CREATE TABLE `menus` (
-`id_menu` int(11) NOT NULL AUTO_INCREMENT,
+  `id_menu` int(11) NOT NULL AUTO_INCREMENT,
   `nombre_menu` varchar(100) NOT NULL,
   `fecha_inicio` date NOT NULL,
   `fecha_fin` date NOT NULL,
@@ -48,7 +49,7 @@ CREATE TABLE `menus` (
 
 -- Tabla: repartidores
 CREATE TABLE `repartidores` (
-`id_repartidor` int(11) NOT NULL AUTO_INCREMENT,
+  `id_repartidor` int(11) NOT NULL AUTO_INCREMENT,
   `nombre` varchar(100) DEFAULT NULL,
   `telefono` varchar(20) DEFAULT NULL,
   `vehiculo` varchar(50) DEFAULT NULL,
@@ -57,14 +58,25 @@ CREATE TABLE `repartidores` (
 
 -- Tabla: roles
 CREATE TABLE `roles` (
-`id_rol` int(11) NOT NULL AUTO_INCREMENT,
+  `id_rol` int(11) NOT NULL AUTO_INCREMENT,
   `nombre_rol` varchar(50) NOT NULL,
   PRIMARY KEY (`id_rol`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- =====================================================
+-- [NUEVA] Tabla: estados (catálogo de estados de pedido)
+-- =====================================================
+CREATE TABLE `estados` (
+  `id_estado` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre_estado` varchar(50) NOT NULL,
+  `descripcion` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id_estado`),
+  UNIQUE KEY `uk_nombre_estado` (`nombre_estado`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Tabla: combos
 CREATE TABLE `combos` (
-`id_combo` int(11) NOT NULL AUTO_INCREMENT,
+  `id_combo` int(11) NOT NULL AUTO_INCREMENT,
   `categoria_id` int(11) NOT NULL,
   `nombre_combo` varchar(100) NOT NULL,
   `descripcion` text DEFAULT NULL,
@@ -77,7 +89,7 @@ CREATE TABLE `combos` (
 
 -- Tabla: productos
 CREATE TABLE `productos` (
-`id_producto` int(11) NOT NULL AUTO_INCREMENT,
+  `id_producto` int(11) NOT NULL AUTO_INCREMENT,
   `categoria_id` int(11) NOT NULL,
   `nombre_producto` varchar(100) NOT NULL,
   `descripcion` text DEFAULT NULL,
@@ -92,7 +104,7 @@ CREATE TABLE `productos` (
 
 -- Tabla: usuarios
 CREATE TABLE `usuarios` (
-`id_usuario` int(11) NOT NULL AUTO_INCREMENT,
+  `id_usuario` int(11) NOT NULL AUTO_INCREMENT,
   `rol_id` int(11) NOT NULL,
   `nombre` varchar(100) NOT NULL,
   `correo` varchar(150) NOT NULL,
@@ -107,7 +119,7 @@ CREATE TABLE `usuarios` (
 
 -- Tabla: combo_producto
 CREATE TABLE `combo_producto` (
-`combo_id` int(11) NOT NULL,
+  `combo_id` int(11) NOT NULL,
   `producto_id` int(11) NOT NULL,
   `cantidad` int(11) NOT NULL DEFAULT 1,
   PRIMARY KEY (`combo_id`,`producto_id`),
@@ -118,7 +130,7 @@ CREATE TABLE `combo_producto` (
 
 -- Tabla: direcciones_envio
 CREATE TABLE `direcciones_envio` (
-`id_direccion` int(11) NOT NULL AUTO_INCREMENT,
+  `id_direccion` int(11) NOT NULL AUTO_INCREMENT,
   `usuario_id` int(11) NOT NULL,
   `detalles` text NOT NULL,
   `referencias` text DEFAULT NULL,
@@ -130,7 +142,7 @@ CREATE TABLE `direcciones_envio` (
 
 -- Tabla: menu_items
 CREATE TABLE `menu_items` (
-`id_item` int(11) NOT NULL AUTO_INCREMENT,
+  `id_item` int(11) NOT NULL AUTO_INCREMENT,
   `menu_id` int(11) NOT NULL,
   `producto_id` int(11) DEFAULT NULL,
   `combo_id` int(11) DEFAULT NULL,
@@ -143,13 +155,12 @@ CREATE TABLE `menu_items` (
   CONSTRAINT `fk_menu_items_productos` FOREIGN KEY (`producto_id`) REFERENCES `productos` (`id_producto`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tabla: pedidos
+-- Tabla: pedidos (MODIFICADA: se añade la FK a estados)
 CREATE TABLE `pedidos` (
-`id_pedido` int(11) NOT NULL AUTO_INCREMENT,
+  `id_pedido` int(11) NOT NULL AUTO_INCREMENT,
   `cliente_id` int(11) NOT NULL,
   `estado_id` int(11) NOT NULL,
   `metodo_entrega` enum('Domicilio','Tienda') NOT NULL,
-  `observaciones` text DEFAULT NULL,
   `subtotal` decimal(10,2) NOT NULL,
   `impuestos` decimal(10,2) NOT NULL,
   `total` decimal(10,2) NOT NULL,
@@ -157,13 +168,14 @@ CREATE TABLE `pedidos` (
   `fecha_creacion` datetime NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id_pedido`),
   KEY `fk_pedidos_usuarios` (`cliente_id`),
-  CONSTRAINT `fk_pedidos_usuarios` FOREIGN KEY (`cliente_id`) REFERENCES `usuarios` (`id_usuario`) ON UPDATE CASCADE
+  KEY `fk_pedidos_estados` (`estado_id`),
+  CONSTRAINT `fk_pedidos_usuarios` FOREIGN KEY (`cliente_id`) REFERENCES `usuarios` (`id_usuario`) ON UPDATE CASCADE,
+  CONSTRAINT `fk_pedidos_estados` FOREIGN KEY (`estado_id`) REFERENCES `estados` (`id_estado`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 
 -- Tabla: procesos_preparacion
 CREATE TABLE `procesos_preparacion` (
-`id_proceso` int(11) NOT NULL AUTO_INCREMENT,
+  `id_proceso` int(11) NOT NULL AUTO_INCREMENT,
   `producto_id` int(11) NOT NULL,
   `estacion_id` int(11) NOT NULL,
   `orden_paso` int(11) NOT NULL,
@@ -177,7 +189,7 @@ CREATE TABLE `procesos_preparacion` (
 
 -- Tabla: producto_ingrediente
 CREATE TABLE `producto_ingrediente` (
-`producto_id` int(11) NOT NULL,
+  `producto_id` int(11) NOT NULL,
   `ingrediente_id` int(11) NOT NULL,
   PRIMARY KEY (`producto_id`,`ingrediente_id`),
   KEY `fk_prod_ing_ingredientes` (`ingrediente_id`),
@@ -187,7 +199,7 @@ CREATE TABLE `producto_ingrediente` (
 
 -- Tabla: detalle_pedido
 CREATE TABLE `detalle_pedido` (
-`id_detalle` int(11) NOT NULL AUTO_INCREMENT,
+  `id_detalle` int(11) NOT NULL AUTO_INCREMENT,
   `pedido_id` int(11) NOT NULL,
   `producto_id` int(11) DEFAULT NULL,
   `combo_id` int(11) DEFAULT NULL,
@@ -204,7 +216,7 @@ CREATE TABLE `detalle_pedido` (
 
 -- Tabla: pagos_simulados
 CREATE TABLE `pagos_simulados` (
-`id_pago` int(11) NOT NULL AUTO_INCREMENT,
+  `id_pago` int(11) NOT NULL AUTO_INCREMENT,
   `pedido_id` int(11) NOT NULL,
   `metodo_pago` enum('Tarjeta','Efectivo') NOT NULL,
   `monto` decimal(10,2) NOT NULL,
@@ -220,7 +232,7 @@ CREATE TABLE `pagos_simulados` (
 
 -- Tabla: seguimiento_pedido
 CREATE TABLE `seguimiento_pedido` (
-`id_seguimiento` int(11) NOT NULL AUTO_INCREMENT,
+  `id_seguimiento` int(11) NOT NULL AUTO_INCREMENT,
   `pedido_id` int(11) NOT NULL,
   `repartidor_id` int(11) DEFAULT NULL,
   `estado_nombre` varchar(100) NOT NULL,
@@ -235,7 +247,9 @@ CREATE TABLE `seguimiento_pedido` (
   CONSTRAINT `fk_seguimiento_repartidores` FOREIGN KEY (`repartidor_id`) REFERENCES `repartidores` (`id_repartidor`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Inserción de datos
+-- =====================================================
+-- INSERCIÓN DE DATOS
+-- =====================================================
 
 -- Datos: categorias
 INSERT INTO `categorias` VALUES (1,'Bebidas'),(2,'Tostadas'),(3,'Postres');
@@ -255,16 +269,22 @@ INSERT INTO `repartidores` VALUES (1,'Carlos Ramirez','8888-8888','Motocicleta')
 -- Datos: roles
 INSERT INTO `roles` VALUES (1,'Administrador'),(2,'Cliente');
 
+-- =====================================================
+-- [NUEVO] Datos: estados (catálogo de estados)
+-- =====================================================
+INSERT INTO `estados` (`nombre_estado`, `descripcion`) VALUES
+('Pendiente', 'Pedido creado, esperando confirmación'),
+('En preparación', 'El pedido está siendo preparado'),
+('Listo', 'Pedido listo para entregar o retirar'),
+('Entregado', 'Pedido entregado al cliente'),
+('Cancelado', 'Pedido cancelado');
+
 -- Datos: usuarios
 -- Credenciales iniciales del administrador:
 -- correo: admin@latosteleria.com
 -- contrasena: Admin123!
--- Credenciales iniciales del cliente:
--- correo: cliente@latosteleria.com
--- contrasena: Cliente123!
 INSERT INTO `usuarios` VALUES
-(1,1,'Administrador General','admin@latosteleria.com','$2y$10$ZKc.NCagjTWKETLuR71YtOkAEX9ybXBQJ7gyAhJnq4dW2P4xxrPxO',NULL,NULL),
-(2,2,'Cliente Demo','cliente@latosteleria.com','$2y$10$soR8dBLDIblltcguYhhKLOy9cxCWUV3y21G.eGSUFDZpXkgthnDGS',NULL,NULL);
+(1,1,'Administrador General','admin@latosteleria.com','$2y$10$8txu.MMIP0sB2AG.jPgGSuTM/j/mu9QyOscvjPMG4tsNPmmVOtSdu',NULL,NULL);
 
 -- Datos: combos
 INSERT INTO `combos` VALUES (1,1,'Combo Desayuno Tostelero','Incluye café latte, tostada de aguacate y cheesecake.',6500.00,1),(2,1,'Combo Dulce Café','Incluye café latte y cheesecake.',4000.00,1),(3,2,'Combo Merienda','Incluye café latte y brownie de chocolate',2800.00,1),(4,3,'Combo Postres','Incluye cheesecake y brownie',3500.00,1);
@@ -285,7 +305,7 @@ INSERT INTO `procesos_preparacion` VALUES (1,1,1,1,3),(2,2,1,1,4),(3,2,2,2,5),(4
 INSERT INTO `producto_ingrediente` VALUES (1,1),(1,2),(2,3),(2,4),(3,5),(3,6),(4,7),(4,8),(4,9);
 
 /* =====================================================
-   DATOS ADICIONALES
+   DATOS ADICIONALES (los que ya tenías)
    ===================================================== */
 
 -- Nuevas categorías
@@ -324,12 +344,6 @@ INSERT INTO repartidores VALUES
 -- Nuevo rol
 INSERT INTO roles VALUES
 (3,'Empleado');
-
--- Usuario para el rol Empleado
--- correo: empleado@latosteleria.com
--- contrasena: Empleado123!
-INSERT INTO usuarios VALUES
-(3,3,'Empleado Demo','empleado@latosteleria.com','$2y$10$z9DtusWwAIFjhPLR3YgqruXBPOiVuYxU/VtsqjEoWVwWcV2YuC.Eq',NULL,NULL);
 
 -- Nuevos productos
 INSERT INTO productos VALUES
@@ -397,4 +411,4 @@ INSERT INTO producto_ingrediente VALUES
 
 SET FOREIGN_KEY_CHECKS = 1;
 
--- Fin del script
+-- Fin del script

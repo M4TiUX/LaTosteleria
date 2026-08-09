@@ -6,145 +6,245 @@ import { createBrowserRouter } from "react-router-dom";
 import { Home } from "./components/Home/Home";
 import { RouterProvider } from "react-router";
 import { PageNotFound } from "./components/Home/PageNotFound";
+
 import UserProvider from "./components/User/UserProvider";
 import { Unauthorized } from "./components/User/Unauthorized";
 import { Login } from "./components/User/Login";
 import { Logout } from "./components/User/Logout";
 import { Signup } from "./components/User/Signup";
 import { Auth } from "./components/User/Auth";
+
 import { ListProduct } from "./components/Producto/ListProduct";
 import { DetailProduct } from "./components/Producto/DetailProduct";
+import { TableProduct } from "./components/Producto/TableProduct";
+import { CreateProduct } from "./components/Producto/CreateProduct";
+import { UpdateProduct } from "./components/Producto/UpdateProduct";
+
 import { ListCombo } from "./components/Combo/ListCombo";
 import { DetailCombo } from "./components/Combo/DetailCombo";
+import { TableCombo } from "./components/Combo/TableCombo";
+import { CreateCombo } from "./components/Combo/CreateCombo";
+import { UpdateCombo } from "./components/Combo/UpdateCombo";
+
 import { ProcesosList } from "./components/Procesos/ProcesosList";
 import { ProcesosDetail } from "./components/Procesos/ProcesosDetail";
-import { TableProduct } from "./components/Producto/TableProduct";
+
 import { ListMenus } from "./components/Menu/ListMenus";
 import { DetailMenu } from "./components/Menu/DetailMenu";
 import { AvailableMenu } from "./components/Menu/AvailableMenu";
 import { CreateMenu } from "./components/Menu/CreateMenu";
 import { EditMenu } from "./components/Menu/EditMenu";
 import { MenuMaintenance } from "./components/Menu/MenuMaintenance";
+
 import { SeguimientoPedido } from "./components/Pedido/SeguimientoPedido";
-import { CreateProduct } from "./components/Producto/CreateProduct";
-import { UpdateProduct } from "./components/Producto/UpdateProduct";
+import { ListPedidos } from "./components/Pedido/ListPedidos";
+import { CreatePedido } from "./components/Pedido/CreatePedido";
+
 import { ToastContainer } from "react-toastify";
-import { TableCombo } from "./components/Combo/TableCombo";
-import { CreateCombo } from "./components/Combo/CreateCombo";
-import { UpdateCombo } from "./components/Combo/UpdateCombo";
+import { DetailPedido } from "./components/Pedido/DetailPedido";
 
 const rutas = createBrowserRouter([
   {
     element: <App />,
+
     children: [
+      // =====================================================
+      // RUTAS PÚBLICAS
+      // =====================================================
+
       {
         path: "/",
         element: <Home />,
       },
-      //Grupos de rutas a autorizar
-      //Grupo 1: Administrador
-      //Grupo 2: Cliente
-      //Grupo 3: Administrador y el Cliente
+
+      {
+        path: "/producto/",
+        element: <ListProduct />,
+      },
+
+      {
+        path: "/producto/:id",
+        element: <DetailProduct />,
+      },
+
+      {
+        path: "/combo/",
+        element: <ListCombo />,
+      },
+
+      {
+        path: "/combo/:id",
+        element: <DetailCombo />,
+      },
+
+      {
+        path: "/menu/",
+        element: <ListMenus />,
+      },
+
+      {
+        path: "/menu/disponible",
+        element: <AvailableMenu />,
+      },
+
+      {
+        path: "/menu/:id",
+        element: <DetailMenu />,
+      },
+
+      // =====================================================
+      // USUARIOS
+      // =====================================================
+
+      {
+        path: "/unauthorized",
+        element: <Unauthorized />,
+      },
+
+      {
+        path: "/user/login",
+        element: <Login />,
+      },
+
+      {
+        path: "/user/logout",
+        element: <Logout />,
+      },
+
+      {
+        path: "/user/create",
+        element: <Signup />,
+      },
+
+      // =====================================================
+      // ADMINISTRADOR
+      // =====================================================
+
       {
         element: <Auth requiredRoles={["Administrador"]} />,
+
         children: [
+          // Mantenimiento de productos
+
+          {
+            path: "/producto-table",
+            element: <TableProduct />,
+          },
+
+          {
+            path: "/producto/create",
+            element: <CreateProduct />,
+          },
+
+          {
+            path: "/producto/update/:id",
+            element: <UpdateProduct />,
+          },
+
+          // Mantenimiento de combos
+
+          {
+            path: "/combo-table",
+            element: <TableCombo />,
+          },
+
+          {
+            path: "/combo/create",
+            element: <CreateCombo />,
+          },
+
+          {
+            path: "/combo/update/:id",
+            element: <UpdateCombo />,
+          },
+
+          // Mantenimiento de menús
+
           {
             path: "/menu/mantenimiento",
             element: <MenuMaintenance />,
           },
+
           {
             path: "/menu/mantenimiento/crear",
             element: <CreateMenu />,
           },
+
           {
             path: "/menu/mantenimiento/editar/:id",
             element: <EditMenu />,
           },
         ],
       },
+
+      // =====================================================
+      // ADMINISTRADOR Y EMPLEADO
+      // =====================================================
+
       {
-        path: "/unauthorized",
-        element: <Unauthorized />,
+        element: <Auth requiredRoles={["Administrador", "Empleado"]} />,
+
+        children: [
+          {
+            path: "/procesos/",
+            element: <ProcesosList />,
+          },
+
+          {
+            path: "/procesos/:id",
+            element: <ProcesosDetail />,
+          },
+        ],
       },
+
+      // =====================================================
+      // CLIENTE
+      // =====================================================
+
       {
-        path: "/user/login",
-        element: <Login />,
+        element: <Auth requiredRoles={["Cliente"]} />,
+
+        children: [
+          {
+            path: "/pedido/crear",
+            element: <CreatePedido />,
+          },
+
+          {
+            path: "/pedido/seguimiento/:id",
+            element: <SeguimientoPedido />,
+          },
+        ],
       },
+
+      // =====================================================
+      // CLIENTE, EMPLEADO Y ADMINISTRADOR
+      // =====================================================
+
       {
-        path: "/user/logout",
-        element: <Logout />,
+        element: (
+          <Auth requiredRoles={["Cliente", "Empleado", "Administrador"]} />
+        ),
+
+        children: [
+          {
+            path: "/pedido",
+            element: <ListPedidos />,
+          },
+          {
+            path: "/pedido/detalle/:id",
+            element: <DetailPedido />,
+          },
+        ],
       },
-      {
-        path: "/user/create",
-        element: <Signup />,
-      },
-      {
-        path: "/producto/",
-        element: <ListProduct />,
-      },
-      {
-        path: "/producto/:id",
-        element: <DetailProduct />,
-      },
-      {
-        path: "/combo/",
-        element: <ListCombo />,
-      },
-      {
-        path: "/combo/:id",
-        element: <DetailCombo />,
-      },
-      {
-        path: "/procesos/",
-        element: <ProcesosList />,
-      },
-      {
-        path: "/procesos/:id",
-        element: <ProcesosDetail />,
-      },
-      {
-        path: "/producto-table",
-        element: <TableProduct />,
-      },
-      {
-        path: "/menu/",
-        element: <ListMenus />,
-      },
-      {
-        path: "/menu/disponible",
-        element: <AvailableMenu />,
-      },
-      {
-        path: "/menu/:id",
-        element: <DetailMenu />,
-      },
+
+      // =====================================================
+      // PÁGINA NO ENCONTRADA
+      // =====================================================
+
       {
         path: "*",
         element: <PageNotFound />,
-      },
-      {
-        path: "/pedido/seguimiento/:id",
-        element: <SeguimientoPedido />,
-      },
-      {
-        path: "/producto/create",
-        element: <CreateProduct />,
-      },
-      {
-        path: "/producto/update/:id",
-        element: <UpdateProduct />,
-      },
-      {
-        path: "/combo-table",
-        element: <TableCombo />,
-      },
-      {
-        path: "/combo/create",
-        element: <CreateCombo />,
-      },
-      {
-        path: "/combo/update/:id",
-        element: <UpdateCombo />,
       },
     ],
   },

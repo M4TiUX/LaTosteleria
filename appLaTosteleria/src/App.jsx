@@ -3,6 +3,7 @@ import { appTheme } from "./themes/theme";
 import { Layout } from "./components/Layout/Layout";
 import { Outlet } from 'react-router-dom'
 import { CartProvider } from "./context/CartContext";
+import 'leaflet/dist/leaflet.css';
 
 export default function App() { 
   return ( 
