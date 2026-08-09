@@ -14,6 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import SeguimientoPedidoService from "../../services/SeguimientoPedidoService";
+import MapaSeguimiento from "./MapaSeguimiento";
 
 function formatDateTime(value) {
   if (!value) {
@@ -127,7 +128,8 @@ export function SeguimientoPedido() {
           Seguimiento del pedido
         </Typography>
         <Typography color="text.secondary">
-          El estado se actualiza automaticamente cada 5 segundos mientras el pedido siga en proceso.
+          El estado se actualiza automaticamente cada 5 segundos mientras el
+          pedido siga en proceso.
         </Typography>
       </Box>
 
@@ -135,7 +137,12 @@ export function SeguimientoPedido() {
         <Alert
           severity="warning"
           action={
-            <Button color="inherit" size="small" onClick={handleCreateDemo} disabled={creatingDemo}>
+            <Button
+              color="inherit"
+              size="small"
+              onClick={handleCreateDemo}
+              disabled={creatingDemo}
+            >
               {creatingDemo ? "Creando..." : "Crear demo"}
             </Button>
           }
@@ -158,7 +165,8 @@ export function SeguimientoPedido() {
                     Pedido #{tracking.pedido_id}
                   </Typography>
                   <Typography color="text.secondary">
-                    Cliente: {tracking.cliente?.nombre} ({tracking.cliente?.correo})
+                    Cliente: {tracking.cliente?.nombre} (
+                    {tracking.cliente?.correo})
                   </Typography>
                   <Typography color="text.secondary">
                     Metodo de entrega: {tracking.metodo_entrega}
@@ -168,21 +176,35 @@ export function SeguimientoPedido() {
                   </Typography>
                 </Box>
 
-                <Chip 
-                  label={tracking.estado_actual} 
-                  color={tracking.progreso === 100 ? "success" : "warning"} 
+                <Chip
+                  label={tracking.estado_actual}
+                  color={tracking.progreso === 100 ? "success" : "warning"}
                 />
-
               </Stack>
 
               <Box>
-                <Typography sx={{ mb: 1 }}>Progreso: {tracking.progreso}%</Typography>
-                <LinearProgress variant="determinate" value={tracking.progreso} sx={{ height: 10, borderRadius: 999 }} />
-              </Box>  
+                <Typography sx={{ mb: 1 }}>
+                  Progreso: {tracking.progreso}%
+                </Typography>
+                <LinearProgress
+                  variant="determinate"
+                  value={tracking.progreso}
+                  sx={{ height: 10, borderRadius: 999 }}
+                />
+              </Box>
 
               <Alert severity={tracking.progreso === 100 ? "success" : "info"}>
                 {tracking.comentario_actual}
               </Alert>
+
+              <Divider />
+
+              <Box>
+                <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
+                  Ubicación en tiempo real
+                </Typography>
+                <MapaSeguimiento idPedido={tracking.pedido_id} />
+              </Box>
 
               <Divider />
 
@@ -207,8 +229,12 @@ export function SeguimientoPedido() {
                         justifyContent="space-between"
                         spacing={1}
                       >
-                        <Typography fontWeight={700}>{item.estado_nombre}</Typography>
-                        <Typography color="text.secondary">{formatDateTime(item.fecha_hora)}</Typography>
+                        <Typography fontWeight={700}>
+                          {item.estado_nombre}
+                        </Typography>
+                        <Typography color="text.secondary">
+                          {formatDateTime(item.fecha_hora)}
+                        </Typography>
                       </Stack>
                       <Typography sx={{ mt: 0.75 }} color="text.secondary">
                         {item.comentario}
@@ -219,7 +245,8 @@ export function SeguimientoPedido() {
               </Box>
 
               <Typography color="text.secondary">
-                Si necesitas otro pedido de prueba, usa el boton "Crear demo" desde un pedido inexistente o cambia la ruta manualmente.
+                Si necesitas otro pedido de prueba, usa el boton Crear demo
+                desde un pedido inexistente o cambia la ruta manualmente.
               </Typography>
             </Stack>
           </CardContent>

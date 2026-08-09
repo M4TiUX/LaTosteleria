@@ -85,7 +85,9 @@ export function ProcesosList() {
                       color: "#fff",
                       textTransform: "none",
                       marginTop: "auto",
+                      
                     }}
+                    
                   >
                     Ver detalle
                   </Button>
