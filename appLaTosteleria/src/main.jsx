@@ -41,6 +41,7 @@ import { ListPedidos } from "./components/Pedido/ListPedidos";
 import { CreatePedido } from "./components/Pedido/CreatePedido";
 
 import { ToastContainer } from "react-toastify";
+import { DetailPedido } from "./components/Pedido/DetailPedido";
 
 const rutas = createBrowserRouter([
   {
@@ -181,14 +182,7 @@ const rutas = createBrowserRouter([
       // =====================================================
 
       {
-        element: (
-          <Auth
-            requiredRoles={[
-              "Administrador",
-              "Empleado",
-            ]}
-          />
-        ),
+        element: <Auth requiredRoles={["Administrador", "Empleado"]} />,
 
         children: [
           {
@@ -229,19 +223,17 @@ const rutas = createBrowserRouter([
 
       {
         element: (
-          <Auth
-            requiredRoles={[
-              "Cliente",
-              "Empleado",
-              "Administrador",
-            ]}
-          />
+          <Auth requiredRoles={["Cliente", "Empleado", "Administrador"]} />
         ),
 
         children: [
           {
             path: "/pedido",
             element: <ListPedidos />,
+          },
+          {
+            path: "/pedido/detalle/:id",
+            element: <DetailPedido />,
           },
         ],
       },
