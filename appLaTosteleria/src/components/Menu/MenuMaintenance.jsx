@@ -1,10 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+
 import {
   Alert,
   Box,
   Button,
   Chip,
+  CircularProgress,
   Container,
   InputAdornment,
   MenuItem,
@@ -19,149 +22,216 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import EditIcon from "@mui/icons-material/Edit";
+import SearchIcon from "@mui/icons-material/Search";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import BlockIcon from "@mui/icons-material/Block";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import SearchIcon from "@mui/icons-material/Search";
-import toast from "react-hot-toast";
+
+import { toast } from "react-toastify";
+
 import MenuService from "../../services/MenuService";
-import { formatMenuDate, formatMenuTime, isMenuAvailable } from "./menuUtils";
-
-function formatStatus(menu, now) {
-  const activo = Number(menu.activo) === 1;
-  const disponible = isMenuAvailable(menu, now);
-
-  if (!activo) {
-    return {
-      label: "Inactivo",
-      color: "default",
-    };
-  }
-
-  if (disponible) {
-    return {
-      label: "Disponible",
-      color: "success",
-    };
-  }
-
-  return {
-    label: "Activo",
-    color: "warning",
-  };
-}
-
-function buildMenuUpdatePayload(menu, activo) {
-  const productos = [];
-  const combos = [];
-
-  menu.categorias?.forEach((category) => {
-    category.productos?.forEach((item) => {
-      productos.push(Number(item.id));
-    });
-
-    category.combos?.forEach((item) => {
-      combos.push(Number(item.id));
-    });
-  });
-
-  return {
-    id_menu: Number(menu.id_menu),
-    nombre_menu: menu.nombre_menu,
-    fecha_inicio: menu.fecha_inicio,
-    fecha_fin: menu.fecha_fin,
-    hora_inicio: String(menu.hora_inicio).slice(0, 8),
-    hora_fin: String(menu.hora_fin).slice(0, 8),
-    productos: Array.from(new Set(productos)),
-    combos: Array.from(new Set(combos)),
-    activo,
-  };
-}
+import {
+  formatMenuDate,
+  formatMenuTime,
+} from "./menuUtils";
 
 export function MenuMaintenance() {
-  const [menus, setMenus] = useState([]);
-  const [loaded, setLoaded] = useState(false);
-  const [error, setError] = useState(null);
-  const [now] = useState(() => new Date());
-  const [processingId, setProcessingId] = useState(null);
-  const [busqueda, setBusqueda] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const { t } = useTranslation();
 
-  const loadMenus = () => {
-    MenuService.getMenus()
-      .then((response) => {
-        setMenus(response.data ?? []);
-        setLoaded(true);
-      })
-      .catch((err) => {
-        setError(err);
-        setLoaded(true);
-      });
-  };
+  const [menus, setMenus] = useState([]);
+  const [busqueda, setBusqueda] = useState("");
+  const [estado, setEstado] = useState("");
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState("");
+  const [actualizandoId, setActualizandoId] =
+    useState(null);
 
   useEffect(() => {
-    loadMenus();
+    cargarMenus();
   }, []);
 
-  const menusFiltrados = menus.filter((menu) => {
-    const status = formatStatus(menu, now);
-    const coincideBusqueda = menu.nombre_menu
-      .toLowerCase()
-      .includes(busqueda.toLowerCase());
+  const cargarMenus = async () => {
+    try {
+      setCargando(true);
+      setError("");
 
-    const coincideEstado =
-      statusFilter === "" || status.label === statusFilter;
+      const response =
+        await MenuService.getMenus();
 
-    return coincideBusqueda && coincideEstado;
-  });
+      if (Array.isArray(response.data)) {
+        setMenus(response.data);
+      } else if (
+        Array.isArray(response.data?.data)
+      ) {
+        setMenus(response.data.data);
+      } else if (
+        Array.isArray(response.data?.menus)
+      ) {
+        setMenus(response.data.menus);
+      } else {
+        setMenus([]);
+      }
+    } catch (err) {
+      console.error(
+        "Error al cargar los menús:",
+        err
+      );
 
-  const handleToggleActive = async (menu) => {
-    const action = Number(menu.activo) === 1 ? "desactivar" : "activar";
-    const confirmed = window.confirm(
-      `¿Desea ${action} el menú "${menu.nombre_menu}"?`,
-    );
+      setError(
+        t("menus.maintenance.loadError")
+      );
+    } finally {
+      setCargando(false);
+    }
+  };
 
-    if (!confirmed) {
+  const menusFiltrados = useMemo(() => {
+    return menus.filter((menu) => {
+      const nombre = String(
+        menu.nombre_menu ?? ""
+      ).toLowerCase();
+
+      const coincideBusqueda =
+        nombre.includes(
+          busqueda.toLowerCase()
+        );
+
+      const activo =
+        Number(menu.activo) === 1;
+
+      const coincideEstado =
+        estado === "" ||
+        (estado === "activo" && activo) ||
+        (estado === "inactivo" &&
+          !activo);
+
+      return (
+        coincideBusqueda &&
+        coincideEstado
+      );
+    });
+  }, [menus, busqueda, estado]);
+
+  const cambiarEstado = async (menu) => {
+    const estaActivo =
+      Number(menu.activo) === 1;
+
+    const nuevoEstado = estaActivo
+      ? 0
+      : 1;
+
+    const mensajeConfirmacion =
+      estaActivo
+        ? t(
+            "menus.maintenance.confirmDisable",
+            {
+              name: menu.nombre_menu,
+            }
+          )
+        : t(
+            "menus.maintenance.confirmEnable",
+            {
+              name: menu.nombre_menu,
+            }
+          );
+
+    const confirmado =
+      window.confirm(
+        mensajeConfirmacion
+      );
+
+    if (!confirmado) {
       return;
     }
 
     try {
-      setError(null);
-      setProcessingId(Number(menu.id_menu));
+      setActualizandoId(menu.id_menu);
 
-      const response = await MenuService.getMenuById(menu.id_menu);
-      const payload = buildMenuUpdatePayload(
-        response.data,
-        Number(menu.activo) === 1 ? 0 : 1,
+      await MenuService.changeStatus({
+        id_menu: Number(menu.id_menu),
+        activo: nuevoEstado,
+      });
+
+      setMenus((menusActuales) =>
+        menusActuales.map(
+          (menuActual) =>
+            Number(
+              menuActual.id_menu
+            ) ===
+            Number(menu.id_menu)
+              ? {
+                  ...menuActual,
+                  activo: nuevoEstado,
+                }
+              : menuActual
+        )
       );
 
-      await MenuService.updateMenu(payload);
       toast.success(
-        Number(payload.activo) === 1
-          ? "El menú fue activado correctamente."
-          : "El menú fue desactivado correctamente.",
+        nuevoEstado === 1
+          ? t(
+              "menus.maintenance.enableSuccess"
+            )
+          : t(
+              "menus.maintenance.disableSuccess"
+            )
       );
-      loadMenus();
     } catch (err) {
-      setError(err);
-      toast.error("No fue posible actualizar el estado del menú.");
+      console.error(
+        "Error al actualizar el estado del menú:",
+        err
+      );
+
+      toast.error(
+        err.response?.data?.message ||
+          t(
+            "menus.maintenance.statusError"
+          )
+      );
     } finally {
-      setProcessingId(null);
+      setActualizandoId(null);
     }
   };
 
-  if (!loaded) {
-    return <p>Cargando mantenimiento de menús...</p>;
+  if (cargando) {
+    return (
+      <Box
+        sx={{
+          minHeight: 300,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: 2,
+        }}
+      >
+        <CircularProgress />
+
+        <Typography
+          color="text.secondary"
+        >
+          {t(
+            "menus.maintenance.loading"
+          )}
+        </Typography>
+      </Box>
+    );
   }
 
   return (
-    <Container maxWidth="xl" sx={{ py: 5 }}>
+    <Container
+      maxWidth="xl"
+      sx={{ py: 5 }}
+    >
+      {/* Encabezado */}
       <Box
         sx={{
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent:
+            "space-between",
           alignItems: "center",
           flexWrap: "wrap",
           gap: 2,
@@ -176,47 +246,60 @@ export function MenuMaintenance() {
               color: "#4a1714",
             }}
           >
-            Mantenimiento de Menús
+            {t(
+              "menus.maintenance.title"
+            )}
           </Typography>
 
           <Typography
             variant="body1"
             sx={{
-              color: "text.secondary",
+              color:
+                "text.secondary",
               mt: 1,
             }}
           >
-            Administra los menús registrados en el sistema
+            {t(
+              "menus.maintenance.description"
+            )}
           </Typography>
         </Box>
 
         <Button
           component={Link}
-          to="/menu/mantenimiento/crear"
+          to="/menu/create"
           variant="contained"
-          startIcon={<AddCircleIcon />}
+          startIcon={
+            <AddCircleIcon />
+          }
           sx={{
-            backgroundColor: "#9b1209",
+            backgroundColor:
+              "#9b1209",
             px: 3,
             py: 1.5,
             borderRadius: 2,
             textTransform: "none",
             fontSize: "1rem",
             fontWeight: 600,
+
             "&:hover": {
-              backgroundColor: "#7d0e07",
+              backgroundColor:
+                "#7d0e07",
             },
           }}
         >
-          Nuevo Menú
+          {t(
+            "menus.maintenance.newMenu"
+          )}
         </Button>
       </Box>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error?.response?.data?.message ??
-            error?.message ??
-            "No fue posible cargar los menús."}
+        <Alert
+          severity="error"
+          sx={{ mb: 3 }}
+        >
+          {error}
         </Alert>
       )}
 
@@ -227,10 +310,12 @@ export function MenuMaintenance() {
           borderRadius: 4,
         }}
       >
+        {/* Filtros */}
         <Box
           sx={{
             display: "flex",
-            justifyContent: "space-between",
+            justifyContent:
+              "space-between",
             flexWrap: "wrap",
             gap: 2,
             mb: 3,
@@ -244,9 +329,15 @@ export function MenuMaintenance() {
             }}
           >
             <TextField
-              placeholder="Buscar menú..."
+              placeholder={t(
+                "menus.maintenance.search"
+              )}
               value={busqueda}
-              onChange={(event) => setBusqueda(event.target.value)}
+              onChange={(event) =>
+                setBusqueda(
+                  event.target.value
+                )
+              }
               size="small"
               sx={{ width: 300 }}
               InputProps={{
@@ -259,21 +350,44 @@ export function MenuMaintenance() {
             />
 
             <Select
-              value={statusFilter}
-              onChange={(event) => setStatusFilter(event.target.value)}
+              value={estado}
+              onChange={(event) =>
+                setEstado(
+                  event.target.value
+                )
+              }
               displayEmpty
               size="small"
-              sx={{ width: 250 }}
+              sx={{ width: 220 }}
             >
-              <MenuItem value="">Todos los estados</MenuItem>
-              <MenuItem value="Disponible">Disponible</MenuItem>
-              <MenuItem value="Activo">Activo</MenuItem>
-              <MenuItem value="Inactivo">Inactivo</MenuItem>
+              <MenuItem value="">
+                {t(
+                  "menus.maintenance.allStatuses"
+                )}
+              </MenuItem>
+
+              <MenuItem value="activo">
+                {t(
+                  "menus.status.active"
+                )}
+              </MenuItem>
+
+              <MenuItem value="inactivo">
+                {t(
+                  "menus.status.inactive"
+                )}
+              </MenuItem>
             </Select>
           </Box>
 
           <Chip
-            label={`Total: ${menusFiltrados.length} menús`}
+            label={t(
+              "menus.maintenance.total",
+              {
+                count:
+                  menusFiltrados.length,
+              }
+            )}
             sx={{
               fontSize: "0.95rem",
               px: 1,
@@ -281,158 +395,299 @@ export function MenuMaintenance() {
           />
         </Box>
 
+        {/* Tabla */}
         <TableContainer>
           <Table>
             <TableHead>
               <TableRow
                 sx={{
-                  backgroundColor: "#faf4f2",
+                  backgroundColor:
+                    "#faf4f2",
                 }}
               >
                 <TableCell>
-                  <strong>ID</strong>
+                  <strong>
+                    {t(
+                      "menus.maintenance.id"
+                    )}
+                  </strong>
                 </TableCell>
+
                 <TableCell>
-                  <strong>Menú</strong>
+                  <strong>
+                    {t(
+                      "menus.maintenance.menu"
+                    )}
+                  </strong>
                 </TableCell>
+
                 <TableCell>
-                  <strong>Inicio</strong>
+                  <strong>
+                    {t(
+                      "menus.maintenance.start"
+                    )}
+                  </strong>
                 </TableCell>
+
                 <TableCell>
-                  <strong>Fin</strong>
+                  <strong>
+                    {t(
+                      "menus.maintenance.end"
+                    )}
+                  </strong>
                 </TableCell>
+
                 <TableCell align="center">
-                  <strong>Estado</strong>
+                  <strong>
+                    {t(
+                      "menus.maintenance.status"
+                    )}
+                  </strong>
                 </TableCell>
+
                 <TableCell align="center">
-                  <strong>Acciones</strong>
+                  <strong>
+                    {t(
+                      "menus.maintenance.actions"
+                    )}
+                  </strong>
                 </TableCell>
               </TableRow>
             </TableHead>
+
             <TableBody>
-              {menusFiltrados.map((menu) => {
-                const status = formatStatus(menu, now);
+              {menusFiltrados.map(
+                (menu) => {
+                  const activo =
+                    Number(
+                      menu.activo
+                    ) === 1;
 
-                return (
-                  <TableRow
-                    key={menu.id_menu}
-                    hover
-                    sx={{
-                      "&:last-child td, &:last-child th": {
-                        border: 0,
-                      },
-                    }}
-                  >
-                    <TableCell>{menu.id_menu}</TableCell>
-                    <TableCell>
-                      <Typography fontWeight={600}>
-                        {menu.nombre_menu}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography fontWeight={500}>
-                        {formatMenuDate(menu.fecha_inicio)}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {formatMenuTime(menu.hora_inicio)}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography fontWeight={500}>
-                        {formatMenuDate(menu.fecha_fin)}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {formatMenuTime(menu.hora_fin)}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Chip
-                        label={status.label}
-                        color={status.color}
-                        size="small"
-                        sx={{
-                          fontWeight: 600,
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell align="center">
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "center",
-                          gap: 1,
-                          flexWrap: "wrap",
-                        }}
-                      >
-                        <Button
-                          component={Link}
-                          to={`/menu/${menu.id_menu}`}
-                          variant="contained"
-                          startIcon={<VisibilityIcon />}
-                          size="small"
-                          sx={{
-                            textTransform: "none",
-                            borderRadius: 2,
-                          }}
+                  const actualizando =
+                    Number(
+                      actualizandoId
+                    ) ===
+                    Number(
+                      menu.id_menu
+                    );
+
+                  return (
+                    <TableRow
+                      key={
+                        menu.id_menu
+                      }
+                      hover
+                    >
+                      <TableCell>
+                        {menu.id_menu}
+                      </TableCell>
+
+                      <TableCell>
+                        <Typography
+                          fontWeight={
+                            600
+                          }
                         >
-                          Detalle
-                        </Button>
+                          {
+                            menu.nombre_menu
+                          }
+                        </Typography>
+                      </TableCell>
 
-                        <Button
-                          component={Link}
-                          to={`/menu/mantenimiento/editar/${menu.id_menu}`}
-                          variant="outlined"
-                          startIcon={<EditIcon />}
-                          size="small"
-                          sx={{
-                            textTransform: "none",
-                            borderRadius: 2,
-                            borderColor: "#b71c1c",
-                            color: "#b71c1c",
-                            "&:hover": {
-                              borderColor: "#8e0000",
-                              backgroundColor: "#fff4f4",
-                            },
-                          }}
+                      <TableCell>
+                        <Typography variant="body2">
+                          {formatMenuDate(
+                            menu.fecha_inicio
+                          )}
+                        </Typography>
+
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
                         >
-                          Editar
-                        </Button>
+                          {formatMenuTime(
+                            menu.hora_inicio
+                          )}
+                        </Typography>
+                      </TableCell>
 
-                        <Button
-                          variant="outlined"
-                          onClick={() => handleToggleActive(menu)}
-                          disabled={processingId === Number(menu.id_menu)}
-                          startIcon={
-                            Number(menu.activo) === 1 ? (
-                              <BlockIcon />
-                            ) : (
-                              <CheckCircleIcon />
-                            )
+                      <TableCell>
+                        <Typography variant="body2">
+                          {formatMenuDate(
+                            menu.fecha_fin
+                          )}
+                        </Typography>
+
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                        >
+                          {formatMenuTime(
+                            menu.hora_fin
+                          )}
+                        </Typography>
+                      </TableCell>
+
+                      <TableCell align="center">
+                        <Chip
+                          label={
+                            activo
+                              ? t(
+                                  "menus.status.active"
+                                )
+                              : t(
+                                  "menus.status.inactive"
+                                )
+                          }
+                          color={
+                            activo
+                              ? "success"
+                              : "default"
                           }
                           size="small"
-                          color={Number(menu.activo) === 1 ? "error" : "success"}
                           sx={{
-                            textTransform: "none",
-                            borderRadius: 2,
+                            fontWeight:
+                              600,
+                          }}
+                        />
+                      </TableCell>
+
+                      <TableCell align="center">
+                        <Box
+                          sx={{
+                            display:
+                              "flex",
+                            justifyContent:
+                              "center",
+                            gap: 1,
+                            flexWrap:
+                              "wrap",
                           }}
                         >
-                          {processingId === Number(menu.id_menu)
-                            ? "Guardando..."
-                            : Number(menu.activo) === 1
-                              ? "Inhabilitar"
-                              : "Habilitar"}
-                        </Button>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+                          <Button
+                            component={
+                              Link
+                            }
+                            to={`/menu/${menu.id_menu}`}
+                            variant="contained"
+                            startIcon={
+                              <VisibilityIcon />
+                            }
+                            size="small"
+                            sx={{
+                              textTransform:
+                                "none",
+                              borderRadius:
+                                2,
+                            }}
+                          >
+                            {t(
+                              "menus.maintenance.detail"
+                            )}
+                          </Button>
 
-              {menusFiltrados.length === 0 && (
+                          <Button
+                            component={
+                              Link
+                            }
+                            to={`/menu/update/${menu.id_menu}`}
+                            variant="outlined"
+                            startIcon={
+                              <EditIcon />
+                            }
+                            size="small"
+                            sx={{
+                              textTransform:
+                                "none",
+                              borderRadius:
+                                2,
+                              borderColor:
+                                "#b71c1c",
+                              color:
+                                "#b71c1c",
+
+                              "&:hover":
+                                {
+                                  borderColor:
+                                    "#8e0000",
+                                  backgroundColor:
+                                    "#fff4f4",
+                                },
+                            }}
+                          >
+                            {t(
+                              "menus.maintenance.edit"
+                            )}
+                          </Button>
+
+                          <Button
+                            onClick={() =>
+                              cambiarEstado(
+                                menu
+                              )
+                            }
+                            disabled={
+                              actualizando
+                            }
+                            variant="outlined"
+                            startIcon={
+                              actualizando ? (
+                                <CircularProgress
+                                  size={
+                                    16
+                                  }
+                                  color="inherit"
+                                />
+                              ) : activo ? (
+                                <BlockIcon />
+                              ) : (
+                                <CheckCircleIcon />
+                              )
+                            }
+                            size="small"
+                            color={
+                              activo
+                                ? "error"
+                                : "success"
+                            }
+                            sx={{
+                              textTransform:
+                                "none",
+                              borderRadius:
+                                2,
+                            }}
+                          >
+                            {actualizando
+                              ? t(
+                                  "menus.maintenance.saving"
+                                )
+                              : activo
+                                ? t(
+                                    "menus.maintenance.disable"
+                                  )
+                                : t(
+                                    "menus.maintenance.enable"
+                                  )}
+                          </Button>
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  );
+                }
+              )}
+
+              {menusFiltrados.length ===
+                0 && (
                 <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 5 }}>
+                  <TableCell
+                    colSpan={6}
+                    align="center"
+                    sx={{ py: 5 }}
+                  >
                     <Typography color="text.secondary">
-                      No se encontraron menús
+                      {t(
+                        "menus.maintenance.noResults"
+                      )}
                     </Typography>
                   </TableCell>
                 </TableRow>

@@ -234,6 +234,171 @@ const resources = {
           },
         },
       },
+
+      menus: {
+        common: {
+          products: "Productos",
+          combos: "Combos",
+          start: "Inicio",
+          end: "Fin",
+          status: "Estado",
+          actions: "Acciones",
+          detail: "Detalle",
+          edit: "Editar",
+          save: "Guardar",
+          saving: "Guardando...",
+          enable: "Habilitar",
+          disable: "Inhabilitar",
+          noCategory: "Sin categoría",
+        },
+
+        status: {
+          active: "Activo",
+          inactive: "Inactivo",
+          available: "Disponible",
+          availableNow: "Disponible ahora",
+          unavailable: "Fuera de horario",
+          activeMenu: "Menú activo",
+          inactiveMenu: "Menú inactivo",
+        },
+
+        list: {
+          loading: "Cargando menús...",
+          title: "Menús registrados",
+          description: "Consulta los menús registrados por fecha y horario.",
+          availableDescription:
+            "Consulta los menús disponibles en La Tostelería.",
+          showAvailable: "Mostrar solo disponibles",
+          showingAvailable: "Mostrando solo disponibles",
+          viewMenu: "Ver menú",
+          noAvailable: "No hay menús disponibles en este momento.",
+        },
+
+        available: {
+          loading: "Cargando menú disponible...",
+          noMenu: "No hay un menú disponible en este momento.",
+          title: "Menús disponibles ahora",
+          description:
+            "El sistema muestra un único menú disponible según la fecha y hora actual.",
+          availableNow: "Disponible ahora",
+          availability:
+            "Disponible del {{startDate}} {{startTime}} al {{endDate}} {{endTime}}.",
+          viewDetail: "Ver detalle completo",
+        },
+
+        detail: {
+          loading: "Cargando menú...",
+          notFound: "No se encontró el menú solicitado.",
+          availability:
+            "Disponible del {{startDate}} {{startTime}} al {{endDate}} {{endTime}}.",
+          back: "Volver al listado",
+        },
+
+        create: {
+          title: "Crear menú",
+          description:
+            "Registre la disponibilidad, los productos y los combos que formarán parte del menú.",
+          save: "Guardar menú",
+          error: "No fue posible registrar el menú.",
+        },
+
+        edit: {
+          title: "Modificar menú",
+          description:
+            "Actualice la disponibilidad y los elementos incluidos en el menú.",
+          update: "Actualizar menú",
+          loadError: "No fue posible cargar el menú solicitado.",
+          updateError: "No fue posible actualizar el menú.",
+          notFound: "No se encontró el menú solicitado.",
+        },
+
+        form: {
+          title: "Información del menú",
+          name: "Nombre del menú",
+          startDate: "Fecha de inicio",
+          endDate: "Fecha de fin",
+          startTime: "Hora de inicio",
+          endTime: "Hora de fin",
+          active: "Menú activo",
+
+          products: "Productos",
+          combos: "Combos",
+
+          selectMultiple: "Seleccione uno o varios {{items}}",
+          noAvailable: "No hay {{items}} disponibles",
+          loadingItems: "Cargando {{items}}...",
+
+          itemHint:
+            "Los elementos se agrupan por categoría para facilitar la selección.",
+
+          comboHint:
+            "Si el menú no incluye combos, puede dejar esta selección vacía mientras exista al menos un producto.",
+
+          save: "Guardar menú",
+          saving: "Guardando...",
+
+          validation: {
+            nameRequired: "El nombre del menú es obligatorio.",
+            nameMin: "El nombre del menú debe tener al menos 3 caracteres.",
+            nameMax: "El nombre del menú no puede superar los 100 caracteres.",
+
+            startDateRequired: "La fecha de inicio es obligatoria.",
+            startDateFormat:
+              "La fecha de inicio debe tener formato YYYY-MM-DD.",
+
+            endDateRequired: "La fecha de fin es obligatoria.",
+            endDateFormat: "La fecha de fin debe tener formato YYYY-MM-DD.",
+
+            dateRange:
+              "La fecha de inicio no puede ser mayor que la fecha final.",
+
+            startTimeRequired: "La hora de inicio es obligatoria.",
+            startTimeFormat: "La hora de inicio debe tener formato HH:MM.",
+
+            endTimeRequired: "La hora de fin es obligatoria.",
+            endTimeFormat: "La hora de fin debe tener formato HH:MM.",
+
+            timeRange:
+              "La hora de inicio no puede ser mayor que la hora final cuando las fechas son iguales.",
+
+            itemsRequired: "Debe seleccionar al menos un producto o un combo.",
+          },
+        },
+
+        maintenance: {
+          loading: "Cargando mantenimiento de menús...",
+          title: "Mantenimiento de Menús",
+          description: "Administra los menús registrados en el sistema",
+          newMenu: "Nuevo Menú",
+
+          search: "Buscar menú...",
+          allStatuses: "Todos los estados",
+          total: "Total: {{count}} menús",
+
+          id: "ID",
+          menu: "Menú",
+          start: "Inicio",
+          end: "Fin",
+          status: "Estado",
+          actions: "Acciones",
+
+          detail: "Detalle",
+          edit: "Editar",
+          enable: "Habilitar",
+          disable: "Inhabilitar",
+          saving: "Guardando...",
+
+          noResults: "No se encontraron menús",
+          loadError: "No fue posible cargar los menús.",
+
+          confirmEnable: '¿Desea activar el menú "{{name}}"?',
+          confirmDisable: '¿Desea desactivar el menú "{{name}}"?',
+
+          enableSuccess: "El menú fue activado correctamente.",
+          disableSuccess: "El menú fue desactivado correctamente.",
+          statusError: "No fue posible actualizar el estado del menú.",
+        },
+      },
     },
   },
 
@@ -470,6 +635,167 @@ const resources = {
 
             productsRequired: "You must select at least one product",
           },
+        },
+      },
+
+      menus: {
+        common: {
+          products: "Products",
+          combos: "Combos",
+          start: "Start",
+          end: "End",
+          status: "Status",
+          actions: "Actions",
+          detail: "Details",
+          edit: "Edit",
+          save: "Save",
+          saving: "Saving...",
+          enable: "Enable",
+          disable: "Disable",
+          noCategory: "No category",
+        },
+
+        status: {
+          active: "Active",
+          inactive: "Inactive",
+          available: "Available",
+          availableNow: "Available now",
+          unavailable: "Outside available hours",
+          activeMenu: "Active menu",
+          inactiveMenu: "Inactive menu",
+        },
+
+        list: {
+          loading: "Loading menus...",
+          title: "Registered menus",
+          description: "View registered menus by date and schedule.",
+          availableDescription: "View the menus available at La Tostelería.",
+          showAvailable: "Show available only",
+          showingAvailable: "Showing available only",
+          viewMenu: "View menu",
+          noAvailable: "There are no menus available at this time.",
+        },
+
+        available: {
+          loading: "Loading available menu...",
+          noMenu: "There is no menu available at this time.",
+          title: "Menus available now",
+          description:
+            "The system displays a single available menu based on the current date and time.",
+          availableNow: "Available now",
+          availability:
+            "Available from {{startDate}} {{startTime}} to {{endDate}} {{endTime}}.",
+          viewDetail: "View full details",
+        },
+
+        detail: {
+          loading: "Loading menu...",
+          notFound: "The requested menu was not found.",
+          availability:
+            "Available from {{startDate}} {{startTime}} to {{endDate}} {{endTime}}.",
+          back: "Back to list",
+        },
+
+        create: {
+          title: "Create menu",
+          description:
+            "Enter the availability, products, and combos that will be included in the menu.",
+          save: "Save menu",
+          error: "Unable to create the menu.",
+        },
+
+        edit: {
+          title: "Edit menu",
+          description:
+            "Update the availability and the items included in the menu.",
+          update: "Update menu",
+          loadError: "Unable to load the requested menu.",
+          updateError: "Unable to update the menu.",
+          notFound: "The requested menu was not found.",
+        },
+
+        form: {
+          title: "Menu information",
+          name: "Menu name",
+          startDate: "Start date",
+          endDate: "End date",
+          startTime: "Start time",
+          endTime: "End time",
+          active: "Active menu",
+
+          products: "Products",
+          combos: "Combos",
+
+          selectMultiple: "Select one or more {{items}}",
+          noAvailable: "No {{items}} available",
+          loadingItems: "Loading {{items}}...",
+
+          itemHint: "Items are grouped by category to make selection easier.",
+
+          comboHint:
+            "If the menu does not include combos, you may leave this selection empty as long as at least one product is selected.",
+
+          save: "Save menu",
+          saving: "Saving...",
+
+          validation: {
+            nameRequired: "The menu name is required.",
+            nameMin: "The menu name must contain at least 3 characters.",
+            nameMax: "The menu name cannot exceed 100 characters.",
+
+            startDateRequired: "The start date is required.",
+            startDateFormat: "The start date must use the YYYY-MM-DD format.",
+
+            endDateRequired: "The end date is required.",
+            endDateFormat: "The end date must use the YYYY-MM-DD format.",
+
+            dateRange: "The start date cannot be later than the end date.",
+
+            startTimeRequired: "The start time is required.",
+            startTimeFormat: "The start time must use the HH:MM format.",
+
+            endTimeRequired: "The end time is required.",
+            endTimeFormat: "The end time must use the HH:MM format.",
+
+            timeRange:
+              "The start time cannot be later than the end time when both dates are the same.",
+
+            itemsRequired: "You must select at least one product or one combo.",
+          },
+        },
+
+        maintenance: {
+          loading: "Loading menu maintenance...",
+          title: "Menu Maintenance",
+          description: "Manage the menus registered in the system",
+          newMenu: "New Menu",
+
+          search: "Search menu...",
+          allStatuses: "All statuses",
+          total: "Total: {{count}} menus",
+
+          id: "ID",
+          menu: "Menu",
+          start: "Start",
+          end: "End",
+          status: "Status",
+          actions: "Actions",
+
+          detail: "Details",
+          edit: "Edit",
+          enable: "Enable",
+          disable: "Disable",
+          saving: "Saving...",
+
+          noResults: "No menus found",
+          loadError: "Unable to load the menus.",
+
+          confirmEnable: 'Do you want to enable the menu "{{name}}"?',
+          confirmDisable: 'Do you want to disable the menu "{{name}}"?',
+
+          enableSuccess: "The menu was enabled successfully.",
+          disableSuccess: "The menu was disabled successfully.",
+          statusError: "Unable to update the menu status.",
         },
       },
     },

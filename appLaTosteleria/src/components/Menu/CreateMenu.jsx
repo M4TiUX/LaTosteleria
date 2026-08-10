@@ -1,49 +1,83 @@
-import { useNavigate } from "react-router-dom";
-import { Alert, Container, Stack, Typography } from "@mui/material";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+
+import {
+  Alert,
+  Box,
+  Typography,
+} from "@mui/material";
+
 import MenuService from "../../services/MenuService";
 import { MenuForm } from "./MenuForm";
 
 export function CreateMenu() {
   const navigate = useNavigate();
-  const [errorMessage, setErrorMessage] = useState("");
+  const { t } = useTranslation();
 
-  const guardarMenu = async (data) => {
-    setErrorMessage("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
+  const handleSubmit = async (data) => {
     try {
-      const payload = {
-        ...data,
-        activo: data.activo ? 1 : 0,
-      };
+      setSaving(true);
+      setError("");
 
-      const response = await MenuService.createMenu(payload);
-      const createdMenuId = response?.data?.id_menu;
+      await MenuService.createMenu(data);
 
-      navigate(createdMenuId ? `/menu/${createdMenuId}` : "/menu/mantenimiento");
-    } catch (error) {
-      setErrorMessage(
-        error?.response?.data?.message ??
-          error?.response?.data ??
-          "No fue posible registrar el menú.",
+      navigate("/menu-maintenance");
+    } catch (err) {
+      console.error("Error al crear el menú:", err);
+
+      setError(
+        err.response?.data?.message ||
+          t("menus.create.error")
       );
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Stack spacing={1.5} sx={{ mb: 3 }}>
-        <Typography variant="h4" fontWeight="bold">
-          Crear menú
-        </Typography>
-        <Typography color="text.secondary">
-          Registre la disponibilidad, los productos y los combos que formarán parte del menú.
-        </Typography>
-      </Stack>
+    <Box
+      sx={{
+        maxWidth: 1000,
+        mx: "auto",
+        py: 4,
+      }}
+    >
+      <Typography
+        variant="h3"
+        sx={{
+          fontWeight: 700,
+          mb: 1,
+        }}
+      >
+        {t("menus.create.title")}
+      </Typography>
 
-      {errorMessage && <Alert severity="error" sx={{ mb: 3 }}>{errorMessage}</Alert>}
+      <Typography
+        variant="body1"
+        color="text.secondary"
+        sx={{ mb: 3 }}
+      >
+        {t("menus.create.description")}
+      </Typography>
 
-      <MenuForm onSubmit={guardarMenu} submitText="Guardar menú" />
-    </Container>
+      {error && (
+        <Alert
+          severity="error"
+          sx={{ mb: 3 }}
+        >
+          {error}
+        </Alert>
+      )}
+
+      <MenuForm
+        onSubmit={handleSubmit}
+        saving={saving}
+        submitLabel={t("menus.create.save")}
+      />
+    </Box>
   );
 }
