@@ -26,6 +26,9 @@ class SeguimientoPedidoModel
     ];
 
     private const UPDATE_INTERVAL_SECONDS = 5;
+    private const TIENDA_LAT = 9.928069;
+    private const TIENDA_LNG = -84.090725;
+    private const DELIVERY_DURATION_SECONDS = 60; // duracion simulada del trayecto
 
     public $enlace;
 
@@ -50,6 +53,23 @@ class SeguimientoPedidoModel
 
             $this->ensureInitialTracking($pedido);
             $this->advanceTrackingIfNeeded($pedidoId);
+
+            return $this->buildTrackingResponse($pedidoId);
+        } catch (Exception $e) {
+            handleException($e);
+        }
+    }
+
+    public function avanzarManual($pedidoId, $comentario = null)
+    {
+        try {
+            $pedidoId = (int) $pedidoId;
+            $pedido = $this->getPedido($pedidoId);
+            if ($pedido === null) {
+                return null;
+            }
+
+            $this->avanzarAlSiguienteEstado($pedidoId, $comentario);
 
             return $this->buildTrackingResponse($pedidoId);
         } catch (Exception $e) {
@@ -86,12 +106,52 @@ class SeguimientoPedidoModel
         }
     }
 
+    private function avanzarAlSiguienteEstado($pedidoId, $comentarioOverride = null)
+    {
+        $history = $this->getTrackingHistory($pedidoId);
+        if (empty($history)) {
+            return false;
+        }
+
+        $latest = end($history);
+        reset($history);
+
+        $currentIndex = $this->findStateIndex($latest->estado_nombre);
+        if ($currentIndex === null || $currentIndex >= count(self::STATES) - 1) {
+            return false;
+        }
+
+        $nextIndex = $currentIndex + 1;
+        $nextState = self::STATES[$nextIndex];
+        if ($comentarioOverride) {
+            $nextState['comment'] = trim($comentarioOverride);
+        }
+
+        $repartidorId = null;
+        $latitud = null;
+        $longitud = null;
+
+        if ($nextState['name'] === 'En camino') {
+            $repartidorId = $this->asignarRepartidor();
+            $latitud = self::TIENDA_LAT;
+            $longitud = self::TIENDA_LNG;
+        }
+
+        $this->insertTrackingRow($pedidoId, $nextState, null, $repartidorId, $latitud, $longitud);
+        $this->updatePedidoEstado($pedidoId, $nextIndex + 1);
+
+        return true;
+    }
+
     private function buildTrackingResponse($pedidoId)
     {
         $pedido = $this->getPedido($pedidoId);
         $history = $this->getTrackingHistory($pedidoId);
         $latest = end($history);
         reset($history);
+
+        $direccion = $this->getDireccionPedido($pedidoId);
+        $ubicacionRepartidor = $this->calcularUbicacionRepartidor($latest, $direccion);
 
         return (object) [
             'pedido_id' => (int) $pedido->id_pedido,
@@ -101,10 +161,13 @@ class SeguimientoPedidoModel
                 'correo' => $pedido->cliente_correo,
             ],
             'metodo_entrega' => $pedido->metodo_entrega,
+            'direccion_entrega' => $direccion,
             'fecha_creacion' => $pedido->fecha_creacion,
             'estado_actual' => $latest->estado_nombre,
             'comentario_actual' => $latest->comentario,
             'progreso' => (int) $latest->progreso,
+            'repartidor_id' => $latest->repartidor_id,
+            'ubicacion_repartidor' => $ubicacionRepartidor,
             'actualizacion_automatica_segundos' => self::UPDATE_INTERVAL_SECONDS,
             'historial' => $history,
         ];
@@ -136,6 +199,57 @@ class SeguimientoPedidoModel
         return $result[0];
     }
 
+    private function getDireccionPedido($pedidoId)
+    {
+        $pedidoId = (int) $pedidoId;
+
+        $sql = "SELECT de.id_direccion, de.detalles, de.referencias, de.latitud, de.longitud
+            FROM pedidos p
+            INNER JOIN direcciones_envio de ON de.id_direccion = p.direccion_id
+            WHERE p.id_pedido = $pedidoId
+            LIMIT 1";
+
+        $result = $this->enlace->executeSQL($sql);
+
+        return (is_array($result) && !empty($result)) ? $result[0] : null;
+    }
+
+    private function calcularUbicacionRepartidor($latestTracking, $direccion)
+    {
+        if ($direccion === null || $latestTracking === false) {
+            return null; // Pedido para retirar en tienda, no aplica mapa
+        }
+
+        if ($latestTracking->estado_nombre === 'Entregado') {
+            return (object) [
+                'latitud' => (float) $direccion->latitud,
+                'longitud' => (float) $direccion->longitud,
+                'progreso_ruta' => 100,
+            ];
+        }
+
+        if ($latestTracking->estado_nombre !== 'En camino') {
+            return null;
+        }
+
+        $latInicio = self::TIENDA_LAT;
+        $lngInicio = self::TIENDA_LNG;
+        $latFin = (float) $direccion->latitud;
+        $lngFin = (float) $direccion->longitud;
+
+        $inicioTimestamp = strtotime($latestTracking->fecha_hora);
+        $elapsed = $inicioTimestamp !== false ? (time() - $inicioTimestamp) : 0;
+        $fraction = self::DELIVERY_DURATION_SECONDS > 0
+            ? min(1, max(0, $elapsed / self::DELIVERY_DURATION_SECONDS))
+            : 1;
+
+        return (object) [
+            'latitud' => round($latInicio + (($latFin - $latInicio) * $fraction), 8),
+            'longitud' => round($lngInicio + (($lngFin - $lngInicio) * $fraction), 8),
+            'progreso_ruta' => (int) round($fraction * 100),
+        ];
+    }
+
     private function getDemoClient()
     {
         $sql = "SELECT id_usuario, nombre, correo
@@ -145,11 +259,7 @@ class SeguimientoPedidoModel
 
         $result = $this->enlace->executeSQL($sql);
 
-        if (!is_array($result) || empty($result)) {
-            return null;
-        }
-
-        return $result[0];
+        return (is_array($result) && !empty($result)) ? $result[0] : null;
     }
 
     private function getTrackingHistory($pedidoId)
@@ -159,9 +269,12 @@ class SeguimientoPedidoModel
         $sql = "SELECT
                 id_seguimiento,
                 pedido_id,
+                repartidor_id,
                 estado_nombre,
                 comentario,
-                fecha_hora
+                fecha_hora,
+                latitud,
+                longitud
             FROM seguimiento_pedido
             WHERE pedido_id = $pedidoId
             ORDER BY fecha_hora DESC, id_seguimiento DESC";
@@ -179,6 +292,7 @@ class SeguimientoPedidoModel
             $history[] = (object) [
                 'id_seguimiento' => (int) $row->id_seguimiento,
                 'pedido_id' => (int) $row->pedido_id,
+                'repartidor_id' => $row->repartidor_id !== null ? (int) $row->repartidor_id : null,
                 'estado_nombre' => $row->estado_nombre,
                 'comentario' => $row->comentario,
                 'fecha_hora' => $row->fecha_hora,
@@ -221,11 +335,6 @@ class SeguimientoPedidoModel
         $latest = end($history);
         reset($history);
 
-        $currentIndex = $this->findStateIndex($latest->estado_nombre);
-        if ($currentIndex === null || $currentIndex >= count(self::STATES) - 1) {
-            return;
-        }
-
         $lastUpdateTime = strtotime($latest->fecha_hora);
         if ($lastUpdateTime === false) {
             return;
@@ -235,24 +344,31 @@ class SeguimientoPedidoModel
             return;
         }
 
-        $nextIndex = $currentIndex + 1;
-        $nextState = self::STATES[$nextIndex];
-
-        $this->insertTrackingRow($pedidoId, $nextState);
-        $this->updatePedidoEstado($pedidoId, $nextIndex + 1);
+        $this->avanzarAlSiguienteEstado($pedidoId);
     }
 
-    private function insertTrackingRow($pedidoId, $state, $timestamp = null)
+    private function asignarRepartidor()
+    {
+        $sql = "SELECT id_repartidor FROM repartidores ORDER BY RAND() LIMIT 1";
+        $result = $this->enlace->executeSQL($sql);
+
+        return (is_array($result) && !empty($result)) ? (int) $result[0]->id_repartidor : null;
+    }
+
+    private function insertTrackingRow($pedidoId, $state, $timestamp = null, $repartidorId = null, $latitud = null, $longitud = null)
     {
         $pedidoId = (int) $pedidoId;
         $stateName = $this->escape($state['name']);
         $comment = $this->escape($state['comment']);
         $timestamp = $this->escape($timestamp ?? $this->getCurrentTimestamp());
+        $repartidorSql = $repartidorId === null ? 'NULL' : (int) $repartidorId;
+        $latSql = $latitud === null ? 'NULL' : (float) $latitud;
+        $lngSql = $longitud === null ? 'NULL' : (float) $longitud;
 
         $sql = "INSERT INTO seguimiento_pedido
-            (pedido_id, estado_nombre, comentario, fecha_hora)
+            (pedido_id, repartidor_id, estado_nombre, comentario, fecha_hora, latitud, longitud)
             VALUES
-            ($pedidoId, '$stateName', '$comment', '$timestamp')";
+            ($pedidoId, $repartidorSql, '$stateName', '$comment', '$timestamp', $latSql, $lngSql)";
 
         $this->enlace->executeSQL_DML($sql);
     }

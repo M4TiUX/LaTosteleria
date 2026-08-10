@@ -124,7 +124,6 @@ class PedidoModel
             }
 
             return $pedidos;
-
         } catch (Exception $e) {
             handleException($e);
         }
@@ -230,7 +229,6 @@ class PedidoModel
                 );
 
             return $pedido;
-
         } catch (Exception $e) {
             handleException($e);
         }
@@ -243,292 +241,115 @@ class PedidoModel
     public function create($pedido)
     {
         try {
-
-            // -------------------------------------------------
-            // VALIDAR PEDIDO
-            // -------------------------------------------------
-
             if (!is_object($pedido)) {
-                throw new Exception(
-                    'Debe enviar la informacion del pedido en formato JSON.'
-                );
+                throw new Exception('Debe enviar la informacion del pedido en formato JSON.');
             }
 
-            $items =
-                isset($pedido->items) &&
-                is_array($pedido->items)
-                    ? $pedido->items
-                    : [];
-
+            $items = isset($pedido->items) && is_array($pedido->items) ? $pedido->items : [];
             if (empty($items)) {
-                throw new Exception(
-                    'Debe agregar al menos un producto o combo al pedido.'
-                );
+                throw new Exception('Debe agregar al menos un producto o combo al pedido.');
             }
 
-            // -------------------------------------------------
-            // CLIENTE
-            // -------------------------------------------------
-
-            $clienteId =
-                isset($pedido->cliente_id)
-                    ? (int) $pedido->cliente_id
-                    : 0;
-
+            $clienteId = isset($pedido->cliente_id) ? (int) $pedido->cliente_id : 0;
             if ($clienteId <= 0) {
-                throw new Exception(
-                    'Debe iniciar sesion para registrar un pedido.'
-                );
+                throw new Exception('Debe iniciar sesion para registrar un pedido.');
             }
 
-            // -------------------------------------------------
-            // ENCARGADO
-            // -------------------------------------------------
+            $metodoEntrega = isset($pedido->metodo_entrega) ? trim((string) $pedido->metodo_entrega) : 'Tienda';
+            if (!in_array($metodoEntrega, ['Tienda', 'Domicilio'], true)) {
+                throw new Exception('El metodo de entrega debe ser "Tienda" o "Domicilio".');
+            }
 
-            $encargadoId =
-                isset($pedido->encargado_id) &&
-                (int) $pedido->encargado_id > 0
-                    ? (int) $pedido->encargado_id
-                    : null;
+            $direccionId = null;
+            $costoEnvio = 0.00;
 
-            $encargadoSql =
-                $encargadoId === null
-                    ? 'NULL'
-                    : $encargadoId;
+            if ($metodoEntrega === 'Domicilio') {
+                $direccionId = isset($pedido->direccion_id) ? (int) $pedido->direccion_id : 0;
+                if ($direccionId <= 0) {
+                    throw new Exception('Debe seleccionar una direccion de entrega registrada.');
+                }
 
-            // -------------------------------------------------
-            // INFORMACIÓN GENERAL
-            // -------------------------------------------------
+                $direccion = $this->getDireccionEnvio($direccionId, $clienteId);
+                if ($direccion === null) {
+                    throw new Exception('La direccion seleccionada no es valida o no le pertenece.');
+                }
 
-            $metodoEntrega = 'Tienda';
+                $costoEnvio = (float) $direccion->costo_zona;
+            }
 
-            $observaciones =
-                isset($pedido->observaciones)
-                    ? $this->sanitizeObservation(
-                        $pedido->observaciones
-                    )
-                    : null;
+            $observaciones = isset($pedido->observaciones)
+                ? $this->sanitizeObservation($pedido->observaciones)
+                : null;
 
-            // -------------------------------------------------
-            // VALIDAR PRODUCTOS Y COMBOS
-            // -------------------------------------------------
-
-            $validatedItems =
-                $this->validateItems(
-                    $items
-                );
-
-            // -------------------------------------------------
-            // CALCULAR TOTAL
-            // -------------------------------------------------
+            $validatedItems = $this->validateItems($items);
 
             $subtotal = 0.0;
-
             foreach ($validatedItems as $item) {
-                $subtotal +=
-                    $item['unit_price'] *
-                    $item['cantidad'];
+                $subtotal += $item['unit_price'] * $item['cantidad'];
             }
 
-            $subtotal =
-                round($subtotal, 2);
-
-            // Temporalmente impuestos en 0
+            $subtotal = round($subtotal, 2);
             $impuestos = 0.00;
+            $total = round($subtotal + $impuestos + $costoEnvio, 2);
+            $fechaCreacion = $this->escape(date('Y-m-d H:i:s'));
+            $observacionesSql = $observaciones === null ? 'NULL' : "'" . $this->escape($observaciones) . "'";
+            $direccionIdSql = $direccionId === null ? 'NULL' : (int) $direccionId;
 
-            $total =
-                round(
-                    $subtotal +
-                    $impuestos,
-                    2
-                );
+            $sql = "INSERT INTO pedidos
+            (cliente_id, estado_id, metodo_entrega, direccion_id, observaciones, subtotal, impuestos, total, costo_envio, fecha_creacion)
+            VALUES
+            ($clienteId, 1, '$metodoEntrega', $direccionIdSql, $observacionesSql, $subtotal, $impuestos, $total, $costoEnvio, '$fechaCreacion')";
 
-            // -------------------------------------------------
-            // VALIDAR PAGO
-            // -------------------------------------------------
-
-            $pago =
-                $this->validatePayment(
-                    $pedido,
-                    $total
-                );
-
-            // -------------------------------------------------
-            // FECHA
-            // -------------------------------------------------
-
-            $fechaCreacion =
-                $this->escape(
-                    date(
-                        'Y-m-d H:i:s'
-                    )
-                );
-
-            $observacionesSql =
-                $observaciones === null
-                    ? 'NULL'
-                    : "'" .
-                        $this->escape(
-                            $observaciones
-                        ) .
-                        "'";
-
-            // -------------------------------------------------
-            // INSERTAR PEDIDO
-            // -------------------------------------------------
-
-            $sql =
-                "INSERT INTO pedidos
-                (
-                    cliente_id,
-                    encargado_id,
-                    estado_id,
-                    metodo_entrega,
-                    observaciones,
-                    subtotal,
-                    impuestos,
-                    total,
-                    costo_envio,
-                    fecha_creacion
-                )
-                VALUES
-                (
-                    $clienteId,
-                    $encargadoSql,
-                    1,
-                    '$metodoEntrega',
-                    $observacionesSql,
-                    $subtotal,
-                    $impuestos,
-                    $total,
-                    0.00,
-                    '$fechaCreacion'
-                )";
-
-            $pedidoId =
-                $this->enlace
-                    ->executeSQL_DML_last(
-                        $sql
-                    );
+            $pedidoId = $this->enlace->executeSQL_DML_last($sql);
 
             if ($pedidoId <= 0) {
-                throw new Exception(
-                    'No fue posible registrar el pedido.'
-                );
+                throw new Exception('No fue posible registrar el pedido.');
             }
 
-            // -------------------------------------------------
-            // INSERTAR DETALLE
-            // -------------------------------------------------
+            foreach ($validatedItems as $item) {
+                $productoId = $item['item_type'] === 'producto' ? (int) $item['item_id'] : 'NULL';
+                $comboId = $item['item_type'] === 'combo' ? (int) $item['item_id'] : 'NULL';
+                $cantidad = (int) $item['cantidad'];
+                $observacionDetalle = $item['observaciones'] === null
+                    ? 'NULL'
+                    : "'" . $this->escape($item['observaciones']) . "'";
 
-            foreach (
-                $validatedItems as $item
-            ) {
-                $productoId =
-                    $item['item_type'] ===
-                    'producto'
-                        ? (int)
-                            $item['item_id']
-                        : 'NULL';
-
-                $comboId =
-                    $item['item_type'] ===
-                    'combo'
-                        ? (int)
-                            $item['item_id']
-                        : 'NULL';
-
-                $cantidad =
-                    (int)
-                    $item['cantidad'];
-
-                $observacionDetalle =
-                    $item['observaciones'] ===
-                    null
-                        ? 'NULL'
-                        : "'" .
-                            $this->escape(
-                                $item[
-                                    'observaciones'
-                                ]
-                            ) .
-                            "'";
-
-                $detailSql =
-                    "INSERT INTO detalle_pedido
-                    (
-                        pedido_id,
-                        producto_id,
-                        combo_id,
-                        cantidad,
-                        observaciones
-                    )
-                    VALUES
-                    (
-                        $pedidoId,
-                        $productoId,
-                        $comboId,
-                        $cantidad,
-                        $observacionDetalle
-                    )";
-
-                $this->enlace
-                    ->executeSQL_DML(
-                        $detailSql
-                    );
-            }
-
-            // -------------------------------------------------
-            // REGISTRAR PAGO
-            // -------------------------------------------------
-
-            $this->registerPayment(
-                $pedidoId,
-                $pago,
-                $total,
-                $fechaCreacion
-            );
-
-            // -------------------------------------------------
-            // CREAR SEGUIMIENTO
-            // -------------------------------------------------
-
-            $trackingSql =
-                "INSERT INTO seguimiento_pedido
-                (
-                    pedido_id,
-                    estado_nombre,
-                    fecha_hora,
-                    comentario
-                )
+                $detailSql = "INSERT INTO detalle_pedido
+                (pedido_id, producto_id, combo_id, cantidad, observaciones)
                 VALUES
-                (
-                    $pedidoId,
-                    'Recibido',
-                    '$fechaCreacion',
-                    'Pedido creado y enviado a seguimiento automatico.'
-                )";
+                ($pedidoId, $productoId, $comboId, $cantidad, $observacionDetalle)";
 
-            $this->enlace
-                ->executeSQL_DML(
-                    $trackingSql
-                );
+                $this->enlace->executeSQL_DML($detailSql);
+            }
 
-            // -------------------------------------------------
-            // RESPUESTA
-            // -------------------------------------------------
+            $trackingSql = "INSERT INTO seguimiento_pedido
+            (pedido_id, estado_nombre, fecha_hora, comentario)
+            VALUES
+            ($pedidoId, 'Recibido', '$fechaCreacion', 'Pedido creado y enviado a seguimiento automatico.')";
 
-            $seguimientoModel =
-                new SeguimientoPedidoModel();
+            $this->enlace->executeSQL_DML($trackingSql);
 
-            return $seguimientoModel
-                ->getTracking(
-                    $pedidoId
-                );
+            $seguimientoModel = new SeguimientoPedidoModel();
 
+            return $seguimientoModel->getTracking($pedidoId);
         } catch (Exception $e) {
             handleException($e);
         }
+    }
+
+    private function getDireccionEnvio($direccionId, $clienteId)
+    {
+        $direccionId = (int) $direccionId;
+        $clienteId = (int) $clienteId;
+
+        $sql = "SELECT id_direccion, detalles, referencias, latitud, longitud, costo_zona
+        FROM direcciones_envio
+        WHERE id_direccion = $direccionId AND usuario_id = $clienteId
+        LIMIT 1";
+
+        $result = $this->enlace->executeSQL($sql);
+
+        return (is_array($result) && !empty($result)) ? $result[0] : null;
     }
 
     // =========================================================
@@ -553,11 +374,11 @@ class PedidoModel
 
         $metodoPago =
             isset($pago->metodo_pago)
-                ? trim(
-                    (string)
-                    $pago->metodo_pago
-                )
-                : '';
+            ? trim(
+                (string)
+                $pago->metodo_pago
+            )
+            : '';
 
         if (
             $metodoPago !== 'Efectivo' &&
@@ -580,9 +401,9 @@ class PedidoModel
                 isset(
                     $pago->monto_recibido
                 )
-                    ? (float)
-                        $pago->monto_recibido
-                    : 0;
+                ? (float)
+                $pago->monto_recibido
+                : 0;
 
             if (
                 $montoRecibido <= 0
@@ -604,28 +425,28 @@ class PedidoModel
             $vuelto =
                 round(
                     $montoRecibido -
-                    $total,
+                        $total,
                     2
                 );
 
             return [
                 'metodo_pago' =>
-                    'Efectivo',
+                'Efectivo',
 
                 'monto_recibido' =>
-                    round(
-                        $montoRecibido,
-                        2
-                    ),
+                round(
+                    $montoRecibido,
+                    2
+                ),
 
                 'vuelto' =>
-                    $vuelto,
+                $vuelto,
 
                 'ultimos_cuatro_digitos' =>
-                    null,
+                null,
 
                 'marca_tarjeta' =>
-                    null,
+                null,
             ];
         }
 
@@ -638,12 +459,12 @@ class PedidoModel
                 $pago
                     ->ultimos_cuatro_digitos
             )
-                ? trim(
-                    (string)
-                    $pago
-                        ->ultimos_cuatro_digitos
-                )
-                : '';
+            ? trim(
+                (string)
+                $pago
+                    ->ultimos_cuatro_digitos
+            )
+            : '';
 
         if (
             !preg_match(
@@ -660,11 +481,11 @@ class PedidoModel
             isset(
                 $pago->marca_tarjeta
             )
-                ? trim(
-                    (string)
-                    $pago->marca_tarjeta
-                )
-                : '';
+            ? trim(
+                (string)
+                $pago->marca_tarjeta
+            )
+            : '';
 
         if (
             $marcaTarjeta === ''
@@ -694,22 +515,22 @@ class PedidoModel
 
         return [
             'metodo_pago' =>
-                'Tarjeta',
+            'Tarjeta',
 
             'monto_recibido' =>
-                round(
-                    $total,
-                    2
-                ),
+            round(
+                $total,
+                2
+            ),
 
             'vuelto' =>
-                0.00,
+            0.00,
 
             'ultimos_cuatro_digitos' =>
-                $ultimosCuatro,
+            $ultimosCuatro,
 
             'marca_tarjeta' =>
-                $marcaTarjeta,
+            $marcaTarjeta,
         ];
     }
 
@@ -748,9 +569,7 @@ class PedidoModel
             $montoRecibido =
                 round(
                     (float)
-                    $pago[
-                        'monto_recibido'
-                    ],
+                    $pago['monto_recibido'],
                     2
                 );
 
@@ -799,16 +618,12 @@ class PedidoModel
 
         $ultimosCuatro =
             $this->escape(
-                $pago[
-                    'ultimos_cuatro_digitos'
-                ]
+                $pago['ultimos_cuatro_digitos']
             );
 
         $marcaTarjeta =
             $this->escape(
-                $pago[
-                    'marca_tarjeta'
-                ]
+                $pago['marca_tarjeta']
             );
 
         /*
@@ -912,9 +727,9 @@ class PedidoModel
 
         $items =
             $this->enlace
-                ->executeSQL(
-                    $sql
-                );
+            ->executeSQL(
+                $sql
+            );
 
         return is_array($items)
             ? $items
@@ -936,40 +751,40 @@ class PedidoModel
                 isset(
                     $item->item_type
                 )
-                    ? strtolower(
-                        trim(
-                            (string)
-                            $item->item_type
-                        )
+                ? strtolower(
+                    trim(
+                        (string)
+                        $item->item_type
                     )
-                    : '';
+                )
+                : '';
 
             $itemId =
                 isset(
                     $item->item_id
                 )
-                    ? (int)
-                        $item->item_id
-                    : 0;
+                ? (int)
+                $item->item_id
+                : 0;
 
             $cantidad =
                 isset(
                     $item->cantidad
                 )
-                    ? (int)
-                        $item->cantidad
-                    : 0;
+                ? (int)
+                $item->cantidad
+                : 0;
 
             $observaciones =
                 isset(
                     $item->observaciones
                 )
-                    ? $this
-                        ->sanitizeDetailObservation(
-                            $item
-                                ->observaciones
-                        )
-                    : null;
+                ? $this
+                ->sanitizeDetailObservation(
+                    $item
+                        ->observaciones
+                )
+                : null;
 
             if (
                 (
@@ -989,12 +804,12 @@ class PedidoModel
             $catalogItem =
                 $itemType ===
                 'producto'
-                    ? $this->getProduct(
-                        $itemId
-                    )
-                    : $this->getCombo(
-                        $itemId
-                    );
+                ? $this->getProduct(
+                    $itemId
+                )
+                : $this->getCombo(
+                    $itemId
+                );
 
             if (
                 $catalogItem ===
@@ -1008,28 +823,28 @@ class PedidoModel
             $unitPrice =
                 $itemType ===
                 'producto'
-                    ? (float)
-                        $catalogItem
-                            ->precio
-                    : (float)
-                        $catalogItem
-                            ->precio_especial;
+                ? (float)
+                $catalogItem
+                    ->precio
+                : (float)
+                $catalogItem
+                    ->precio_especial;
 
             $validatedItems[] = [
                 'item_type' =>
-                    $itemType,
+                $itemType,
 
                 'item_id' =>
-                    $itemId,
+                $itemId,
 
                 'cantidad' =>
-                    $cantidad,
+                $cantidad,
 
                 'unit_price' =>
-                    $unitPrice,
+                $unitPrice,
 
                 'observaciones' =>
-                    $observaciones,
+                $observaciones,
             ];
         }
 
@@ -1062,9 +877,9 @@ class PedidoModel
 
         $result =
             $this->enlace
-                ->executeSQL(
-                    $sql
-                );
+            ->executeSQL(
+                $sql
+            );
 
         if (
             !is_array($result) ||
@@ -1079,8 +894,8 @@ class PedidoModel
         return
             (int) $product->activo ===
             1
-                ? $product
-                : null;
+            ? $product
+            : null;
     }
 
     // =========================================================
@@ -1109,9 +924,9 @@ class PedidoModel
 
         $result =
             $this->enlace
-                ->executeSQL(
-                    $sql
-                );
+            ->executeSQL(
+                $sql
+            );
 
         if (
             !is_array($result) ||
@@ -1126,8 +941,8 @@ class PedidoModel
         return
             (int) $combo->activo ===
             1
-                ? $combo
-                : null;
+            ? $combo
+            : null;
     }
 
     // =========================================================

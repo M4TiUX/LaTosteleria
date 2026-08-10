@@ -23,6 +23,21 @@ class seguimientoPedido
         }
     }
 
+    public function update($id)
+    {
+        try {
+            $request = new Request();
+            $response = new Response();
+            $seguimientoModel = new SeguimientoPedidoModel();
+            $body = $request->getJSON();
+
+            $result = $seguimientoModel->avanzarManual((int) $id, $body->comentario ?? null);
+            $response->toJSON($result);
+        } catch (Exception $e) {
+            handleException($e);
+        }
+    }
+
     public function createDemo()
     {
         try {
