@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useTranslation } from "react-i18next";
 
 import {
   Autocomplete,
@@ -23,43 +24,51 @@ import * as yup from "yup";
 import CategoryService from "../../../services/CategoryService";
 import IngredientService from "../../../services/IngredientService";
 
-const productSchema = yup.object({
-  nombre_producto: yup
-    .string()
-    .required("El nombre del producto es obligatorio")
-    .min(3, "El nombre debe tener al menos 3 caracteres"),
+const crearProductSchema = (t) =>
+  yup.object({
+    nombre_producto: yup
+      .string()
+      .required(t("products.form.validation.nameRequired"))
+      .min(3, t("products.form.validation.nameMin")),
 
-  descripcion: yup
-    .string()
-    .required("La descripción es obligatoria")
-    .min(5, "La descripción debe tener al menos 5 caracteres"),
+    descripcion: yup
+      .string()
+      .required(t("products.form.validation.descriptionRequired"))
+      .min(5, t("products.form.validation.descriptionMin")),
 
-  precio: yup
-    .number()
-    .typeError("El precio debe ser un número")
-    .positive("El precio debe ser mayor que cero")
-    .required("El precio es obligatorio"),
+    precio: yup
+      .number()
+      .typeError(t("products.form.validation.priceNumber"))
+      .positive(t("products.form.validation.pricePositive"))
+      .required(t("products.form.validation.priceRequired")),
 
-  categoria_id: yup
-    .number()
-    .typeError("Debe seleccionar una categoría")
-    .positive("Debe seleccionar una categoría")
-    .required("La categoría es obligatoria"),
+    categoria_id: yup
+      .number()
+      .typeError(t("products.form.validation.categorySelect"))
+      .positive(t("products.form.validation.categorySelect"))
+      .required(t("products.form.validation.categoryRequired")),
 
-  ingredientes: yup
-    .array()
-    .min(1, "Debe seleccionar al menos un ingrediente")
-    .required("Debe seleccionar al menos un ingrediente"),
+    ingredientes: yup
+      .array()
+      .min(1, t("products.form.validation.ingredientRequired"))
+      .required(t("products.form.validation.ingredientRequired")),
 
-  imagen: yup.string().nullable(),
-});
+    imagen: yup.string().nullable(),
+  });
 
 export default function ProductForm({
   defaultValues,
   onSubmit,
-  buttonText = "Guardar producto",
+  buttonText,
   loading = false,
 }) {
+  const { t, i18n } = useTranslation();
+
+  const productSchema = useMemo(
+    () => crearProductSchema(t),
+    [t, i18n.language],
+  );
+
   const [categorias, setCategorias] = useState([]);
   const [ingredientesDisponibles, setIngredientesDisponibles] = useState([]);
   const [cargandoDatos, setCargandoDatos] = useState(true);
@@ -69,7 +78,10 @@ export default function ProductForm({
   const [vistaPrevia, setVistaPrevia] = useState(
     defaultValues?.imagen ? `/images/${defaultValues.imagen}` : null,
   );
+
   const [archivoImagen, setArchivoImagen] = useState(null);
+
+  const esActualizacion = Boolean(defaultValues);
 
   const valoresIniciales = {
     nombre_producto: "",
@@ -85,7 +97,6 @@ export default function ProductForm({
     control,
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
   } = useForm({
     defaultValues: valoresIniciales,
@@ -105,10 +116,6 @@ export default function ProductForm({
         IngredientService.getIngredients(),
       ]);
 
-      /*
-       * Ajusta estas líneas si tus servicios devuelven directamente
-       * el arreglo y no utilizan la propiedad data.
-       */
       setCategorias(respuestaCategorias?.data || respuestaCategorias || []);
 
       setIngredientesDisponibles(
@@ -129,16 +136,13 @@ export default function ProductForm({
     }
 
     if (!archivo.type.startsWith("image/")) {
-      alert("Debe seleccionar un archivo de imagen.");
+      alert(t("products.form.invalidImage"));
       return;
     }
 
     const urlTemporal = URL.createObjectURL(archivo);
 
-    // Guardar el archivo real
     setArchivoImagen(archivo);
-
-    // Mostrar información y vista previa
     setNombreImagen(archivo.name);
     setVistaPrevia(urlTemporal);
   };
@@ -186,15 +190,17 @@ export default function ProductForm({
           },
         }}
       >
-        {/* Mejora 2: título y descripción */}
         <Box sx={{ mb: 4 }}>
           <Typography variant="h4" component="h1" fontWeight={700} gutterBottom>
-            Crear producto
+            {esActualizacion
+              ? t("products.form.updateTitle")
+              : t("products.form.createTitle")}
           </Typography>
 
           <Typography variant="body1" color="text.secondary">
-            Complete la información necesaria para registrar un nuevo producto
-            en el catálogo.
+            {esActualizacion
+              ? t("products.form.updateDescription")
+              : t("products.form.createDescription")}
           </Typography>
         </Box>
 
@@ -207,7 +213,7 @@ export default function ProductForm({
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="Nombre del producto"
+                label={t("products.form.name")}
                 {...register("nombre_producto")}
                 error={Boolean(errors.nombre_producto)}
                 helperText={errors.nombre_producto?.message}
@@ -217,7 +223,7 @@ export default function ProductForm({
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="Precio"
+                label={t("products.form.price")}
                 type="number"
                 slotProps={{
                   htmlInput: {
@@ -236,7 +242,7 @@ export default function ProductForm({
                 fullWidth
                 multiline
                 minRows={3}
-                label="Descripción"
+                label={t("products.form.description")}
                 {...register("descripcion")}
                 error={Boolean(errors.descripcion)}
                 helperText={errors.descripcion?.message}
@@ -252,16 +258,21 @@ export default function ProductForm({
                     {...field}
                     select
                     fullWidth
-                    label="Categoría"
+                    label={t("products.form.category")}
                     error={Boolean(errors.categoria_id)}
                     helperText={errors.categoria_id?.message}
                     slotProps={{
+                      inputLabel: {
+                        shrink: true,
+                      },
                       select: {
                         native: true,
                       },
                     }}
                   >
-                    <option value="">Seleccione una categoría</option>
+                    <option value="">
+                      {t("products.form.selectCategory")}
+                    </option>
 
                     {categorias.map((categoria) => (
                       <option
@@ -276,7 +287,6 @@ export default function ProductForm({
               />
             </Grid>
 
-            {/* Mejora 6: ingredientes como chips */}
             <Grid item xs={12} md={6}>
               <Controller
                 name="ingredientes"
@@ -324,8 +334,8 @@ export default function ProductForm({
                     renderInput={(params) => (
                       <TextField
                         {...params}
-                        label="Ingredientes"
-                        placeholder="Seleccione ingredientes"
+                        label={t("products.form.ingredients")}
+                        placeholder={t("products.form.selectIngredients")}
                         error={Boolean(errors.ingredientes)}
                         helperText={errors.ingredientes?.message}
                       />
@@ -335,7 +345,6 @@ export default function ProductForm({
               />
             </Grid>
 
-            {/* Mejora 3: selección y vista previa de imagen */}
             <Grid item xs={12}>
               <Box
                 sx={{
@@ -346,7 +355,7 @@ export default function ProductForm({
                 }}
               >
                 <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                  Imagen del producto
+                  {t("products.form.productImage")}
                 </Typography>
 
                 <Typography
@@ -354,7 +363,7 @@ export default function ProductForm({
                   color="text.secondary"
                   sx={{ mb: 2 }}
                 >
-                  Seleccione una imagen para representar el producto.
+                  {t("products.form.imageDescription")}
                 </Typography>
 
                 <input
@@ -373,7 +382,7 @@ export default function ProductForm({
                   variant="outlined"
                   startIcon={<ImageOutlinedIcon />}
                 >
-                  Seleccionar imagen
+                  {t("products.form.selectImage")}
                 </Button>
 
                 {nombreImagen && (
@@ -382,7 +391,9 @@ export default function ProductForm({
                     color="text.secondary"
                     sx={{ mt: 1.5 }}
                   >
-                    Archivo seleccionado: {nombreImagen}
+                    {t("products.form.selectedFile", {
+                      name: nombreImagen,
+                    })}
                   </Typography>
                 )}
 
@@ -403,7 +414,7 @@ export default function ProductForm({
                     <Box
                       component="img"
                       src={vistaPrevia}
-                      alt="Vista previa del producto"
+                      alt={t("products.form.imagePreview")}
                       sx={{
                         width: "100%",
                         height: "100%",
@@ -425,7 +436,6 @@ export default function ProductForm({
               </Box>
             </Grid>
 
-            {/* Mejora 4: botón más ancho */}
             <Grid item xs={12}>
               <Box
                 sx={{
@@ -460,7 +470,9 @@ export default function ProductForm({
                     textTransform: "none",
                   }}
                 >
-                  {loading ? "Guardando..." : buttonText}
+                  {loading
+                    ? t("products.form.saving")
+                    : buttonText || t("products.form.save")}
                 </Button>
               </Box>
             </Grid>

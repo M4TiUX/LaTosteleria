@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+
 import {
   CircularProgress,
   FormControl,
@@ -12,6 +14,8 @@ import {
 import CategoryService from "../../../services/CategoryService";
 
 export function SelectCategory({ control, errors }) {
+  const { t } = useTranslation();
+
   const [categorias, setCategorias] = useState([]);
   const [cargando, setCargando] = useState(true);
 
@@ -43,18 +47,20 @@ export function SelectCategory({ control, errors }) {
           error={Boolean(errors.categoria_id)}
           disabled={cargando}
         >
-          <InputLabel id="categoria-label">Categoría</InputLabel>
+          <InputLabel id="categoria-label">
+            {t("products.form.category")}
+          </InputLabel>
 
           <Select
             {...field}
             labelId="categoria-label"
-            label="Categoría"
+            label={t("products.form.category")}
             value={field.value ?? ""}
           >
             {cargando ? (
               <MenuItem disabled>
                 <CircularProgress size={20} sx={{ mr: 1 }} />
-                Cargando categorías...
+                {t("products.form.loadingCategories")}
               </MenuItem>
             ) : (
               categorias.map((categoria) => (

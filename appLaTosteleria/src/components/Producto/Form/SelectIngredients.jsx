@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 import {
   Autocomplete,
@@ -10,6 +11,8 @@ import {
 import IngredientService from "../../../services/IngredientService";
 
 export function SelectIngredients({ control, errors }) {
+  const { t } = useTranslation();
+
   const [ingredientes, setIngredientes] = useState([]);
   const [cargando, setCargando] = useState(true);
 
@@ -57,13 +60,15 @@ export function SelectIngredients({ control, errors }) {
               )
             );
           }}
-          noOptionsText="No hay ingredientes disponibles"
-          loadingText="Cargando ingredientes..."
+          noOptionsText={t("products.form.noIngredientsAvailable")}
+          loadingText={t("products.form.loadingIngredients")}
           renderInput={(params) => (
             <TextField
               {...params}
-              label="Ingredientes"
-              placeholder="Seleccione uno o varios ingredientes"
+              label={t("products.form.ingredients")}
+              placeholder={t(
+                "products.form.selectSeveralIngredients",
+              )}
               error={Boolean(errors.ingredientes)}
               helperText={errors.ingredientes?.message}
               InputProps={{

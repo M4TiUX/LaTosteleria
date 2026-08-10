@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ProductService from "../../services/ProductService";
+import { useTranslation } from "react-i18next";
 
 import {
   Box,
@@ -16,6 +17,7 @@ import {
 } from "@mui/material";
 
 export function ListProduct() {
+  const { t } = useTranslation();
   const [productos, setProductos] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
@@ -43,12 +45,12 @@ export function ListProduct() {
           );
         } else {
           setProductos([]);
-          setError("La API no devolvió una lista válida de productos.");
+          setError(t("products.invalidResponse"));
         }
       })
       .catch((error) => {
         console.error("Error al traer productos:", error);
-        setError("No fue posible cargar los productos.");
+        setError(t("products.loadError"));
       })
       .finally(() => {
         setCargando(false);
@@ -77,7 +79,7 @@ export function ListProduct() {
       >
         <CircularProgress />
 
-        <Typography color="text.secondary">Cargando productos...</Typography>
+        <Typography color="text.secondary">{t("products.loading")}</Typography>
       </Box>
     );
   }
@@ -115,7 +117,7 @@ export function ListProduct() {
             },
           }}
         >
-          Nuestros productos
+          {t("products.title")}
         </Typography>
 
         <Typography
@@ -123,8 +125,7 @@ export function ListProduct() {
           color="text.secondary"
           sx={{ mt: 1, maxWidth: 650 }}
         >
-          Conoce nuestra variedad de productos preparados especialmente para
-          disfrutar en cualquier momento del día.
+          {t("products.description")}
         </Typography>
       </Box>
 
@@ -168,7 +169,7 @@ export function ListProduct() {
                   />
 
                   <Chip
-                    label={producto.nombre_categoria || "Sin categoría"}
+                    label={producto.nombre_categoria || t("products.noCategory")}
                     size="small"
                     sx={{
                       position: "absolute",
@@ -210,7 +211,7 @@ export function ListProduct() {
                       lineHeight: 1.5,
                     }}
                   >
-                    {producto.descripcion || "Producto sin descripción."}
+                    {producto.descripcion || t("products.noDescription")}
                   </Typography>
 
                   <Typography
@@ -236,7 +237,7 @@ export function ListProduct() {
                       fontWeight: "bold",
                     }}
                   >
-                    Ver detalle
+                    {t("products.viewDetail")}
                   </Button>
                 </CardActions>
               </Card>
@@ -254,7 +255,7 @@ export function ListProduct() {
           }}
         >
           <Typography variant="h6" color="text.secondary">
-            No se encontraron productos disponibles.
+            {t("products.noProducts")}
           </Typography>
         </Box>
       )}

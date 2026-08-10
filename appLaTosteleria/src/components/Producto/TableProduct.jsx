@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import ProductService from "../../services/ProductService";
 
 import {
@@ -29,6 +30,8 @@ import BlockIcon from "@mui/icons-material/Block";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 export function TableProduct() {
+  const { t } = useTranslation();
+
   const [data, setData] = useState([]);
   const [busqueda, setBusqueda] = useState("");
   const [categoria, setCategoria] = useState("");
@@ -95,7 +98,7 @@ export function TableProduct() {
               color: "#4a1714",
             }}
           >
-            Mantenimiento de Productos
+            {t("products.maintenance.title")}
           </Typography>
 
           <Typography
@@ -105,7 +108,7 @@ export function TableProduct() {
               mt: 1,
             }}
           >
-            Administra los productos disponibles en el sistema
+            {t("products.maintenance.subtitle")}
           </Typography>
         </Box>
 
@@ -128,7 +131,7 @@ export function TableProduct() {
             },
           }}
         >
-          Nuevo Producto
+          {t("products.maintenance.newProduct")}
         </Button>
       </Box>
 
@@ -158,7 +161,7 @@ export function TableProduct() {
             }}
           >
             <TextField
-              placeholder="Buscar producto..."
+              placeholder={t("products.maintenance.searchPlaceholder")}
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
               size="small"
@@ -179,7 +182,9 @@ export function TableProduct() {
               size="small"
               sx={{ width: 250 }}
             >
-              <MenuItem value="">Todas las categorías</MenuItem>
+              <MenuItem value="">
+                {t("products.maintenance.allCategories")}
+              </MenuItem>
 
               {categorias.map((cat) => (
                 <MenuItem key={cat} value={cat}>
@@ -190,7 +195,9 @@ export function TableProduct() {
           </Box>
 
           <Chip
-            label={`Total: ${productosFiltrados.length} productos`}
+            label={t("products.maintenance.total", {
+              count: productosFiltrados.length,
+            })}
             sx={{
               fontSize: "0.95rem",
               px: 1,
@@ -212,27 +219,27 @@ export function TableProduct() {
                 </TableCell>
 
                 <TableCell>
-                  <strong>Imagen</strong>
+                  <strong>{t("products.maintenance.image")}</strong>
                 </TableCell>
 
                 <TableCell>
-                  <strong>Producto</strong>
+                  <strong>{t("products.maintenance.product")}</strong>
                 </TableCell>
 
                 <TableCell>
-                  <strong>Categoría</strong>
+                  <strong>{t("products.maintenance.category")}</strong>
                 </TableCell>
 
                 <TableCell>
-                  <strong>Precio</strong>
+                  <strong>{t("products.maintenance.price")}</strong>
                 </TableCell>
 
                 <TableCell align="center">
-                  <strong>Estado</strong>
+                  <strong>{t("products.maintenance.status")}</strong>
                 </TableCell>
 
                 <TableCell align="center">
-                  <strong>Acciones</strong>
+                  <strong>{t("products.maintenance.actions")}</strong>
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -295,7 +302,9 @@ export function TableProduct() {
                   <TableCell align="center">
                     <Chip
                       label={
-                        Number(item.activo) === 1 ? "Activo" : "Inhabilitado"
+                        Number(item.activo) === 1
+                          ? t("products.maintenance.active")
+                          : t("products.maintenance.disabled")
                       }
                       color={Number(item.activo) === 1 ? "success" : "default"}
                       size="small"
@@ -324,7 +333,7 @@ export function TableProduct() {
                           borderRadius: 2,
                         }}
                       >
-                        Detalle
+                        {t("products.maintenance.detail")}
                       </Button>
 
                       <Button
@@ -345,7 +354,7 @@ export function TableProduct() {
                           },
                         }}
                       >
-                        Editar
+                        {t("products.maintenance.edit")}
                       </Button>
 
                       <Button
@@ -366,8 +375,8 @@ export function TableProduct() {
                         }}
                       >
                         {Number(item.activo) === 1
-                          ? "Inhabilitar"
-                          : "Habilitar"}
+                          ? t("products.maintenance.disable")
+                          : t("products.maintenance.enable")}
                       </Button>
                     </Box>
                   </TableCell>
@@ -378,7 +387,7 @@ export function TableProduct() {
                 <TableRow>
                   <TableCell colSpan={7} align="center" sx={{ py: 5 }}>
                     <Typography color="text.secondary">
-                      No se encontraron productos
+                      {t("products.maintenance.noProducts")}
                     </Typography>
                   </TableCell>
                 </TableRow>

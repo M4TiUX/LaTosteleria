@@ -44,6 +44,8 @@ import { ToastContainer } from "react-toastify";
 import { DetailPedido } from "./components/Pedido/DetailPedido";
 import { FacturaPedido } from "./components/Pedido/FacturaPedido";
 
+import "./i18n";
+
 import axios from "axios";
 
 const rutas = createBrowserRouter([

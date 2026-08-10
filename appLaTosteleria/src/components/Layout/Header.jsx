@@ -16,8 +16,13 @@ import MoreIcon from "@mui/icons-material/MoreVert";
 import Tooltip from "@mui/material/Tooltip";
 import { useCart } from "../../hooks/useCart";
 import { UserContext } from "../../context/UserContext";
+//Traductor
+import { useTranslation } from "react-i18next";
 
 export default function Header() {
+  //Traductor
+  const { t, i18n } = useTranslation();
+
   const { decodeToken, autorize } = useContext(UserContext);
   const userData = decodeToken();
 
@@ -54,9 +59,9 @@ export default function Header() {
   };
 
   const userItems = [
-    { name: "Login", link: "/user/login", login: false },
-    { name: "Registrarse", link: "/user/create", login: false },
-    { name: "Logout", link: "/user/logout", login: true },
+    { name: t("user.login"), link: "/user/login", login: false },
+    { name: t("user.register"), link: "/user/create", login: false },
+    { name: t("user.logout"), link: "/user/logout", login: true },
   ];
 
   // =====================================================
@@ -65,37 +70,37 @@ export default function Header() {
 
   const navItems = [
     {
-      name: "Productos",
+      name: t("nav.productos"),
       link: "/producto",
       roles: null,
     },
     {
-      name: "Mantenimiento Productos",
+      name: t("nav.mantenimientoProductos"),
       link: "/producto-table",
       roles: ["Administrador"],
     },
     {
-      name: "Combos",
+      name: t("nav.combos"),
       link: "/Combo",
       roles: null,
     },
     {
-      name: "Procesos",
+      name: t("nav.procesos"),
       link: "/Procesos",
       roles: ["Administrador", "Empleado"],
     },
     {
-      name: "Menús",
+      name: t("nav.menus"),
       link: "/menu",
       roles: null,
     },
     {
-      name: "Pedidos",
+      name: t("nav.pedidos"),
       link: "/pedido",
       roles: ["Cliente", "Empleado", "Administrador"],
     },
     {
-      name: "Mantenimiento Menús",
+      name: t("nav.mantenimientoMenus"),
       link: "/menu/mantenimiento",
       roles: ["Administrador"],
     },
@@ -177,9 +182,7 @@ export default function Header() {
         to={page.link}
         onClick={handleClosePrincipalMenu}
       >
-        <Typography sx={{ textAlign: "center" }}>
-          {page.name}
-        </Typography>
+        <Typography sx={{ textAlign: "center" }}>{page.name}</Typography>
       </MenuItem>
     );
   });
@@ -229,11 +232,7 @@ export default function Header() {
         )}
 
         {userItems.map((setting, index) => {
-          if (
-            setting.login &&
-            userData &&
-            Object.keys(userData).length > 0
-          ) {
+          if (setting.login && userData && Object.keys(userData).length > 0) {
             return (
               <MenuItem
                 key={index}
@@ -248,10 +247,7 @@ export default function Header() {
             );
           }
 
-          if (
-            !setting.login &&
-            Object.keys(userData).length === 0
-          ) {
+          if (!setting.login && Object.keys(userData).length === 0) {
             return (
               <MenuItem
                 key={index}
@@ -304,10 +300,7 @@ export default function Header() {
             to="/pedido/crear"
             onClick={handleOpcionesMenuClose}
           >
-            <IconButton
-              size="large"
-              sx={{ color: "secondary.main" }}
-            >
+            <IconButton size="large" sx={{ color: "secondary.main" }}>
               <Badge
                 badgeContent={getCountItems(cart)}
                 sx={{
@@ -317,9 +310,7 @@ export default function Header() {
                   },
                 }}
               >
-                <ShoppingCartIcon
-                  sx={{ color: "secondary.main" }}
-                />
+                <ShoppingCartIcon sx={{ color: "secondary.main" }} />
               </Badge>
             </IconButton>
 
@@ -496,6 +487,26 @@ export default function Header() {
                     </IconButton>
                   </Tooltip>
                 )}
+
+              <Box sx={{ display: "flex", alignItems: "center", mr: 1 }}>
+                <Button
+                  color="inherit"
+                  size="small"
+                  onClick={() => i18n.changeLanguage("es")}
+                  sx={{ minWidth: "35px" }}
+                >
+                  ES
+                </Button>
+
+                <Button
+                  color="inherit"
+                  size="small"
+                  onClick={() => i18n.changeLanguage("en")}
+                  sx={{ minWidth: "35px" }}
+                >
+                  EN
+                </Button>
+              </Box>
 
               <IconButton size="large" color="inherit">
                 <Badge badgeContent={17} color="error">

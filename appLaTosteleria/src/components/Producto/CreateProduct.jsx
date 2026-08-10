@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import { Box, Container } from "@mui/material";
 
@@ -9,6 +10,8 @@ import { toast } from "react-toastify";
 
 export function CreateProduct() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
   const [guardando, setGuardando] = useState(false);
 
   const guardarProducto = async (producto) => {
@@ -32,9 +35,7 @@ export function CreateProduct() {
 
       const response = await ProductService.createProduct(formData);
 
-      toast.success(
-        response.data.message || "Producto registrado correctamente.",
-      );
+      toast.success(response.data.message || t("products.form.createSuccess"));
 
       navigate("/producto");
     } catch (error) {
@@ -42,11 +43,10 @@ export function CreateProduct() {
 
       if (error.response) {
         toast.error(
-          error.response?.data.message ||
-            "Ocurrió un error al registrar el producto.",
+          error.response?.data.message || t("products.form.createError"),
         );
       } else {
-        toast.error("No fue posible comunicarse con el servidor.");
+        toast.error(t("products.form.serverError"));
       }
     } finally {
       setGuardando(false);
@@ -68,7 +68,7 @@ export function CreateProduct() {
         <ProductForm
           onSubmit={guardarProducto}
           loading={guardando}
-          buttonText="Guardar producto"
+          buttonText={t("products.form.save")}
         />
       </Container>
     </Box>
