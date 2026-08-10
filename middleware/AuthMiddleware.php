@@ -4,82 +4,168 @@ use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-class AuthMiddleware {
+class AuthMiddleware
+{
+    private $authenticatedUser = null;
+
     /**
-     * Manejar la solicitud para verificar el token y el rol del usuario.
-     * @param $request: solicitud, $requiredRoles: array con nombres de roles permitidos
-     * @return boolean
+     * Verifica token y rol.
      */
-    //$requiredRoles=["Administrador","Cliente"]
-    public function handle($requiredRoles) {
-        // Obtener y validar el token de la cabecera Authorization
+    public function handle($requiredRoles = [])
+    {
         $token = $this->getTokenFromHeader();
+
         if (!$token) {
-            return $this->errorResponse(401, 'Acceso denegado: token no proporcionado.');
+            return $this->errorResponse(
+                401,
+                'Acceso denegado: token no proporcionado.'
+            );
         }
 
-        // Verificar y decodificar el token
         $decodedToken = $this->verifyToken($token);
+
         if (!$decodedToken) {
-            return $this->errorResponse(401, 'Acceso denegado: token inválido o expirado.');
+            return $this->errorResponse(
+                401,
+                'Acceso denegado: token inválido o expirado.'
+            );
         }
 
-        // Verificar los roles permitidos
-        if (!$this->checkRole($decodedToken->rol->name, $requiredRoles)) {
-            return $this->errorResponse(403, 'Acceso denegado: rol no autorizado.');
+        $this->authenticatedUser = $decodedToken;
+
+        if (!empty($requiredRoles)) {
+
+            $userRole =
+                $decodedToken->rol->name ?? null;
+
+            if (
+                !$userRole ||
+                !$this->checkRole(
+                    $userRole,
+                    $requiredRoles
+                )
+            ) {
+                return $this->errorResponse(
+                    403,
+                    'Acceso denegado: rol no autorizado.'
+                );
+            }
         }
 
-        // Continuar con la siguiente parte del middleware o controlador
         return true;
     }
 
     /**
-     * Obtener el token de la cabecera Authorization.
-     * @return string|null
+     * Devuelve el usuario obtenido del JWT.
      */
-    private function getTokenFromHeader() {
-        $headers = apache_request_headers();
-        $authHeader = $headers['Authorization'] ?? '';
-        if ($authHeader && strpos($authHeader, 'Bearer ') === 0) {
-            return str_replace('Bearer ', '', $authHeader);
+    public function getAuthenticatedUser()
+    {
+        return $this->authenticatedUser;
+    }
+
+    /**
+     * Obtener token Bearer.
+     */
+    private function getTokenFromHeader()
+    {
+        $headers = [];
+
+        if (function_exists('apache_request_headers')) {
+            $headers = apache_request_headers();
         }
+
+        $authHeader = '';
+
+        foreach ($headers as $key => $value) {
+            if (
+                strtolower($key) ===
+                'authorization'
+            ) {
+                $authHeader = $value;
+                break;
+            }
+        }
+
+        /*
+         * Alternativa para algunos
+         * servidores/configuraciones Apache.
+         */
+        if (
+            !$authHeader &&
+            isset($_SERVER['HTTP_AUTHORIZATION'])
+        ) {
+            $authHeader =
+                $_SERVER['HTTP_AUTHORIZATION'];
+        }
+
+        if (
+            $authHeader &&
+            preg_match(
+                '/Bearer\s+(\S+)/i',
+                $authHeader,
+                $matches
+            )
+        ) {
+            return $matches[1];
+        }
+
         return null;
     }
 
     /**
-     * Verificar y decodificar el token JWT.
-     * @param string $token
-     * @return object|false
+     * Verificar JWT.
      */
-    private function verifyToken($token) {
+    private function verifyToken($token)
+    {
         try {
-            return JWT::decode($token, new Key(config::get('SECRET_KEY'), 'HS256'));
+            return JWT::decode(
+                $token,
+                new Key(
+                    config::get('SECRET_KEY'),
+                    'HS256'
+                )
+            );
+
         } catch (ExpiredException $e) {
-            return false; // El token ha expirado
+            return false;
+
         } catch (Exception $e) {
-            return false; // El token no es válido
+            return false;
         }
     }
 
     /**
-     * Verificar si el rol del usuario está en el array de roles permitidos.
-     * @param string $userRole
-     * @param array $requiredRoles
-     * @return boolean
+     * Validar rol.
      */
-    private function checkRole($userRole, $requiredRoles) {
-        return in_array($userRole, $requiredRoles);
+    private function checkRole(
+        $userRole,
+        $requiredRoles
+    ) {
+        return in_array(
+            $userRole,
+            $requiredRoles,
+            true
+        );
     }
 
     /**
-     * Generar una respuesta de error y detener la ejecución.
-     * @param int $statusCode
-     * @param string $message
-     * @return void
+     * Respuesta de error.
      */
-    private function errorResponse($statusCode, $message) {
+    private function errorResponse(
+        $statusCode,
+        $message
+    ) {
         http_response_code($statusCode);
-        echo json_encode(['status' => $statusCode, 'result' => $message]);
+
+        header(
+            'Content-Type: application/json; charset=utf-8'
+        );
+
+        echo json_encode([
+            'status' => $statusCode,
+            'result' => $message
+        ]);
+
         exit;
     }
 }

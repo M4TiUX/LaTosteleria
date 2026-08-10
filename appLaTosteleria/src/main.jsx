@@ -42,6 +42,9 @@ import { CreatePedido } from "./components/Pedido/CreatePedido";
 
 import { ToastContainer } from "react-toastify";
 import { DetailPedido } from "./components/Pedido/DetailPedido";
+import { FacturaPedido } from "./components/Pedido/FacturaPedido";
+
+import axios from "axios";
 
 const rutas = createBrowserRouter([
   {
@@ -235,6 +238,10 @@ const rutas = createBrowserRouter([
             path: "/pedido/detalle/:id",
             element: <DetailPedido />,
           },
+          {
+            path: "/pedido/factura/:id",
+            element: <FacturaPedido />,
+          },
         ],
       },
 
@@ -249,6 +256,23 @@ const rutas = createBrowserRouter([
     ],
   },
 ]);
+
+axios.interceptors.request.use(
+  (config) => {
+    const storedUser = localStorage.getItem("user");
+
+    if (storedUser) {
+      const token = JSON.parse(storedUser);
+
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  },
+);
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

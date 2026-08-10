@@ -38,9 +38,7 @@ function formatDateTime(value) {
     return "-";
   }
 
-  const date = new Date(
-    String(value).replace(" ", "T"),
-  );
+  const date = new Date(String(value).replace(" ", "T"));
 
   if (Number.isNaN(date.getTime())) {
     return value;
@@ -59,23 +57,17 @@ export function DetailPedido() {
 
   const userData = decodeToken();
 
-  const roleName =
-    userData?.rol?.name ?? "";
+  const roleName = userData?.rol?.name ?? "";
 
-  const isCliente =
-    roleName === "Cliente";
+  const isCliente = roleName === "Cliente";
 
-  const [pedido, setPedido] =
-    useState(null);
+  const [pedido, setPedido] = useState(null);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [error, setError] =
-    useState(null);
+  const [error, setError] = useState(null);
 
-  const [unauthorized, setUnauthorized] =
-    useState(false);
+  const [unauthorized, setUnauthorized] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -92,11 +84,7 @@ export function DetailPedido() {
           realmente le pertenezca.
         */
 
-        if (
-          isCliente &&
-          Number(data?.cliente_id) !==
-            Number(userData?.id)
-        ) {
+        if (isCliente && Number(data?.cliente_id) !== Number(userData?.id)) {
           setUnauthorized(true);
           setPedido(null);
           return;
@@ -106,10 +94,8 @@ export function DetailPedido() {
       })
       .catch((requestError) => {
         setError(
-          requestError?.response?.data
-            ?.message ??
-            requestError?.response?.data
-              ?.result ??
+          requestError?.response?.data?.message ??
+            requestError?.response?.data?.result ??
             requestError?.message ??
             "No fue posible cargar el pedido.",
         );
@@ -117,24 +103,14 @@ export function DetailPedido() {
       .finally(() => {
         setLoading(false);
       });
-  }, [
-    id,
-    isCliente,
-    userData?.id,
-  ]);
+  }, [id, isCliente, userData?.id]);
 
   if (loading) {
     return (
-      <Stack
-        spacing={2}
-        alignItems="center"
-        sx={{ py: 6 }}
-      >
+      <Stack spacing={2} alignItems="center" sx={{ py: 6 }}>
         <CircularProgress />
 
-        <Typography>
-          Cargando detalle del pedido...
-        </Typography>
+        <Typography>Cargando detalle del pedido...</Typography>
       </Stack>
     );
   }
@@ -151,8 +127,7 @@ export function DetailPedido() {
       >
         <Stack spacing={2}>
           <Alert severity="error">
-            No tiene autorización para
-            consultar este pedido.
+            No tiene autorización para consultar este pedido.
           </Alert>
 
           <Box>
@@ -160,9 +135,7 @@ export function DetailPedido() {
               component={Link}
               to="/pedido"
               variant="outlined"
-              startIcon={
-                <ArrowBackOutlinedIcon />
-              }
+              startIcon={<ArrowBackOutlinedIcon />}
             >
               Volver a pedidos
             </Button>
@@ -183,18 +156,14 @@ export function DetailPedido() {
         }}
       >
         <Stack spacing={2}>
-          <Alert severity="error">
-            {error}
-          </Alert>
+          <Alert severity="error">{error}</Alert>
 
           <Box>
             <Button
               component={Link}
               to="/pedido"
               variant="outlined"
-              startIcon={
-                <ArrowBackOutlinedIcon />
-              }
+              startIcon={<ArrowBackOutlinedIcon />}
             >
               Volver a pedidos
             </Button>
@@ -214,9 +183,7 @@ export function DetailPedido() {
           py: 3,
         }}
       >
-        <Alert severity="warning">
-          No se encontró el pedido solicitado.
-        </Alert>
+        <Alert severity="warning">No se encontró el pedido solicitado.</Alert>
       </Box>
     );
   }
@@ -248,32 +215,35 @@ export function DetailPedido() {
           spacing={1.5}
         >
           <Box>
-            <Typography
-              variant="h5"
-              fontWeight={700}
-            >
+            <Typography variant="h5" fontWeight={700}>
               Pedido #{pedido.id_pedido}
             </Typography>
 
-            <Typography
-              variant="body2"
-              color="text.secondary"
-            >
+            <Typography variant="body2" color="text.secondary">
               Detalle completo del pedido.
             </Typography>
           </Box>
 
-          <Button
-            component={Link}
-            to="/pedido"
-            variant="outlined"
-            size="small"
-            startIcon={
-              <ArrowBackOutlinedIcon />
-            }
-          >
-            Volver
-          </Button>
+          <Stack direction="row" spacing={1}>
+            <Button
+              component={Link}
+              to={`/pedido/factura/${pedido.id_pedido}`}
+              variant="contained"
+              size="small"
+            >
+              Ver factura
+            </Button>
+
+            <Button
+              component={Link}
+              to="/pedido"
+              variant="outlined"
+              size="small"
+              startIcon={<ArrowBackOutlinedIcon />}
+            >
+              Volver
+            </Button>
+          </Stack>
         </Stack>
 
         {/* ======================================
@@ -295,142 +265,73 @@ export function DetailPedido() {
             }}
           >
             <Stack spacing={2}>
-              <Typography
-                variant="h6"
-                fontWeight={700}
-              >
+              <Typography variant="h6" fontWeight={700}>
                 Información del pedido
               </Typography>
 
-              <Grid
-                container
-                spacing={2}
-              >
-                <Grid
-                  item
-                  xs={12}
-                  md={6}
-                >
-                  <Stack
-                    direction="row"
-                    spacing={1.2}
-                    alignItems="center"
-                  >
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <Stack direction="row" spacing={1.2} alignItems="center">
                     <PersonOutlineOutlinedIcon
                       color="action"
                       fontSize="small"
                     />
 
                     <Box>
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                      >
+                      <Typography variant="caption" color="text.secondary">
                         Cliente
                       </Typography>
 
-                      <Typography
-                        fontWeight={600}
-                        variant="body2"
-                      >
-                        {
-                          pedido.cliente_nombre
-                        }
+                      <Typography fontWeight={600} variant="body2">
+                        {pedido.cliente_nombre}
                       </Typography>
                     </Box>
                   </Stack>
                 </Grid>
 
-                <Grid
-                  item
-                  xs={12}
-                  md={6}
-                >
-                  <Stack
-                    direction="row"
-                    spacing={1.2}
-                    alignItems="center"
-                  >
-                    <EmailOutlinedIcon
-                      color="action"
-                      fontSize="small"
-                    />
+                <Grid item xs={12} md={6}>
+                  <Stack direction="row" spacing={1.2} alignItems="center">
+                    <EmailOutlinedIcon color="action" fontSize="small" />
 
                     <Box>
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                      >
+                      <Typography variant="caption" color="text.secondary">
                         Correo
                       </Typography>
 
-                      <Typography
-                        fontWeight={600}
-                        variant="body2"
-                      >
-                        {
-                          pedido.cliente_correo
-                        }
+                      <Typography fontWeight={600} variant="body2">
+                        {pedido.cliente_correo}
                       </Typography>
                     </Box>
                   </Stack>
                 </Grid>
 
-                <Grid
-                  item
-                  xs={12}
-                  md={6}
-                >
-                  <Stack
-                    direction="row"
-                    spacing={1.2}
-                    alignItems="center"
-                  >
+                <Grid item xs={12} md={6}>
+                  <Stack direction="row" spacing={1.2} alignItems="center">
                     <LocalShippingOutlinedIcon
                       color="action"
                       fontSize="small"
                     />
 
                     <Box>
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                      >
+                      <Typography variant="caption" color="text.secondary">
                         Método de entrega
                       </Typography>
 
-                      <Typography
-                        fontWeight={600}
-                        variant="body2"
-                      >
-                        {
-                          pedido.metodo_entrega
-                        }
+                      <Typography fontWeight={600} variant="body2">
+                        {pedido.metodo_entrega}
                       </Typography>
                     </Box>
                   </Stack>
                 </Grid>
 
-                <Grid
-                  item
-                  xs={12}
-                  md={6}
-                >
+                <Grid item xs={12} md={6}>
                   <Box>
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                    >
+                    <Typography variant="caption" color="text.secondary">
                       Fecha de creación
                     </Typography>
 
-                    <Typography
-                      fontWeight={600}
-                      variant="body2"
-                    >
-                      {formatDateTime(
-                        pedido.fecha_creacion,
-                      )}
+                    <Typography fontWeight={600} variant="body2">
+                      {formatDateTime(pedido.fecha_creacion)}
                     </Typography>
                   </Box>
                 </Grid>
@@ -438,21 +339,11 @@ export function DetailPedido() {
 
               <Divider />
 
-              <Stack
-                direction="row"
-                spacing={1.2}
-                alignItems="flex-start"
-              >
-                <NotesOutlinedIcon
-                  color="action"
-                  fontSize="small"
-                />
+              <Stack direction="row" spacing={1.2} alignItems="flex-start">
+                <NotesOutlinedIcon color="action" fontSize="small" />
 
                 <Box>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                  >
+                  <Typography variant="caption" color="text.secondary">
                     Observaciones generales
                   </Typography>
 
@@ -486,144 +377,95 @@ export function DetailPedido() {
             }}
           >
             <Stack spacing={2}>
-              <Stack
-                direction="row"
-                spacing={1}
-                alignItems="center"
-              >
-                <ReceiptLongOutlinedIcon
-                  fontSize="small"
-                />
+              <Stack direction="row" spacing={1} alignItems="center">
+                <ReceiptLongOutlinedIcon fontSize="small" />
 
-                <Typography
-                  variant="h6"
-                  fontWeight={700}
-                >
+                <Typography variant="h6" fontWeight={700}>
                   Productos y combos
                 </Typography>
               </Stack>
 
-              {!pedido.items ||
-              pedido.items.length === 0 ? (
+              {!pedido.items || pedido.items.length === 0 ? (
                 <Alert severity="info">
-                  Este pedido no contiene
-                  elementos registrados.
+                  Este pedido no contiene elementos registrados.
                 </Alert>
               ) : (
-                <Stack
-                  spacing={1.5}
-                  divider={<Divider />}
-                >
-                  {pedido.items.map(
-                    (item) => (
+                <Stack spacing={1.5} divider={<Divider />}>
+                  {pedido.items.map((item) => (
+                    <Stack key={item.id_detalle} spacing={0.8}>
                       <Stack
-                        key={
-                          item.id_detalle
-                        }
-                        spacing={0.8}
+                        direction={{
+                          xs: "column",
+                          sm: "row",
+                        }}
+                        justifyContent="space-between"
+                        spacing={1}
                       >
-                        <Stack
-                          direction={{
-                            xs: "column",
-                            sm: "row",
-                          }}
-                          justifyContent="space-between"
-                          spacing={1}
-                        >
-                          <Box>
-                            <Stack
-                              direction="row"
-                              spacing={1}
-                              alignItems="center"
-                            >
-                              <Typography
-                                fontWeight={
-                                  700
-                                }
-                                variant="body2"
-                              >
-                                {
-                                  item.nombre
-                                }
-                              </Typography>
-
-                              <Chip
-                                size="small"
-                                variant="outlined"
-                                label={
-                                  item.item_type ===
-                                  "combo"
-                                    ? "Combo"
-                                    : "Producto"
-                                }
-                              />
-                            </Stack>
-
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                            >
-                              Cantidad:{" "}
-                              {
-                                item.cantidad
-                              }
-                            </Typography>
-                          </Box>
-
-                          <Box
-                            sx={{
-                              textAlign: {
-                                xs: "left",
-                                sm: "right",
-                              },
-                            }}
-                          >
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                            >
-                              Precio unitario
-                            </Typography>
-
-                            <Typography
-                              variant="body2"
-                              fontWeight={600}
-                            >
-                              {formatCurrency(
-                                item.precio_unitario,
-                              )}
-                            </Typography>
-
-                            <Typography
-                              variant="body2"
-                              color="primary"
-                              fontWeight={700}
-                            >
-                              Subtotal:{" "}
-                              {formatCurrency(
-                                item.subtotal,
-                              )}
-                            </Typography>
-                          </Box>
-                        </Stack>
-
                         <Box>
-                          <Typography
-                            variant="caption"
-                            color="text.secondary"
+                          <Stack
+                            direction="row"
+                            spacing={1}
+                            alignItems="center"
                           >
-                            Observaciones
+                            <Typography fontWeight={700} variant="body2">
+                              {item.nombre}
+                            </Typography>
+
+                            <Chip
+                              size="small"
+                              variant="outlined"
+                              label={
+                                item.item_type === "combo"
+                                  ? "Combo"
+                                  : "Producto"
+                              }
+                            />
+                          </Stack>
+
+                          <Typography variant="body2" color="text.secondary">
+                            Cantidad: {item.cantidad}
+                          </Typography>
+                        </Box>
+
+                        <Box
+                          sx={{
+                            textAlign: {
+                              xs: "left",
+                              sm: "right",
+                            },
+                          }}
+                        >
+                          <Typography variant="caption" color="text.secondary">
+                            Precio unitario
                           </Typography>
 
-                          <Typography variant="body2">
-                            {item.observaciones
-                              ? item.observaciones
-                              : "Sin observaciones."}
+                          <Typography variant="body2" fontWeight={600}>
+                            {formatCurrency(item.precio_unitario)}
+                          </Typography>
+
+                          <Typography
+                            variant="body2"
+                            color="primary"
+                            fontWeight={700}
+                          >
+                            Subtotal: {formatCurrency(item.subtotal)}
                           </Typography>
                         </Box>
                       </Stack>
-                    ),
-                  )}
+
+                      <Box>
+                        <Typography variant="caption" color="text.secondary">
+                          Observaciones
+                        </Typography>
+
+                        <Typography variant="body2">
+                          {item.observaciones
+                            ? item.observaciones
+                            : "Sin observaciones."}
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  ))}
                 </Stack>
               )}
             </Stack>
@@ -649,64 +491,35 @@ export function DetailPedido() {
             }}
           >
             <Stack spacing={1.5}>
-              <Typography
-                variant="h6"
-                fontWeight={700}
-              >
+              <Typography variant="h6" fontWeight={700}>
                 Resumen
               </Typography>
 
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-              >
-                <Typography variant="body2">
-                  Subtotal
-                </Typography>
+              <Stack direction="row" justifyContent="space-between">
+                <Typography variant="body2">Subtotal</Typography>
 
                 <Typography variant="body2">
-                  {formatCurrency(
-                    pedido.subtotal,
-                  )}
+                  {formatCurrency(pedido.subtotal)}
                 </Typography>
               </Stack>
 
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-              >
-                <Typography variant="body2">
-                  Impuestos
-                </Typography>
+              <Stack direction="row" justifyContent="space-between">
+                <Typography variant="body2">Impuestos</Typography>
 
                 <Typography variant="body2">
-                  {formatCurrency(
-                    pedido.impuestos,
-                  )}
+                  {formatCurrency(pedido.impuestos)}
                 </Typography>
               </Stack>
 
               <Divider />
 
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-              >
-                <Typography
-                  variant="h6"
-                  fontWeight={700}
-                >
+              <Stack direction="row" justifyContent="space-between">
+                <Typography variant="h6" fontWeight={700}>
                   Total
                 </Typography>
 
-                <Typography
-                  variant="h6"
-                  color="primary"
-                  fontWeight={700}
-                >
-                  {formatCurrency(
-                    pedido.total,
-                  )}
+                <Typography variant="h6" color="primary" fontWeight={700}>
+                  {formatCurrency(pedido.total)}
                 </Typography>
               </Stack>
             </Stack>
