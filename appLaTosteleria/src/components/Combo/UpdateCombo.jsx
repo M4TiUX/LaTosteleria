@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Alert, Box, CircularProgress, Typography } from "@mui/material";
 import { toast } from "react-toastify";
 
@@ -9,11 +10,12 @@ import { ComboForm } from "./Form/ComboForm";
 export function UpdateCombo() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [combo, setCombo] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     ComboService.getComboById(id)
@@ -24,7 +26,7 @@ export function UpdateCombo() {
       })
       .catch((error) => {
         console.error("Error al cargar el combo:", error);
-        setError("No fue posible cargar el combo.");
+        setError(true);
       })
       .finally(() => {
         setCargando(false);
@@ -42,7 +44,7 @@ export function UpdateCombo() {
 
       toast.success(
         response.data?.message ||
-          "Combo actualizado correctamente."
+          t("combos.form.updateSuccess")
       );
 
       navigate("/combo-table");
@@ -51,7 +53,7 @@ export function UpdateCombo() {
 
       toast.error(
         error.response?.data?.message ||
-          "Ocurrió un error al actualizar el combo."
+          t("combos.form.updateError")
       );
     } finally {
       setGuardando(false);
@@ -76,7 +78,7 @@ export function UpdateCombo() {
     return (
       <Box sx={{ maxWidth: 850, mx: "auto", py: 5 }}>
         <Alert severity="error">
-          {error}
+          {t("combos.form.loadError")}
         </Alert>
       </Box>
     );
@@ -98,14 +100,14 @@ export function UpdateCombo() {
           mb: 4,
         }}
       >
-        Editar Combo
+        {t("combos.form.updateTitle")}
       </Typography>
 
       <ComboForm
         defaultValues={combo}
         onSubmit={actualizarCombo}
         guardando={guardando}
-        textoBoton="Actualizar Combo"
+        textoBoton={t("combos.form.update")}
       />
     </Box>
   );

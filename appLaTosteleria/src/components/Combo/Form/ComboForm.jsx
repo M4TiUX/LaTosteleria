@@ -1,4 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Controller,
+  useForm,
+} from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useTranslation } from "react-i18next";
+
 import ProductService from "../../../services/ProductService";
 import CategoryService from "../../../services/CategoryService";
 
@@ -9,6 +16,7 @@ import {
   Chip,
   CircularProgress,
   FormControl,
+  FormHelperText,
   InputLabel,
   ListItemText,
   MenuItem,
@@ -20,50 +28,132 @@ import {
 
 import SaveIcon from "@mui/icons-material/Save";
 
+import * as yup from "yup";
+
+const crearComboSchema = (t) =>
+  yup.object({
+    nombre_combo: yup
+      .string()
+      .required(
+        t("combos.form.validation.nameRequired")
+      )
+      .min(
+        3,
+        t("combos.form.validation.nameMin")
+      ),
+
+    descripcion: yup
+      .string()
+      .required(
+        t("combos.form.validation.descriptionRequired")
+      )
+      .min(
+        5,
+        t("combos.form.validation.descriptionMin")
+      ),
+
+    precio_especial: yup
+      .number()
+      .typeError(
+        t("combos.form.validation.priceNumber")
+      )
+      .positive(
+        t("combos.form.validation.pricePositive")
+      )
+      .required(
+        t("combos.form.validation.priceRequired")
+      ),
+
+    categoria_id: yup
+      .number()
+      .typeError(
+        t("combos.form.validation.categorySelect")
+      )
+      .positive(
+        t("combos.form.validation.categorySelect")
+      )
+      .required(
+        t("combos.form.validation.categoryRequired")
+      ),
+
+    productos: yup
+      .array()
+      .min(
+        1,
+        t("combos.form.validation.productsRequired")
+      )
+      .required(
+        t("combos.form.validation.productsRequired")
+      ),
+  });
+
 export function ComboForm({
   defaultValues = {},
   onSubmit,
   guardando = false,
-  textoBoton = "Guardar Combo",
+  textoBoton,
 }) {
+  const { t, i18n } = useTranslation();
+
+  const comboSchema = useMemo(
+    () => crearComboSchema(t),
+    [t, i18n.language]
+  );
+
   const [categorias, setCategorias] = useState([]);
-  const [productosDisponibles, setProductosDisponibles] = useState([]);
+  const [productosDisponibles, setProductosDisponibles] =
+    useState([]);
+  const [cargando, setCargando] = useState(true);
 
-  const [nombreCombo, setNombreCombo] = useState(
-    defaultValues.nombre_combo || ""
-  );
-
-  const [descripcion, setDescripcion] = useState(
-    defaultValues.descripcion || ""
-  );
-
-  const [precioEspecial, setPrecioEspecial] = useState(
-    defaultValues.precio_especial || ""
-  );
-
-  const [categoriaId, setCategoriaId] = useState(
-    defaultValues.categoria_id || ""
-  );
-
-  const [productosSeleccionados, setProductosSeleccionados] = useState(
+  const productosIniciales =
     defaultValues.productos?.map((producto) => ({
       producto_id: Number(producto.id_producto),
       cantidad: Number(producto.cantidad),
-    })) || []
-  );
+    })) || [];
 
-  const [cargando, setCargando] = useState(true);
+  const valoresIniciales = {
+    nombre_combo: defaultValues.nombre_combo || "",
+    descripcion: defaultValues.descripcion || "",
+    precio_especial:
+      defaultValues.precio_especial || "",
+    categoria_id:
+      defaultValues.categoria_id
+        ? Number(defaultValues.categoria_id)
+        : "",
+    productos: productosIniciales,
+  };
 
-  // Cargar categorías y productos
+  const {
+    control,
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm({
+    defaultValues: valoresIniciales,
+    resolver: yupResolver(comboSchema),
+  });
+
+  const productosSeleccionados =
+    watch("productos") || [];
+
   useEffect(() => {
     Promise.all([
       CategoryService.getCategories(),
       ProductService.getProducts(),
     ])
-      .then(([categoriasResponse, productosResponse]) => {
-        setCategorias(categoriasResponse.data);
-        setProductosDisponibles(productosResponse.data);
-      })
+      .then(
+        ([categoriasResponse, productosResponse]) => {
+          setCategorias(
+            categoriasResponse?.data || []
+          );
+
+          setProductosDisponibles(
+            productosResponse?.data || []
+          );
+        }
+      )
       .catch((error) => {
         console.error(
           "Error al cargar datos del formulario:",
@@ -75,58 +165,86 @@ export function ComboForm({
       });
   }, []);
 
-  // Seleccionar o quitar productos
-  const manejarSeleccionProductos = (event) => {
-    const idsSeleccionados = event.target.value.map(Number);
+  const manejarSeleccionProductos = (
+    idsSeleccionados
+  ) => {
+    const ids = idsSeleccionados.map(Number);
 
-    setProductosSeleccionados((actuales) =>
-      idsSeleccionados.map((id) => {
-        const existente = actuales.find(
-          (producto) => producto.producto_id === id
+    const nuevosProductos = ids.map((id) => {
+      const existente =
+        productosSeleccionados.find(
+          (producto) =>
+            Number(producto.producto_id) === id
         );
 
-        return (
-          existente || {
-            producto_id: id,
-            cantidad: 1,
-          }
-        );
-      })
+      return (
+        existente || {
+          producto_id: id,
+          cantidad: 1,
+        }
+      );
+    });
+
+    setValue(
+      "productos",
+      nuevosProductos,
+      {
+        shouldValidate: true,
+        shouldDirty: true,
+      }
     );
   };
 
-  // Cambiar cantidad
-  const cambiarCantidad = (productoId, cantidad) => {
-    setProductosSeleccionados((actuales) =>
-      actuales.map((producto) =>
-        producto.producto_id === productoId
+  const cambiarCantidad = (
+    productoId,
+    cantidad
+  ) => {
+    const nuevaCantidad = Math.max(
+      1,
+      Number(cantidad)
+    );
+
+    const productosActualizados =
+      productosSeleccionados.map((producto) =>
+        Number(producto.producto_id) ===
+        Number(productoId)
           ? {
               ...producto,
-              cantidad: Math.max(1, Number(cantidad)),
+              cantidad: nuevaCantidad,
             }
           : producto
-      )
+      );
+
+    setValue(
+      "productos",
+      productosActualizados,
+      {
+        shouldValidate: true,
+        shouldDirty: true,
+      }
     );
   };
 
-  // Enviar formulario
-  const manejarSubmit = (event) => {
-    event.preventDefault();
-
-    if (productosSeleccionados.length === 0) {
-      alert("Debe seleccionar al menos un producto.");
-      return;
-    }
-
-    const datosCombo = {
-      nombre_combo: nombreCombo,
-      descripcion: descripcion,
-      precio_especial: Number(precioEspecial),
-      categoria_id: Number(categoriaId),
-      productos: productosSeleccionados,
-    };
-
-    onSubmit(datosCombo);
+  const enviarFormulario = (datos) => {
+    onSubmit({
+      ...datos,
+      precio_especial: Number(
+        datos.precio_especial
+      ),
+      categoria_id: Number(
+        datos.categoria_id
+      ),
+      productos: datos.productos.map(
+        (producto) => ({
+          producto_id: Number(
+            producto.producto_id
+          ),
+          cantidad: Number(
+            producto.cantidad
+          ),
+        })
+      ),
+    });
   };
 
   if (cargando) {
@@ -158,7 +276,16 @@ export function ComboForm({
     >
       <Box
         component="form"
-        onSubmit={manejarSubmit}
+
+        // MUY IMPORTANTE:
+        // evita las validaciones nativas
+        // de Chrome como:
+        // "Please fill out this field"
+        noValidate
+
+        onSubmit={handleSubmit(
+          enviarFormulario
+        )}
         sx={{
           display: "flex",
           flexDirection: "column",
@@ -167,81 +294,145 @@ export function ComboForm({
       >
         {/* Nombre */}
         <TextField
-          label="Nombre del combo"
-          value={nombreCombo}
-          onChange={(event) =>
-            setNombreCombo(event.target.value)
-          }
-          required
+          label={t("combos.form.name")}
           fullWidth
+          {...register("nombre_combo")}
+          error={Boolean(
+            errors.nombre_combo
+          )}
+          helperText={
+            errors.nombre_combo?.message
+          }
         />
 
         {/* Descripción */}
         <TextField
-          label="Descripción"
-          value={descripcion}
-          onChange={(event) =>
-            setDescripcion(event.target.value)
-          }
+          label={t(
+            "combos.form.description"
+          )}
+          fullWidth
           multiline
           rows={3}
-          fullWidth
+          {...register("descripcion")}
+          error={Boolean(
+            errors.descripcion
+          )}
+          helperText={
+            errors.descripcion?.message
+          }
         />
 
-        {/* Precio */}
+        {/* Precio especial */}
         <TextField
-          label="Precio especial"
+          label={t(
+            "combos.form.specialPrice"
+          )}
           type="number"
-          value={precioEspecial}
-          onChange={(event) =>
-            setPrecioEspecial(event.target.value)
-          }
-          inputProps={{
-            min: 0,
-          }}
-          required
           fullWidth
+          {...register("precio_especial")}
+          error={Boolean(
+            errors.precio_especial
+          )}
+          helperText={
+            errors.precio_especial?.message
+          }
+          slotProps={{
+            htmlInput: {
+              min: 0,
+              step: "0.01",
+            },
+          }}
         />
 
         {/* Categoría */}
-        <FormControl fullWidth required>
-          <InputLabel id="categoria-label">
-            Categoría
-          </InputLabel>
+        <Controller
+          name="categoria_id"
+          control={control}
+          render={({ field }) => (
+            <FormControl
+              fullWidth
+              error={Boolean(
+                errors.categoria_id
+              )}
+            >
+              <InputLabel id="combo-categoria-label">
+                {t(
+                  "combos.form.category"
+                )}
+              </InputLabel>
 
-          <Select
-            labelId="categoria-label"
-            value={categoriaId}
-            label="Categoría"
-            onChange={(event) =>
-              setCategoriaId(event.target.value)
-            }
-          >
-            {categorias.map((categoria) => (
-              <MenuItem
-                key={categoria.id_categoria}
-                value={categoria.id_categoria}
+              <Select
+                {...field}
+                labelId="combo-categoria-label"
+                label={t(
+                  "combos.form.category"
+                )}
+                value={field.value ?? ""}
               >
-                {categoria.nombre_categoria}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+                <MenuItem value="">
+                  <em>
+                    {t(
+                      "combos.form.selectCategory"
+                    )}
+                  </em>
+                </MenuItem>
 
-        {/* Selección de productos */}
-        <FormControl fullWidth>
-          <InputLabel id="productos-label">
-            Productos incluidos
+                {categorias.map(
+                  (categoria) => (
+                    <MenuItem
+                      key={
+                        categoria.id_categoria
+                      }
+                      value={Number(
+                        categoria.id_categoria
+                      )}
+                    >
+                      {
+                        categoria.nombre_categoria
+                      }
+                    </MenuItem>
+                  )
+                )}
+              </Select>
+
+              <FormHelperText>
+                {
+                  errors.categoria_id
+                    ?.message
+                }
+              </FormHelperText>
+            </FormControl>
+          )}
+        />
+
+        {/* Productos incluidos */}
+        <FormControl
+          fullWidth
+          error={Boolean(errors.productos)}
+        >
+          <InputLabel id="combo-productos-label">
+            {t(
+              "combos.form.includedProducts"
+            )}
           </InputLabel>
 
           <Select
-            labelId="productos-label"
+            labelId="combo-productos-label"
             multiple
             value={productosSeleccionados.map(
-              (producto) => producto.producto_id
+              (producto) =>
+                Number(
+                  producto.producto_id
+                )
             )}
-            onChange={manejarSeleccionProductos}
-            label="Productos incluidos"
+            onChange={(event) =>
+              manejarSeleccionProductos(
+                event.target.value
+              )
+            }
+            label={t(
+              "combos.form.includedProducts"
+            )}
             renderValue={(seleccionados) => (
               <Box
                 sx={{
@@ -254,7 +445,9 @@ export function ComboForm({
                   const producto =
                     productosDisponibles.find(
                       (item) =>
-                        Number(item.id_producto) === Number(id)
+                        Number(
+                          item.id_producto
+                        ) === Number(id)
                     );
 
                   return (
@@ -262,7 +455,12 @@ export function ComboForm({
                       key={id}
                       label={
                         producto?.nombre_producto ||
-                        `Producto ${id}`
+                        t(
+                          "combos.form.productWithId",
+                          {
+                            id,
+                          }
+                        )
                       }
                       size="small"
                     />
@@ -271,39 +469,62 @@ export function ComboForm({
               </Box>
             )}
           >
-            {productosDisponibles.map((producto) => {
-              const seleccionado =
-                productosSeleccionados.some(
-                  (item) =>
-                    item.producto_id ===
-                    Number(producto.id_producto)
+            {productosDisponibles.map(
+              (producto) => {
+                const seleccionado =
+                  productosSeleccionados.some(
+                    (item) =>
+                      Number(
+                        item.producto_id
+                      ) ===
+                      Number(
+                        producto.id_producto
+                      )
+                  );
+
+                return (
+                  <MenuItem
+                    key={
+                      producto.id_producto
+                    }
+                    value={Number(
+                      producto.id_producto
+                    )}
+                  >
+                    <Checkbox
+                      checked={
+                        seleccionado
+                      }
+                    />
+
+                    <ListItemText
+                      primary={
+                        producto.nombre_producto
+                      }
+                    />
+                  </MenuItem>
                 );
-
-              return (
-                <MenuItem
-                  key={producto.id_producto}
-                  value={Number(producto.id_producto)}
-                >
-                  <Checkbox checked={seleccionado} />
-
-                  <ListItemText
-                    primary={producto.nombre_producto}
-                  />
-                </MenuItem>
-              );
-            })}
+              }
+            )}
           </Select>
+
+          <FormHelperText>
+            {errors.productos?.message}
+          </FormHelperText>
         </FormControl>
 
         {/* Cantidades */}
-        {productosSeleccionados.length > 0 && (
+        {productosSeleccionados.length >
+          0 && (
           <Box>
             <Typography
               variant="h6"
               fontWeight={600}
               sx={{ mb: 2 }}
             >
-              Cantidad de productos
+              {t(
+                "combos.form.productQuantity"
+              )}
             </Typography>
 
             <Box
@@ -314,12 +535,18 @@ export function ComboForm({
               }}
             >
               {productosSeleccionados.map(
-                (productoSeleccionado) => {
+                (
+                  productoSeleccionado
+                ) => {
                   const producto =
                     productosDisponibles.find(
                       (item) =>
-                        Number(item.id_producto) ===
-                        productoSeleccionado.producto_id
+                        Number(
+                          item.id_producto
+                        ) ===
+                        Number(
+                          productoSeleccionado.producto_id
+                        )
                     );
 
                   return (
@@ -330,18 +557,22 @@ export function ComboForm({
                       sx={{
                         display: "flex",
                         alignItems: "center",
-                        justifyContent: "space-between",
+                        justifyContent:
+                          "space-between",
                         gap: 2,
                         p: 2,
-                        border: "1px solid",
-                        borderColor: "divider",
+                        border:
+                          "1px solid",
+                        borderColor:
+                          "divider",
                         borderRadius: 2,
                       }}
                     >
                       <Box
                         sx={{
                           display: "flex",
-                          alignItems: "center",
+                          alignItems:
+                            "center",
                           gap: 2,
                         }}
                       >
@@ -349,37 +580,51 @@ export function ComboForm({
                           <Box
                             component="img"
                             src={`/images/${producto.imagen}`}
-                            alt={producto.nombre_producto}
+                            alt={
+                              producto.nombre_producto
+                            }
                             sx={{
                               width: 55,
                               height: 55,
-                              objectFit: "cover",
+                              objectFit:
+                                "cover",
                               borderRadius: 2,
                             }}
                           />
                         )}
 
-                        <Typography fontWeight={600}>
+                        <Typography
+                          fontWeight={600}
+                        >
                           {producto?.nombre_producto ||
-                            "Producto"}
+                            t(
+                              "combos.form.product"
+                            )}
                         </Typography>
                       </Box>
 
                       <TextField
-                        label="Cantidad"
+                        label={t(
+                          "combos.form.quantity"
+                        )}
                         type="number"
                         size="small"
                         value={
                           productoSeleccionado.cantidad
                         }
-                        onChange={(event) =>
+                        onChange={(
+                          event
+                        ) =>
                           cambiarCantidad(
                             productoSeleccionado.producto_id,
-                            event.target.value
+                            event.target
+                              .value
                           )
                         }
-                        inputProps={{
-                          min: 1,
+                        slotProps={{
+                          htmlInput: {
+                            min: 1,
+                          },
                         }}
                         sx={{
                           width: 120,
@@ -393,11 +638,20 @@ export function ComboForm({
           </Box>
         )}
 
-        {/* Botón guardar */}
+        {/* Guardar */}
         <Button
           type="submit"
           variant="contained"
-          startIcon={<SaveIcon />}
+          startIcon={
+            guardando ? (
+              <CircularProgress
+                size={20}
+                color="inherit"
+              />
+            ) : (
+              <SaveIcon />
+            )
+          }
           disabled={guardando}
           sx={{
             mt: 1,
@@ -408,11 +662,15 @@ export function ComboForm({
             fontSize: "1rem",
 
             "&:hover": {
-              backgroundColor: "#7d0e07",
+              backgroundColor:
+                "#7d0e07",
             },
           }}
         >
-          {guardando ? "Guardando..." : textoBoton}
+          {guardando
+            ? t("combos.form.saving")
+            : textoBoton ||
+              t("combos.form.save")}
         </Button>
       </Box>
     </Paper>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import ComboService from "../../services/ComboService";
 
 import {
@@ -29,6 +30,8 @@ import BlockIcon from "@mui/icons-material/Block";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 export function TableCombo() {
+  const { t } = useTranslation();
+
   const [data, setData] = useState([]);
   const [busqueda, setBusqueda] = useState("");
   const [categoria, setCategoria] = useState("");
@@ -87,7 +90,6 @@ export function TableCombo() {
 
   return (
     <Container maxWidth="xl" sx={{ py: 5 }}>
-      {/* Encabezado */}
       <Box
         sx={{
           display: "flex",
@@ -106,7 +108,7 @@ export function TableCombo() {
               color: "#4a1714",
             }}
           >
-            Mantenimiento de Combos
+            {t("combos.maintenance.title")}
           </Typography>
 
           <Typography
@@ -116,7 +118,7 @@ export function TableCombo() {
               mt: 1,
             }}
           >
-            Administra los combos disponibles en el sistema
+            {t("combos.maintenance.subtitle")}
           </Typography>
         </Box>
 
@@ -139,11 +141,10 @@ export function TableCombo() {
             },
           }}
         >
-          Nuevo Combo
+          {t("combos.maintenance.newCombo")}
         </Button>
       </Box>
 
-      {/* Contenedor principal */}
       <Paper
         elevation={4}
         sx={{
@@ -151,7 +152,6 @@ export function TableCombo() {
           borderRadius: 4,
         }}
       >
-        {/* Filtros */}
         <Box
           sx={{
             display: "flex",
@@ -169,7 +169,7 @@ export function TableCombo() {
             }}
           >
             <TextField
-              placeholder="Buscar combo..."
+              placeholder={t("combos.maintenance.searchPlaceholder")}
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
               size="small"
@@ -190,7 +190,9 @@ export function TableCombo() {
               size="small"
               sx={{ width: 250 }}
             >
-              <MenuItem value="">Todas las categorías</MenuItem>
+              <MenuItem value="">
+                {t("combos.maintenance.allCategories")}
+              </MenuItem>
 
               {categorias.map((cat) => (
                 <MenuItem key={cat} value={cat}>
@@ -201,7 +203,9 @@ export function TableCombo() {
           </Box>
 
           <Chip
-            label={`Total: ${combosFiltrados.length} combos`}
+            label={t("combos.maintenance.total", {
+              count: combosFiltrados.length,
+            })}
             sx={{
               fontSize: "0.95rem",
               px: 1,
@@ -209,7 +213,6 @@ export function TableCombo() {
           />
         </Box>
 
-        {/* Tabla */}
         <TableContainer>
           <Table>
             <TableHead>
@@ -223,23 +226,23 @@ export function TableCombo() {
                 </TableCell>
 
                 <TableCell>
-                  <strong>Combo</strong>
+                  <strong>{t("combos.maintenance.combo")}</strong>
                 </TableCell>
 
                 <TableCell>
-                  <strong>Categoría</strong>
+                  <strong>{t("combos.maintenance.category")}</strong>
                 </TableCell>
 
                 <TableCell>
-                  <strong>Precio especial</strong>
+                  <strong>{t("combos.maintenance.specialPrice")}</strong>
                 </TableCell>
 
                 <TableCell align="center">
-                  <strong>Estado</strong>
+                  <strong>{t("combos.maintenance.status")}</strong>
                 </TableCell>
 
                 <TableCell align="center">
-                  <strong>Acciones</strong>
+                  <strong>{t("combos.maintenance.actions")}</strong>
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -265,7 +268,10 @@ export function TableCombo() {
 
                   <TableCell>
                     <Chip
-                      label={item.nombre_categoria || "Sin categoría"}
+                      label={
+                        item.nombre_categoria ||
+                        t("combos.maintenance.noCategory")
+                      }
                       size="small"
                       variant="outlined"
                       sx={{
@@ -286,7 +292,9 @@ export function TableCombo() {
                   <TableCell align="center">
                     <Chip
                       label={
-                        Number(item.activo) === 1 ? "Activo" : "Inhabilitado"
+                        Number(item.activo) === 1
+                          ? t("combos.maintenance.active")
+                          : t("combos.maintenance.disabled")
                       }
                       color={Number(item.activo) === 1 ? "success" : "default"}
                       size="small"
@@ -315,7 +323,7 @@ export function TableCombo() {
                           borderRadius: 2,
                         }}
                       >
-                        Detalle
+                        {t("combos.maintenance.detail")}
                       </Button>
 
                       <Button
@@ -336,7 +344,7 @@ export function TableCombo() {
                           },
                         }}
                       >
-                        Editar
+                        {t("combos.maintenance.edit")}
                       </Button>
 
                       <Button
@@ -357,8 +365,8 @@ export function TableCombo() {
                         }}
                       >
                         {Number(item.activo) === 1
-                          ? "Inhabilitar"
-                          : "Habilitar"}
+                          ? t("combos.maintenance.disable")
+                          : t("combos.maintenance.enable")}
                       </Button>
                     </Box>
                   </TableCell>
@@ -369,7 +377,7 @@ export function TableCombo() {
                 <TableRow>
                   <TableCell colSpan={6} align="center" sx={{ py: 5 }}>
                     <Typography color="text.secondary">
-                      No se encontraron combos
+                      {t("combos.maintenance.noCombos")}
                     </Typography>
                   </TableCell>
                 </TableRow>
