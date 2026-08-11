@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Box,
   Card,
@@ -16,6 +17,7 @@ function formatCurrency(value) {
 }
 
 export function ResumenFactura({ pedido }) {
+  const { t } = useTranslation();
   if (!pedido) {
     return null;
   }
@@ -40,7 +42,7 @@ export function ResumenFactura({ pedido }) {
             variant="h6"
             fontWeight={700}
           >
-            Resumen de factura
+            {t("orders.summary.title")}
           </Typography>
 
           <Stack spacing={1}>
@@ -49,7 +51,7 @@ export function ResumenFactura({ pedido }) {
               justifyContent="space-between"
             >
               <Typography color="text.secondary">
-                Subtotal
+                {t("orders.common.subtotal")}
               </Typography>
 
               <Typography>
@@ -64,7 +66,7 @@ export function ResumenFactura({ pedido }) {
               justifyContent="space-between"
             >
               <Typography color="text.secondary">
-                Impuestos
+                {t("orders.common.taxes")}
               </Typography>
 
               <Typography>
@@ -84,7 +86,7 @@ export function ResumenFactura({ pedido }) {
                 variant="h6"
                 fontWeight={700}
               >
-                Total
+                {t("orders.common.total")}
               </Typography>
 
               <Typography
@@ -107,7 +109,7 @@ export function ResumenFactura({ pedido }) {
               justifyContent="space-between"
             >
               <Typography color="text.secondary">
-                Método de pago
+                {t("orders.common.paymentMethod")}
               </Typography>
 
               <Typography fontWeight={600}>
@@ -120,7 +122,7 @@ export function ResumenFactura({ pedido }) {
               justifyContent="space-between"
             >
               <Typography color="text.secondary">
-                Monto pagado
+                {t("orders.summary.amountPaid")}
               </Typography>
 
               <Typography>
@@ -138,7 +140,7 @@ export function ResumenFactura({ pedido }) {
                 justifyContent="space-between"
               >
                 <Typography color="text.secondary">
-                  Vuelto
+                  {t("orders.summary.change")}
                 </Typography>
 
                 <Typography>
@@ -157,7 +159,7 @@ export function ResumenFactura({ pedido }) {
                   justifyContent="space-between"
                 >
                   <Typography color="text.secondary">
-                    Marca
+                    {t("orders.summary.brand")}
                   </Typography>
 
                   <Typography>
@@ -171,7 +173,7 @@ export function ResumenFactura({ pedido }) {
                   justifyContent="space-between"
                 >
                   <Typography color="text.secondary">
-                    Tarjeta
+                    {t("orders.summary.card")}
                   </Typography>
 
                   <Typography>

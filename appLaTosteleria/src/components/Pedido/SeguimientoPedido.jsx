@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { useTranslation } from "react-i18next";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import icon from "leaflet/dist/images/marker-icon.png";
@@ -93,6 +94,7 @@ function formatDateTime(value) {
 }
 
 export function SeguimientoPedido() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -118,7 +120,7 @@ export function SeguimientoPedido() {
     const loadTracking = async ({ keepLoading = false } = {}) => {
       if (!id) {
         if (isMounted) {
-          setError("Debe indicar un pedido para consultar el seguimiento.");
+          setError(t("orders.tracking.orderRequired"));
           setLoading(false);
         }
         return;
@@ -141,7 +143,7 @@ export function SeguimientoPedido() {
           setError(
             requestError?.response?.data?.message ??
               requestError?.message ??
-              "No fue posible consultar el seguimiento.",
+              t("orders.tracking.loadError"),
           );
         }
       } finally {
@@ -196,7 +198,7 @@ export function SeguimientoPedido() {
           setMapaError(
             requestError?.response?.data?.message ??
               requestError?.message ??
-              "No fue posible consultar la ubicacion del repartidor.",
+              t("orders.tracking.locationError"),
           );
         }
       }
@@ -231,7 +233,7 @@ export function SeguimientoPedido() {
       setError(
         requestError?.response?.data?.message ??
           requestError?.message ??
-          "No fue posible crear el pedido demo.",
+          t("orders.tracking.demoError"),
       );
     } finally {
       setCreatingDemo(false);
@@ -242,7 +244,7 @@ export function SeguimientoPedido() {
     return (
       <Stack spacing={2} alignItems="center" sx={{ py: 8 }}>
         <CircularProgress />
-        <Typography>Cargando seguimiento del pedido...</Typography>
+        <Typography>{t("orders.tracking.loading")}</Typography>
       </Stack>
     );
   }
@@ -269,11 +271,10 @@ export function SeguimientoPedido() {
     <Stack spacing={3}>
       <Box>
         <Typography variant="h4" fontWeight={700} sx={{ mb: 1 }}>
-          Seguimiento del pedido
+          {t("orders.tracking.title")}
         </Typography>
         <Typography color="text.secondary">
-          El estado se actualiza automaticamente cada 5 segundos mientras el
-          pedido siga en proceso.
+          {t("orders.tracking.description")}
         </Typography>
       </Box>
 
@@ -287,7 +288,7 @@ export function SeguimientoPedido() {
               onClick={handleCreateDemo}
               disabled={creatingDemo}
             >
-              {creatingDemo ? "Creando..." : "Crear demo"}
+              {creatingDemo ? t("orders.tracking.creatingDemo") : t("orders.tracking.createDemo")}
             </Button>
           }
         >
@@ -306,17 +307,17 @@ export function SeguimientoPedido() {
               >
                 <Box>
                   <Typography variant="h5" fontWeight={700}>
-                    Pedido #{tracking.pedido_id}
+                    {t("orders.common.orderNumber", { id: tracking.pedido_id })}
                   </Typography>
                   <Typography color="text.secondary">
-                    Cliente: {tracking.cliente?.nombre} (
+                    {t("orders.common.client")}: {tracking.cliente?.nombre} (
                     {tracking.cliente?.correo})
                   </Typography>
                   <Typography color="text.secondary">
-                    Metodo de entrega: {tracking.metodo_entrega}
+                    {t("orders.common.deliveryMethod")}: {tracking.metodo_entrega}
                   </Typography>
                   <Typography color="text.secondary">
-                    Creado: {formatDateTime(tracking.fecha_creacion)}
+                    {t("orders.list.created")}: {formatDateTime(tracking.fecha_creacion)}
                   </Typography>
                 </Box>
 
@@ -328,7 +329,7 @@ export function SeguimientoPedido() {
 
               <Box>
                 <Typography sx={{ mb: 1 }}>
-                  Progreso: {tracking.progreso}%
+                  {t("orders.tracking.progress")}: {tracking.progreso}%
                 </Typography>
                 <LinearProgress
                   variant="determinate"
@@ -351,7 +352,7 @@ export function SeguimientoPedido() {
 
                   <Box>
                     <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
-                      Ubicacion en el mapa
+                      {t("orders.tracking.mapLocation")}
                     </Typography>
 
                     {mapaError && (
@@ -384,7 +385,7 @@ export function SeguimientoPedido() {
                           position={[TIENDA_LAT, TIENDA_LNG]}
                           icon={iconoTienda}
                         >
-                          <Popup>La Tosteleria (tienda)</Popup>
+                          <Popup>{t("orders.tracking.store")}</Popup>
                         </Marker>
 
                         {/* DESTINO / CLIENTE (fijo) */}
@@ -396,7 +397,7 @@ export function SeguimientoPedido() {
                           icon={iconoDestino}
                         >
                           <Popup>
-                            {direccion.detalles || "Direccion de entrega"}
+                            {direccion.detalles || t("orders.tracking.deliveryAddress")}
                           </Popup>
                         </Marker>
 
@@ -410,8 +411,8 @@ export function SeguimientoPedido() {
                             icon={iconoRepartidor}
                           >
                             <Popup>
-                              Repartidor — {ubicacionRepartidor.progreso_ruta}
-                              % del trayecto
+                              {t("orders.tracking.driver")} — {ubicacionRepartidor.progreso_ruta}
+                              % {t("orders.tracking.route")}
                             </Popup>
                           </Marker>
                         )}
@@ -424,8 +425,8 @@ export function SeguimientoPedido() {
                         color="text.secondary"
                         sx={{ mt: 1, display: "block" }}
                       >
-                        La posicion del repartidor se actualiza cada{" "}
-                        {INTERVALO_UBICACION_MS / 1000} segundos.
+                        {t("orders.tracking.driverPositionUpdates")}{" "}
+                        {INTERVALO_UBICACION_MS / 1000} {t("orders.tracking.seconds")}.
                       </Typography>
                     )}
                   </Box>
@@ -436,7 +437,7 @@ export function SeguimientoPedido() {
 
               <Box>
                 <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
-                  Historial del pedido
+                  {t("orders.tracking.history")}
                 </Typography>
 
                 <Stack spacing={1.5}>

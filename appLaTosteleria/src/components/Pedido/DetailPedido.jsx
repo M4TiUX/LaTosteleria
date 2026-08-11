@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import {
   Alert,
@@ -51,6 +52,7 @@ function formatDateTime(value) {
 }
 
 export function DetailPedido() {
+  const { t } = useTranslation();
   const { id } = useParams();
 
   const { decodeToken } = useContext(UserContext);
@@ -97,7 +99,7 @@ export function DetailPedido() {
           requestError?.response?.data?.message ??
             requestError?.response?.data?.result ??
             requestError?.message ??
-            "No fue posible cargar el pedido.",
+            t("orders.detail.loadError"),
         );
       })
       .finally(() => {
@@ -110,7 +112,7 @@ export function DetailPedido() {
       <Stack spacing={2} alignItems="center" sx={{ py: 6 }}>
         <CircularProgress />
 
-        <Typography>Cargando detalle del pedido...</Typography>
+        <Typography>{t("orders.detail.loading")}</Typography>
       </Stack>
     );
   }
@@ -127,7 +129,7 @@ export function DetailPedido() {
       >
         <Stack spacing={2}>
           <Alert severity="error">
-            No tiene autorización para consultar este pedido.
+            {t("orders.detail.unauthorized")}
           </Alert>
 
           <Box>
@@ -137,7 +139,7 @@ export function DetailPedido() {
               variant="outlined"
               startIcon={<ArrowBackOutlinedIcon />}
             >
-              Volver a pedidos
+              {t("orders.detail.backToOrders")}
             </Button>
           </Box>
         </Stack>
@@ -165,7 +167,7 @@ export function DetailPedido() {
               variant="outlined"
               startIcon={<ArrowBackOutlinedIcon />}
             >
-              Volver a pedidos
+              {t("orders.detail.backToOrders")}
             </Button>
           </Box>
         </Stack>
@@ -183,7 +185,7 @@ export function DetailPedido() {
           py: 3,
         }}
       >
-        <Alert severity="warning">No se encontró el pedido solicitado.</Alert>
+        <Alert severity="warning">{t("orders.detail.notFound")}</Alert>
       </Box>
     );
   }
@@ -216,11 +218,11 @@ export function DetailPedido() {
         >
           <Box>
             <Typography variant="h5" fontWeight={700}>
-              Pedido #{pedido.id_pedido}
+              {t("orders.common.orderNumber", { id: pedido.id_pedido })}
             </Typography>
 
             <Typography variant="body2" color="text.secondary">
-              Detalle completo del pedido.
+              {t("orders.detail.description")}
             </Typography>
           </Box>
 
@@ -231,7 +233,7 @@ export function DetailPedido() {
               variant="contained"
               size="small"
             >
-              Ver factura
+              {t("orders.detail.viewInvoice")}
             </Button>
 
             <Button
@@ -241,7 +243,7 @@ export function DetailPedido() {
               size="small"
               startIcon={<ArrowBackOutlinedIcon />}
             >
-              Volver
+              {t("orders.common.back")}
             </Button>
           </Stack>
         </Stack>
@@ -266,7 +268,7 @@ export function DetailPedido() {
           >
             <Stack spacing={2}>
               <Typography variant="h6" fontWeight={700}>
-                Información del pedido
+                {t("orders.detail.orderInfo")}
               </Typography>
 
               <Grid container spacing={2}>
@@ -279,7 +281,7 @@ export function DetailPedido() {
 
                     <Box>
                       <Typography variant="caption" color="text.secondary">
-                        Cliente
+                        {t("orders.common.client")}
                       </Typography>
 
                       <Typography fontWeight={600} variant="body2">
@@ -295,7 +297,7 @@ export function DetailPedido() {
 
                     <Box>
                       <Typography variant="caption" color="text.secondary">
-                        Correo
+                        {t("orders.common.email")}
                       </Typography>
 
                       <Typography fontWeight={600} variant="body2">
@@ -314,7 +316,7 @@ export function DetailPedido() {
 
                     <Box>
                       <Typography variant="caption" color="text.secondary">
-                        Método de entrega
+                        {t("orders.common.deliveryMethod")}
                       </Typography>
 
                       <Typography fontWeight={600} variant="body2">
@@ -327,7 +329,7 @@ export function DetailPedido() {
                 <Grid item xs={12} md={6}>
                   <Box>
                     <Typography variant="caption" color="text.secondary">
-                      Fecha de creación
+                      {t("orders.common.createdAt")}
                     </Typography>
 
                     <Typography fontWeight={600} variant="body2">
@@ -344,13 +346,13 @@ export function DetailPedido() {
 
                 <Box>
                   <Typography variant="caption" color="text.secondary">
-                    Observaciones generales
+                    {t("orders.detail.generalNotes")}
                   </Typography>
 
                   <Typography variant="body2">
                     {pedido.observaciones
                       ? pedido.observaciones
-                      : "Sin observaciones."}
+                      : t("orders.common.noNotes")}
                   </Typography>
                 </Box>
               </Stack>
@@ -381,13 +383,13 @@ export function DetailPedido() {
                 <ReceiptLongOutlinedIcon fontSize="small" />
 
                 <Typography variant="h6" fontWeight={700}>
-                  Productos y combos
+                  {t("orders.common.productsAndCombos")}
                 </Typography>
               </Stack>
 
               {!pedido.items || pedido.items.length === 0 ? (
                 <Alert severity="info">
-                  Este pedido no contiene elementos registrados.
+                  {t("orders.detail.noItems")}
                 </Alert>
               ) : (
                 <Stack spacing={1.5} divider={<Divider />}>
@@ -416,14 +418,14 @@ export function DetailPedido() {
                               variant="outlined"
                               label={
                                 item.item_type === "combo"
-                                  ? "Combo"
-                                  : "Producto"
+                                  ? t("orders.common.combo")
+                                  : t("orders.common.product")
                               }
                             />
                           </Stack>
 
                           <Typography variant="body2" color="text.secondary">
-                            Cantidad: {item.cantidad}
+                            {t("orders.common.quantity", { count: item.cantidad })}
                           </Typography>
                         </Box>
 
@@ -436,7 +438,7 @@ export function DetailPedido() {
                           }}
                         >
                           <Typography variant="caption" color="text.secondary">
-                            Precio unitario
+                            {t("orders.detail.unitPrice")}
                           </Typography>
 
                           <Typography variant="body2" fontWeight={600}>
@@ -448,20 +450,20 @@ export function DetailPedido() {
                             color="primary"
                             fontWeight={700}
                           >
-                            Subtotal: {formatCurrency(item.subtotal)}
+                            {t("orders.common.subtotal")}: {formatCurrency(item.subtotal)}
                           </Typography>
                         </Box>
                       </Stack>
 
                       <Box>
                         <Typography variant="caption" color="text.secondary">
-                          Observaciones
+                          {t("orders.common.notes")}
                         </Typography>
 
                         <Typography variant="body2">
                           {item.observaciones
                             ? item.observaciones
-                            : "Sin observaciones."}
+                            : t("orders.common.noNotes")}
                         </Typography>
                       </Box>
                     </Stack>
@@ -492,11 +494,11 @@ export function DetailPedido() {
           >
             <Stack spacing={1.5}>
               <Typography variant="h6" fontWeight={700}>
-                Resumen
+                {t("orders.common.summary")}
               </Typography>
 
               <Stack direction="row" justifyContent="space-between">
-                <Typography variant="body2">Subtotal</Typography>
+                <Typography variant="body2">{t("orders.common.subtotal")}</Typography>
 
                 <Typography variant="body2">
                   {formatCurrency(pedido.subtotal)}
@@ -504,7 +506,7 @@ export function DetailPedido() {
               </Stack>
 
               <Stack direction="row" justifyContent="space-between">
-                <Typography variant="body2">Impuestos</Typography>
+                <Typography variant="body2">{t("orders.common.taxes")}</Typography>
 
                 <Typography variant="body2">
                   {formatCurrency(pedido.impuestos)}
@@ -515,7 +517,7 @@ export function DetailPedido() {
 
               <Stack direction="row" justifyContent="space-between">
                 <Typography variant="h6" fontWeight={700}>
-                  Total
+                  {t("orders.common.total")}
                 </Typography>
 
                 <Typography variant="h6" color="primary" fontWeight={700}>

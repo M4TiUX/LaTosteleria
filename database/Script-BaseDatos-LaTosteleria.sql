@@ -1,5 +1,6 @@
 -- Base de datos La Tostelería
--- Script limpio para MariaDB 10.4.32 / XAMPP
+-- Script unificado para MariaDB 10.4.32 / XAMPP
+-- Incluye cambios de avances 3 y 5, entrega/direcciones, encargado de pedido y procesos adicionales
 -- Ejecutar sobre una instalación limpia.
 
 CREATE DATABASE IF NOT EXISTS `latosteleria`
@@ -49,9 +50,10 @@ CREATE TABLE `menus` (
 -- Tabla: repartidores
 CREATE TABLE `repartidores` (
 `id_repartidor` int(11) NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(100) DEFAULT NULL,
-  `telefono` varchar(20) DEFAULT NULL,
-  `vehiculo` varchar(50) DEFAULT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `telefono` varchar(20) NOT NULL,
+  `vehiculo` varchar(50) NOT NULL,
+  `disponible` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`id_repartidor`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -122,6 +124,8 @@ CREATE TABLE `direcciones_envio` (
   `usuario_id` int(11) NOT NULL,
   `detalles` text NOT NULL,
   `referencias` text DEFAULT NULL,
+  `latitud` decimal(10,8) DEFAULT NULL,
+  `longitud` decimal(11,8) DEFAULT NULL,
   `costo_zona` decimal(10,2) NOT NULL DEFAULT 0.00,
   PRIMARY KEY (`id_direccion`),
   KEY `fk_direcciones_usuarios` (`usuario_id`),
@@ -147,8 +151,10 @@ CREATE TABLE `menu_items` (
 CREATE TABLE `pedidos` (
 `id_pedido` int(11) NOT NULL AUTO_INCREMENT,
   `cliente_id` int(11) NOT NULL,
+  `encargado_id` int(11) DEFAULT NULL,
   `estado_id` int(11) NOT NULL,
   `metodo_entrega` enum('Domicilio','Tienda') NOT NULL,
+  `direccion_id` int(11) DEFAULT NULL,
   `observaciones` text DEFAULT NULL,
   `subtotal` decimal(10,2) NOT NULL,
   `impuestos` decimal(10,2) NOT NULL,
@@ -157,7 +163,11 @@ CREATE TABLE `pedidos` (
   `fecha_creacion` datetime NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id_pedido`),
   KEY `fk_pedidos_usuarios` (`cliente_id`),
-  CONSTRAINT `fk_pedidos_usuarios` FOREIGN KEY (`cliente_id`) REFERENCES `usuarios` (`id_usuario`) ON UPDATE CASCADE
+  KEY `fk_pedidos_encargado` (`encargado_id`),
+  KEY `fk_pedidos_direccion` (`direccion_id`),
+  CONSTRAINT `fk_pedidos_usuarios` FOREIGN KEY (`cliente_id`) REFERENCES `usuarios` (`id_usuario`) ON UPDATE CASCADE,
+  CONSTRAINT `fk_pedidos_encargado` FOREIGN KEY (`encargado_id`) REFERENCES `usuarios` (`id_usuario`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_pedidos_direccion` FOREIGN KEY (`direccion_id`) REFERENCES `direcciones_envio` (`id_direccion`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -250,7 +260,7 @@ INSERT INTO `ingredientes` VALUES (1,'Café espresso'),(2,'Leche'),(3,'Pan artes
 INSERT INTO `menus` VALUES (1,'Menú Desayuno','2026-06-01','2026-12-31','07:00:00','10:30:00',1),(2,'Menú Almuerzo','2026-06-01','2026-12-31','11:00:00','14:00:00',1),(3,'Menú Tarde','2026-06-01','2026-12-31','14:00:00','17:30:00',1),(4,'Menú Especial','2026-06-01','2026-12-31','08:00:00','18:00:00',1);
 
 -- Datos: repartidores
-INSERT INTO `repartidores` VALUES (1,'Carlos Ramirez','8888-8888','Motocicleta'),(2,'Ana Mora','8777-7777','Automovil');
+INSERT INTO `repartidores` (`id_repartidor`,`nombre`,`telefono`,`vehiculo`,`disponible`) VALUES (1,'Carlos Ramirez','8888-8888','Motocicleta',1),(2,'Ana Mora','8777-7777','Automovil',1);
 
 -- Datos: roles
 INSERT INTO `roles` VALUES (1,'Administrador'),(2,'Cliente');
@@ -317,9 +327,9 @@ INSERT INTO menus VALUES
 (6,'Menú Fin de Semana','2026-06-01','2026-12-31','08:00:00','16:00:00',0);
 
 -- Nuevos repartidores
-INSERT INTO repartidores VALUES
-(3,'Luis Hernández','8666-1111','Motocicleta'),
-(4,'María Gómez','8555-2222','Bicicleta');
+INSERT INTO repartidores (`id_repartidor`,`nombre`,`telefono`,`vehiculo`,`disponible`) VALUES
+(3,'Luis Hernández','8666-1111','Motocicleta',1),
+(4,'María Gómez','8555-2222','Bicicleta',1);
 
 -- Nuevo rol
 INSERT INTO roles VALUES
@@ -374,6 +384,12 @@ INSERT INTO procesos_preparacion VALUES
 (12,8,2,2,6),
 (13,9,1,1,8),
 (14,10,5,1,6);
+
+-- Procesos adicionales para el producto 4
+INSERT INTO procesos_preparacion (producto_id, estacion_id, orden_paso, tiempo_estimado_minutos) VALUES
+(4, 1, 1, 5),
+(4, 2, 2, 18),
+(4, 3, 3, 5);
 
 -- Relación producto-ingrediente
 INSERT INTO producto_ingrediente VALUES

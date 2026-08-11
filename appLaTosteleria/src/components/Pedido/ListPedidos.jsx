@@ -1,5 +1,6 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import {
   Alert,
@@ -73,6 +74,7 @@ function parseDateFilter(value) {
 }
 
 export function ListPedidos() {
+  const { t } = useTranslation();
   // ==========================================
   // USUARIO Y ROL
   // ==========================================
@@ -146,7 +148,7 @@ export function ListPedidos() {
           requestError?.response?.data?.message ??
             requestError?.response?.data?.result ??
             requestError?.message ??
-            "No fue posible cargar el historial de pedidos.",
+            t("orders.list.loadError"),
         );
       })
       .finally(() => {
@@ -160,27 +162,27 @@ export function ListPedidos() {
 
   const title = useMemo(() => {
     if (isCliente) {
-      return "Mis pedidos";
+      return t("orders.list.titles.client");
     }
 
     if (isEmpleado || isAdministrador) {
-      return "Administración de pedidos";
+      return t("orders.list.titles.staff");
     }
 
-    return "Historial de pedidos";
-  }, [isCliente, isEmpleado, isAdministrador]);
+    return t("orders.list.titles.default");
+  }, [isCliente, isEmpleado, isAdministrador, t]);
 
   const description = useMemo(() => {
     if (isCliente) {
-      return "Consulta tus pedidos registrados y accede al seguimiento de cada uno.";
+      return t("orders.list.descriptions.client");
     }
 
     if (isEmpleado || isAdministrador) {
-      return "Consulta los pedidos registrados por los clientes y utiliza los filtros para localizar la información.";
+      return t("orders.list.descriptions.staff");
     }
 
-    return "Consulta los pedidos registrados.";
-  }, [isCliente, isEmpleado, isAdministrador]);
+    return t("orders.list.descriptions.default");
+  }, [isCliente, isEmpleado, isAdministrador, t]);
 
   // ==========================================
   // ESTADOS DISPONIBLES PARA FILTRAR
@@ -263,7 +265,7 @@ export function ListPedidos() {
       <Stack spacing={2} alignItems="center" sx={{ py: 8 }}>
         <CircularProgress />
 
-        <Typography>Cargando pedidos...</Typography>
+        <Typography>{t("orders.list.loading")}</Typography>
       </Stack>
     );
   }
@@ -303,7 +305,7 @@ export function ListPedidos() {
             variant="contained"
             startIcon={<AddShoppingCartOutlinedIcon />}
           >
-            Nuevo pedido
+            {t("orders.list.newOrder")}
           </Button>
         )}
       </Stack>
@@ -332,7 +334,7 @@ export function ListPedidos() {
         >
           <Stack spacing={2}>
             <Typography variant="h6" fontWeight={700}>
-              Filtros del historial
+              {t("orders.list.filters.title")}
             </Typography>
 
             <Grid
@@ -349,20 +351,20 @@ export function ListPedidos() {
               <Grid item xs={12} md={4}>
                 <FormControl fullWidth>
                   <InputLabel id="pedido-status-filter-label">
-                    Estado
+                    {t("orders.common.status")}
                   </InputLabel>
 
                   <Select
                     labelId="pedido-status-filter-label"
                     value={statusFilter}
-                    label="Estado"
+                    label={t("orders.common.status")}
                     onChange={(event) =>
                       setStatusFilter(String(event.target.value))
                     }
                   >
                     {statusOptions.map((status) => (
                       <MenuItem key={status} value={status}>
-                        {status === "TODOS" ? "Todos" : status}
+                        {status === "TODOS" ? t("orders.list.filters.all") : status}
                       </MenuItem>
                     ))}
                   </Select>
@@ -373,7 +375,7 @@ export function ListPedidos() {
 
               <Grid item xs={12} md={3}>
                 <TextField
-                  label="Fecha inicial"
+                  label={t("orders.list.filters.startDate")}
                   type="date"
                   fullWidth
                   value={startDateFilter}
@@ -388,7 +390,7 @@ export function ListPedidos() {
 
               <Grid item xs={12} md={3}>
                 <TextField
-                  label="Fecha final"
+                  label={t("orders.list.filters.endDate")}
                   type="date"
                   fullWidth
                   value={endDateFilter}
@@ -411,13 +413,13 @@ export function ListPedidos() {
                   }}
                   onClick={clearFilters}
                 >
-                  Limpiar
+                  {t("orders.list.filters.clear")}
                 </Button>
               </Grid>
             </Grid>
 
             <Typography color="text.secondary">
-              Mostrando {filteredOrders.length} de {orders.length} pedidos.
+              {t("orders.list.filters.showing", { filtered: filteredOrders.length, total: orders.length })}
             </Typography>
           </Stack>
         </CardContent>
@@ -432,19 +434,18 @@ export function ListPedidos() {
           <CardContent>
             <Stack spacing={2} alignItems="flex-start">
               <Typography variant="h6" fontWeight={700}>
-                No hay pedidos que coincidan con los filtros actuales.
+                {t("orders.list.noResults.title")}
               </Typography>
 
               <Typography color="text.secondary">
-                Ajusta el estado o el rango de fechas para consultar otros
-                pedidos.
+                {t("orders.list.noResults.description")}
               </Typography>
 
               {/* Crear pedido para roles habilitados */}
 
               {canCreateOrder && (
                 <Button component={Link} to="/pedido/crear" variant="outlined">
-                  Crear pedido
+                  {t("orders.list.noResults.create")}
                 </Button>
               )}
             </Stack>
@@ -476,7 +477,7 @@ export function ListPedidos() {
                     >
                       <Box>
                         <Typography variant="h6" fontWeight={700}>
-                          Pedido #{order.id_pedido}
+                          {t("orders.common.orderNumber", { id: order.id_pedido })}
                         </Typography>
 
                         <Typography color="text.secondary">
@@ -485,7 +486,7 @@ export function ListPedidos() {
                       </Box>
 
                       <Chip
-                        label={order.estado_actual ?? "Sin seguimiento"}
+                        label={order.estado_actual ?? t("orders.common.noTracking")}
                         color={
                           String(order.estado_actual).toLowerCase() ===
                           "entregado"
@@ -523,7 +524,7 @@ export function ListPedidos() {
                         />
 
                         <Typography color="text.secondary">
-                          {order.total_items} items
+                          {t("orders.list.items", { count: order.total_items })}
                         </Typography>
                       </Stack>
                     </Stack>
@@ -531,11 +532,11 @@ export function ListPedidos() {
                     {/* Fechas */}
 
                     <Typography color="text.secondary">
-                      Creado: {formatDateTime(order.fecha_creacion)}
+                      {t("orders.list.created")}: {formatDateTime(order.fecha_creacion)}
                     </Typography>
 
                     <Typography color="text.secondary">
-                      Último movimiento:{" "}
+                      {t("orders.list.lastMovement")}:{" "}
                       {formatDateTime(order.fecha_ultimo_estado)}
                     </Typography>
 
@@ -561,7 +562,7 @@ export function ListPedidos() {
 
                       {(order.items?.length ?? 0) > 3 && (
                         <Typography color="text.secondary">
-                          y {(order.items?.length ?? 0) - 3} elementos más...
+                          {t("orders.list.moreItems", { count: (order.items?.length ?? 0) - 3 })}
                         </Typography>
                       )}
                     </Stack>
@@ -572,7 +573,7 @@ export function ListPedidos() {
                       variant="outlined"
                       fullWidth
                     >
-                      Ver detalle
+                      {t("orders.list.actions.detail")}
                     </Button>
 
                     {/* ==================================
@@ -593,7 +594,7 @@ export function ListPedidos() {
                           variant="contained"
                           fullWidth
                         >
-                          Ver seguimiento
+                          {t("orders.list.actions.tracking")}
                         </Button>
 
                         <Button
@@ -602,7 +603,7 @@ export function ListPedidos() {
                           variant="outlined"
                           fullWidth
                         >
-                          Repetir pedido
+                          {t("orders.list.actions.repeat")}
                         </Button>
                       </Stack>
                     )}

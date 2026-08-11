@@ -1,5 +1,6 @@
 import { useContext, useEffect, useMemo, useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import {
   Alert,
@@ -127,6 +128,7 @@ function MapClickHandler({ setSelectedLocation, setMapCenter }) {
 // ============================================================
 
 export function CreatePedido() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { decodeToken } = useContext(UserContext);
   const userData = decodeToken();
@@ -221,7 +223,7 @@ export function CreatePedido() {
         setError(
           requestError?.response?.data?.message ??
             requestError?.message ??
-            "No fue posible cargar los menus disponibles.",
+            t("orders.create.errors.loadMenus"),
         );
       })
       .finally(() => {
@@ -253,7 +255,7 @@ export function CreatePedido() {
         setError(
           requestError?.response?.data?.message ??
             requestError?.message ??
-            "No fue posible cargar el menu seleccionado.",
+            t("orders.create.errors.loadMenu"),
         );
         setSelectedMenu(null);
       })
@@ -287,7 +289,7 @@ export function CreatePedido() {
         setError(
           requestError?.response?.data?.message ??
             requestError?.message ??
-            "No fue posible cargar las direcciones guardadas.",
+            t("orders.create.errors.loadAddresses"),
         );
       })
       .finally(() => {
@@ -398,11 +400,11 @@ export function CreatePedido() {
 
   const handleSaveLocationAsDireccion = async () => {
     if (!selectedLocation) {
-      setError("Primero selecciona una ubicación en el mapa.");
+      setError(t("orders.create.errors.selectMapLocation"));
       return;
     }
     if (!newDireccionDetalle.trim()) {
-      setError("Debes escribir una descripción o referencia de la dirección.");
+      setError(t("orders.create.errors.addressDescription"));
       return;
     }
 
@@ -432,7 +434,7 @@ export function CreatePedido() {
       setError(
         requestError?.response?.data?.message ||
           requestError?.message ||
-          "No se pudo guardar la dirección.",
+          t("orders.create.errors.saveAddress"),
       );
     } finally {
       setSavingDireccion(false);
@@ -445,20 +447,20 @@ export function CreatePedido() {
 
   const handleSubmit = async () => {
     if (!isAuthenticated) {
-      setError("Debe iniciar sesion para registrar un pedido.");
+      setError(t("orders.create.errors.loginRequired"));
       return;
     }
     if (!selectedMenuId) {
-      setError("Debe seleccionar un menu antes de crear el pedido.");
+      setError(t("orders.create.errors.menuRequired"));
       return;
     }
     if (cart.length === 0) {
-      setError("Debe agregar al menos un producto o combo al pedido.");
+      setError(t("orders.create.errors.itemRequired"));
       return;
     }
     if (deliveryMethod === "Domicilio" && !selectedDireccionId) {
       setError(
-        "Debe guardar la ubicación seleccionada como dirección antes de continuar.",
+        t("orders.create.errors.addressRequired"),
       );
       return;
     }
@@ -466,23 +468,23 @@ export function CreatePedido() {
     if (paymentMethod === "Efectivo") {
       const received = Number(amountReceived);
       if (!amountReceived || Number.isNaN(received) || received <= 0) {
-        setError("Debe indicar el monto recibido.");
+        setError(t("orders.create.errors.amountRequired"));
         return;
       }
       if (received < totalAmountRounded) {
-        setError("El monto recibido es insuficiente para pagar el pedido.");
+        setError(t("orders.create.errors.insufficientAmount"));
         return;
       }
     }
 
     if (paymentMethod === "Tarjeta") {
       if (!cardBrand) {
-        setError("Debe seleccionar la marca de la tarjeta.");
+        setError(t("orders.create.errors.cardBrandRequired"));
         return;
       }
       if (!/^[0-9]{4}$/.test(cardLastFour)) {
         setError(
-          "Debe ingresar exactamente los ultimos 4 digitos de la tarjeta.",
+          t("orders.create.errors.cardDigits"),
         );
         return;
       }
@@ -552,7 +554,7 @@ export function CreatePedido() {
         requestError?.response?.data?.message ??
           requestError?.response?.data?.result ??
           requestError?.message ??
-          "No fue posible registrar el pedido.",
+          t("orders.create.errors.createOrder"),
       );
     } finally {
       setSubmitting(false);
@@ -567,7 +569,7 @@ export function CreatePedido() {
     return (
       <Stack spacing={2} alignItems="center" sx={{ py: 8 }}>
         <CircularProgress />
-        <Typography>Cargando menus para crear el pedido...</Typography>
+        <Typography>{t("orders.create.loadingMenus")}</Typography>
       </Stack>
     );
   }
@@ -586,15 +588,14 @@ export function CreatePedido() {
       >
         <Box>
           <Typography variant="h4" fontWeight={700} sx={{ mb: 1 }}>
-            Nuevo pedido
+            {t("orders.create.title")}
           </Typography>
           <Typography color="text.secondary">
-            Selecciona un menu activo y arma el pedido agregando o quitando
-            productos y combos.
+            {t("orders.create.description")}
           </Typography>
         </Box>
         <Button component={Link} to="/pedido" variant="outlined">
-          Ver historial
+          {t("orders.create.viewHistory")}
         </Button>
       </Stack>
 
@@ -611,11 +612,11 @@ export function CreatePedido() {
                 {/* MENÚ Y ENTREGA */}
                 <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
                   <FormControl fullWidth>
-                    <InputLabel id="menu-select-label">Menu</InputLabel>
+                    <InputLabel id="menu-select-label">{t("orders.create.menu")}</InputLabel>
                     <Select
                       labelId="menu-select-label"
                       value={selectedMenuId}
-                      label="Menu"
+                      label={t("orders.create.menu")}
                       onChange={(event) =>
                         setSelectedMenuId(String(event.target.value))
                       }
@@ -641,7 +642,7 @@ export function CreatePedido() {
                       color="text.secondary"
                       sx={{ mb: 1 }}
                     >
-                      Metodo de entrega
+                      {t("orders.common.deliveryMethod")}
                     </Typography>
                     <ToggleButtonGroup
                       value={deliveryMethod}
@@ -651,9 +652,9 @@ export function CreatePedido() {
                       onChange={handleDeliveryMethodChange}
                     >
                       <ToggleButton value="Tienda">
-                        Retiro en tienda
+                        {t("orders.create.storePickup")}
                       </ToggleButton>
-                      <ToggleButton value="Domicilio">Domicilio</ToggleButton>
+                      <ToggleButton value="Domicilio">{t("orders.create.homeDelivery")}</ToggleButton>
                     </ToggleButtonGroup>
 
                     {/* DOMICILIO */}
@@ -667,23 +668,22 @@ export function CreatePedido() {
                           >
                             <CircularProgress size={20} />
                             <Typography variant="body2" color="text.secondary">
-                              Cargando direcciones...
+                              {t("orders.create.loadingAddresses")}
                             </Typography>
                           </Stack>
                         ) : direcciones.length === 0 ? (
                           <Alert severity="warning">
-                            No tiene direcciones guardadas. Puede seleccionar
-                            una ubicación en el mapa más abajo.
+                            {t("orders.create.noSavedAddresses")}
                           </Alert>
                         ) : (
                           <FormControl fullWidth>
                             <InputLabel id="direccion-select-label">
-                              Dirección de entrega
+                              {t("orders.create.deliveryAddress")}
                             </InputLabel>
                             <Select
                               labelId="direccion-select-label"
                               value={selectedDireccionId}
-                              label="Dirección de entrega"
+                              label={t("orders.create.deliveryAddress")}
                               onChange={(event) =>
                                 setSelectedDireccionId(
                                   String(event.target.value),
@@ -698,8 +698,8 @@ export function CreatePedido() {
                                   {direccion.detalles
                                     ? `${direccion.detalles} — ${formatCurrency(direccion.costo_zona ?? 0)}`
                                     : direccion.latitud && direccion.longitud
-                                      ? `Ubicación (${direccion.latitud.toFixed(4)}, ${direccion.longitud.toFixed(4)}) — ${formatCurrency(direccion.costo_zona ?? 0)}`
-                                      : `Dirección sin nombre — ${formatCurrency(direccion.costo_zona ?? 0)}`}
+                                      ? `${t("orders.create.location")} (${direccion.latitud.toFixed(4)}, ${direccion.longitud.toFixed(4)}) — ${formatCurrency(direccion.costo_zona ?? 0)}`
+                                      : `${t("orders.create.unnamedAddress")} — ${formatCurrency(direccion.costo_zona ?? 0)}`}
                                 </MenuItem>
                               ))}
                             </Select>
@@ -709,7 +709,7 @@ export function CreatePedido() {
                         {/* MAPA */}
                         <Box sx={{ mt: 3 }}>
                           <Typography variant="subtitle2" gutterBottom>
-                            Haz clic en el mapa para seleccionar una ubicación
+                            {t("orders.create.mapInstruction")}
                           </Typography>
                           <MapContainer
                             center={mapCenter}
@@ -735,7 +735,7 @@ export function CreatePedido() {
                                   selectedLocation.lng,
                                 ]}
                               >
-                                <Popup>Ubicación seleccionada</Popup>
+                                <Popup>{t("orders.create.selectedLocation")}</Popup>
                               </Marker>
                             )}
                           </MapContainer>
@@ -748,7 +748,7 @@ export function CreatePedido() {
                               sx={{ mt: 1 }}
                             >
                               <Typography variant="body2">
-                                Coordenadas: {selectedLocation.lat.toFixed(6)},{" "}
+                                {t("orders.create.coordinates")}: {selectedLocation.lat.toFixed(6)},{" "}
                                 {selectedLocation.lng.toFixed(6)}
                               </Typography>
                               <Button
@@ -756,7 +756,7 @@ export function CreatePedido() {
                                 size="small"
                                 onClick={() => setOpenSaveDialog(true)}
                               >
-                                Guardar como dirección
+                                {t("orders.create.saveAsAddress")}
                               </Button>
                             </Stack>
                           ) : (
@@ -764,8 +764,7 @@ export function CreatePedido() {
                               variant="caption"
                               sx={{ mt: 1, display: "block" }}
                             >
-                              💡 Haz clic en el mapa para seleccionar una
-                              ubicación
+                              💡 {t("orders.create.mapHint")}
                             </Typography>
                           )}
                         </Box>
@@ -776,15 +775,15 @@ export function CreatePedido() {
 
                 {/* OBSERVACIONES GENERALES */}
                 <TextField
-                  label="Observaciones del pedido"
-                  placeholder="Ejemplo: sin cebolla, empacar por separado, retirar a nombre de Ana"
+                  label={t("orders.create.orderNotes")}
+                  placeholder={t("orders.create.orderNotesPlaceholder")}
                   value={orderNotes}
                   onChange={(event) => setOrderNotes(event.target.value)}
                   fullWidth
                   multiline
                   minRows={3}
                   inputProps={{ maxLength: 500 }}
-                  helperText={`${orderNotes.length}/500 caracteres`}
+                  helperText={t("orders.create.characters500", { count: orderNotes.length })}
                 />
 
                 {/* INFORMACIÓN DEL MENÚ */}
@@ -799,11 +798,11 @@ export function CreatePedido() {
                       sx={{ mb: 2, flexWrap: "wrap" }}
                     >
                       <Chip
-                        label={`Inicio ${selectedMenu.fecha_inicio}`}
+                        label={`${t("orders.create.start")} ${selectedMenu.fecha_inicio}`}
                         size="small"
                       />
                       <Chip
-                        label={`Fin ${selectedMenu.fecha_fin}`}
+                        label={`${t("orders.create.end")} ${selectedMenu.fecha_fin}`}
                         size="small"
                       />
                     </Stack>
@@ -815,7 +814,7 @@ export function CreatePedido() {
                   <Stack spacing={1.5} alignItems="center" sx={{ py: 4 }}>
                     <CircularProgress size={28} />
                     <Typography color="text.secondary">
-                      Cargando detalle del menu...
+                      {t("orders.create.loadingMenuDetail")}
                     </Typography>
                   </Stack>
                 ) : (
@@ -843,7 +842,7 @@ export function CreatePedido() {
                                       color="text.secondary"
                                       variant="body2"
                                     >
-                                      {item.category} · {item.itemType}
+                                      {item.category} · {item.itemType === "combo" ? t("orders.common.combo") : t("orders.common.product")}
                                     </Typography>
                                   </Box>
                                   <Chip
@@ -870,17 +869,17 @@ export function CreatePedido() {
                                     onClick={() => decreaseItem(item)}
                                     disabled={!cartItem}
                                   >
-                                    Quitar
+                                    {t("orders.create.remove")}
                                   </Button>
                                   <Button
                                     variant="contained"
                                     startIcon={<AddOutlinedIcon />}
                                     onClick={() => addItem(item)}
                                   >
-                                    Agregar
+                                    {t("orders.create.add")}
                                   </Button>
                                   <Typography color="text.secondary">
-                                    {cartItem?.quantity ?? 0} en pedido
+                                    {t("orders.create.inOrder", { count: cartItem?.quantity ?? 0 })}
                                   </Typography>
                                 </Stack>
                               </Stack>
@@ -914,14 +913,14 @@ export function CreatePedido() {
                   alignItems="center"
                 >
                   <Typography variant="h6" fontWeight={700}>
-                    Resumen del pedido
+                    {t("orders.create.summary")}
                   </Typography>
-                  <Chip label={`${getCountItems(cart)} items`} size="small" />
+                  <Chip label={t("orders.create.items", { count: getCountItems(cart) })} size="small" />
                 </Stack>
 
                 {cart.length === 0 ? (
                   <Alert severity="info">
-                    Todavia no has agregado productos ni combos.
+                    {t("orders.create.emptyCart")}
                   </Alert>
                 ) : (
                   <Stack spacing={1.5}>
@@ -981,7 +980,7 @@ export function CreatePedido() {
                               });
                             }}
                           >
-                            Eliminar
+                            {t("orders.common.delete")}
                           </Button>
                         </Stack>
                         <TextField
@@ -990,8 +989,8 @@ export function CreatePedido() {
                           multiline
                           minRows={2}
                           sx={{ mt: 1.5 }}
-                          label={`Observacion para ${item.itemType}`}
-                          placeholder="Indicaciones para este producto o combo"
+                          label={t("orders.create.itemNote", { type: item.itemType === "combo" ? t("orders.common.combo").toLowerCase() : t("orders.common.product").toLowerCase() })}
+                          placeholder={t("orders.create.itemNotePlaceholder")}
                           value={itemNotes[item.id] ?? ""}
                           onChange={(event) => {
                             const note = event.target.value;
@@ -1001,7 +1000,7 @@ export function CreatePedido() {
                             }));
                           }}
                           inputProps={{ maxLength: 300 }}
-                          helperText={`${(itemNotes[item.id] ?? "").length}/300 caracteres`}
+                          helperText={t("orders.create.characters300", { count: (itemNotes[item.id] ?? "").length })}
                         />
                       </Box>
                     ))}
@@ -1012,22 +1011,22 @@ export function CreatePedido() {
 
                 <Stack spacing={1}>
                   <Stack direction="row" justifyContent="space-between">
-                    <Typography color="text.secondary">Subtotal</Typography>
+                    <Typography color="text.secondary">{t("orders.common.subtotal")}</Typography>
                     <Typography>{formatCurrency(subtotalAmount)}</Typography>
                   </Stack>
                   <Stack direction="row" justifyContent="space-between">
-                    <Typography color="text.secondary">Impuestos</Typography>
+                    <Typography color="text.secondary">{t("orders.common.taxes")}</Typography>
                     <Typography>{formatCurrency(taxAmount)}</Typography>
                   </Stack>
                   {deliveryMethod === "Domicilio" && (
                     <Stack direction="row" justifyContent="space-between">
-                      <Typography color="text.secondary">Envío</Typography>
+                      <Typography color="text.secondary">{t("orders.create.shipping")}</Typography>
                       <Typography>{formatCurrency(shippingCost)}</Typography>
                     </Stack>
                   )}
                   <Stack direction="row" justifyContent="space-between">
                     <Typography variant="h6" fontWeight={700}>
-                      Total
+                      {t("orders.common.total")}
                     </Typography>
                     <Typography variant="h6" fontWeight={700}>
                       {formatCurrency(totalAmount)}
@@ -1039,25 +1038,25 @@ export function CreatePedido() {
 
                 <Stack spacing={2}>
                   <Typography variant="h6" fontWeight={700}>
-                    Método de pago
+                    {t("orders.common.paymentMethod")}
                   </Typography>
                   <FormControl fullWidth>
-                    <InputLabel id="payment-method-label">Método</InputLabel>
+                    <InputLabel id="payment-method-label">{t("orders.create.method")}</InputLabel>
                     <Select
                       labelId="payment-method-label"
                       value={paymentMethod}
-                      label="Método"
+                      label={t("orders.create.method")}
                       onChange={handlePaymentMethodChange}
                     >
-                      <MenuItem value="Efectivo">Efectivo</MenuItem>
-                      <MenuItem value="Tarjeta">Tarjeta</MenuItem>
+                      <MenuItem value="Efectivo">{t("orders.create.cash")}</MenuItem>
+                      <MenuItem value="Tarjeta">{t("orders.create.card")}</MenuItem>
                     </Select>
                   </FormControl>
 
                   {paymentMethod === "Efectivo" && (
                     <Stack spacing={1.5}>
                       <TextField
-                        label="Monto recibido"
+                        label={t("orders.create.amountReceived")}
                         type="number"
                         fullWidth
                         value={amountReceived}
@@ -1069,11 +1068,11 @@ export function CreatePedido() {
                       {amountReceived !== "" &&
                         (Number(amountReceived) < totalAmount ? (
                           <Alert severity="warning">
-                            El monto recibido es insuficiente.
+                            {t("orders.create.insufficientAmount")}
                           </Alert>
                         ) : (
                           <Alert severity="success">
-                            Vuelto: {formatCurrency(changeAmount)}
+                            {t("orders.summary.change")}: {formatCurrency(changeAmount)}
                           </Alert>
                         ))}
                     </Stack>
@@ -1082,11 +1081,11 @@ export function CreatePedido() {
                   {paymentMethod === "Tarjeta" && (
                     <Stack spacing={1.5}>
                       <FormControl fullWidth>
-                        <InputLabel id="card-brand-label">Marca</InputLabel>
+                        <InputLabel id="card-brand-label">{t("orders.summary.brand")}</InputLabel>
                         <Select
                           labelId="card-brand-label"
                           value={cardBrand}
-                          label="Marca"
+                          label={t("orders.summary.brand")}
                           onChange={(event) => setCardBrand(event.target.value)}
                         >
                           <MenuItem value="Visa">Visa</MenuItem>
@@ -1097,7 +1096,7 @@ export function CreatePedido() {
                         </Select>
                       </FormControl>
                       <TextField
-                        label="Últimos 4 dígitos"
+                        label={t("orders.create.lastFourDigits")}
                         fullWidth
                         value={cardLastFour}
                         onChange={(event) => {
@@ -1107,7 +1106,7 @@ export function CreatePedido() {
                           setCardLastFour(value);
                         }}
                         inputProps={{ inputMode: "numeric", maxLength: 4 }}
-                        helperText="Digite únicamente los últimos 4 dígitos."
+                        helperText={t("orders.create.lastFourDigitsHelp")}
                       />
                     </Stack>
                   )}
@@ -1125,7 +1124,7 @@ export function CreatePedido() {
                     (deliveryMethod === "Domicilio" && !selectedDireccionId)
                   }
                 >
-                  {submitting ? "Registrando pedido..." : "Confirmar pedido"}
+                  {submitting ? t("orders.create.submitting") : t("orders.create.confirm")}
                 </Button>
 
                 <Button
@@ -1134,13 +1133,12 @@ export function CreatePedido() {
                   onClick={cleanCart}
                   disabled={cart.length === 0}
                 >
-                  Limpiar pedido
+                  {t("orders.create.clearOrder")}
                 </Button>
 
                 {!userData?.id && (
                   <Alert severity="warning">
-                    Debe iniciar sesion para registrar el pedido. Ya no se usa
-                    un cliente por defecto del sistema.
+                    {t("orders.create.loginWarning")}
                   </Alert>
                 )}
               </Stack>
@@ -1151,16 +1149,15 @@ export function CreatePedido() {
 
       {/* DIÁLOGO PARA GUARDAR UBICACIÓN */}
       <Dialog open={openSaveDialog} onClose={() => setOpenSaveDialog(false)}>
-        <DialogTitle>Guardar ubicación como dirección</DialogTitle>
+        <DialogTitle>{t("orders.create.saveLocationTitle")}</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Escribe una descripción o referencia para esta ubicación (ej:
-            "Casa", "Oficina", "Calle 123").
+            {t("orders.create.saveLocationDescription")}
           </DialogContentText>
           <TextField
             autoFocus
             margin="dense"
-            label="Detalles de la dirección"
+            label={t("orders.create.addressDetails")}
             fullWidth
             variant="outlined"
             value={newDireccionDetalle}
@@ -1168,18 +1165,18 @@ export function CreatePedido() {
           />
           {selectedLocation && (
             <Typography variant="caption" display="block" sx={{ mt: 1 }}>
-              Coordenadas: {selectedLocation.lat.toFixed(6)},{" "}
+              {t("orders.create.coordinates")}: {selectedLocation.lat.toFixed(6)},{" "}
               {selectedLocation.lng.toFixed(6)}
             </Typography>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenSaveDialog(false)}>Cancelar</Button>
+          <Button onClick={() => setOpenSaveDialog(false)}>{t("orders.common.cancel")}</Button>
           <Button
             onClick={handleSaveLocationAsDireccion}
             disabled={savingDireccion || !newDireccionDetalle.trim()}
           >
-            {savingDireccion ? "Guardando..." : "Guardar"}
+            {savingDireccion ? t("orders.common.saving") : t("orders.common.save")}
           </Button>
         </DialogActions>
       </Dialog>

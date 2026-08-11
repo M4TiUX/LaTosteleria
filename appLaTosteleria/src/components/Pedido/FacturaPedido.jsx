@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Alert,
   Box,
@@ -86,6 +87,7 @@ function formatDateTime(value) {
 // ============================================================
 
 export function FacturaPedido() {
+  const { t } = useTranslation();
 
   const { id } =
     useParams();
@@ -140,7 +142,7 @@ export function FacturaPedido() {
               ?.result ??
             requestError
               ?.message ??
-            "No fue posible cargar la factura."
+            t("orders.invoice.loadError")
           );
         }
       )
@@ -167,7 +169,7 @@ export function FacturaPedido() {
         <CircularProgress />
 
         <Typography>
-          Cargando factura...
+          {t("orders.invoice.loading")}
         </Typography>
       </Stack>
     );
@@ -213,7 +215,7 @@ export function FacturaPedido() {
         }}
       >
         <Alert severity="warning">
-          No se encontró la factura.
+          {t("orders.invoice.notFound")}
         </Alert>
       </Box>
     );
@@ -259,8 +261,7 @@ export function FacturaPedido() {
               variant="h4"
               fontWeight={700}
             >
-              Factura #
-              {pedido.id_pedido}
+              {t("orders.invoice.title", { id: pedido.id_pedido })}
             </Typography>
 
             <Typography
@@ -280,7 +281,7 @@ export function FacturaPedido() {
               <ArrowBackOutlinedIcon />
             }
           >
-            Volver
+            {t("orders.common.back")}
           </Button>
 
         </Stack>
@@ -313,7 +314,7 @@ export function FacturaPedido() {
                 variant="h6"
                 fontWeight={700}
               >
-                Información general
+                {t("orders.invoice.generalInfo")}
               </Typography>
 
 
@@ -336,7 +337,7 @@ export function FacturaPedido() {
                     variant="caption"
                     color="text.secondary"
                   >
-                    Cliente
+                    {t("orders.common.client")}
                   </Typography>
 
                   <Typography
@@ -357,7 +358,7 @@ export function FacturaPedido() {
                     variant="caption"
                     color="text.secondary"
                   >
-                    Correo
+                    {t("orders.common.email")}
                   </Typography>
 
                   <Typography
@@ -384,7 +385,7 @@ export function FacturaPedido() {
                   variant="caption"
                   color="text.secondary"
                 >
-                  Encargado
+                  {t("orders.invoice.manager")}
                 </Typography>
 
                 <Typography
@@ -393,7 +394,7 @@ export function FacturaPedido() {
                   {
                     pedido
                       .encargado_nombre ??
-                    "No aplica"
+                    t("orders.invoice.notApplicable")
                   }
                 </Typography>
 
@@ -419,7 +420,7 @@ export function FacturaPedido() {
                     variant="caption"
                     color="text.secondary"
                   >
-                    Fecha
+                    {t("orders.common.date")}
                   </Typography>
 
                   <Typography>
@@ -440,7 +441,7 @@ export function FacturaPedido() {
                     variant="caption"
                     color="text.secondary"
                   >
-                    Método de entrega
+                    {t("orders.common.deliveryMethod")}
                   </Typography>
 
                   <Typography>
@@ -478,7 +479,7 @@ export function FacturaPedido() {
                     variant="caption"
                     color="text.secondary"
                   >
-                    Método de pago
+                    {t("orders.common.paymentMethod")}
                   </Typography>
 
                   <Typography
@@ -487,7 +488,7 @@ export function FacturaPedido() {
                     {
                       pedido
                         .metodo_pago ??
-                      "No registrado"
+                      t("orders.invoice.notRegistered")
                     }
                   </Typography>
 
@@ -500,7 +501,7 @@ export function FacturaPedido() {
                     variant="caption"
                     color="text.secondary"
                   >
-                    Estado
+                    {t("orders.common.status")}
                   </Typography>
 
                   <Box
@@ -512,7 +513,7 @@ export function FacturaPedido() {
                       label={
                         pedido
                           .estado_actual ??
-                        "Sin seguimiento"
+                        t("orders.common.noTracking")
                       }
                       size="small"
                     />
@@ -536,7 +537,7 @@ export function FacturaPedido() {
                   variant="caption"
                   color="text.secondary"
                 >
-                  Observaciones
+                  {t("orders.common.notes")}
                 </Typography>
 
                 <Typography>
@@ -594,7 +595,7 @@ export function FacturaPedido() {
                   variant="h6"
                   fontWeight={700}
                 >
-                  Detalle de la factura
+                  {t("orders.invoice.detailTitle")}
                 </Typography>
 
               </Stack>
@@ -607,7 +608,7 @@ export function FacturaPedido() {
                 <Alert
                   severity="info"
                 >
-                  No hay elementos registrados.
+                  {t("orders.invoice.noItems")}
                 </Alert>
 
               ) : (
@@ -663,13 +664,13 @@ export function FacturaPedido() {
                                   item
                                     .item_type ===
                                   "combo"
-                                    ? "Combo"
-                                    : "Producto"
+                                    ? t("orders.common.combo")
+                                    : t("orders.common.product")
                                 }
 
                                 {" · "}
 
-                                Cantidad:{" "}
+                                {t("orders.common.quantityLabel")}:{" "}
                                 {
                                   item.cantidad
                                 }
@@ -701,7 +702,7 @@ export function FacturaPedido() {
                                       .precio_unitario
                                   )
                                 }{" "}
-                                c/u
+                                {t("orders.invoice.each")}
                               </Typography>
 
 
@@ -729,7 +730,7 @@ export function FacturaPedido() {
                               variant="caption"
                               color="text.secondary"
                             >
-                              Observaciones
+                              {t("orders.common.notes")}
                             </Typography>
 
                             <Typography
