@@ -29,6 +29,11 @@ import { UpdateCombo } from "./components/Combo/UpdateCombo";
 import { ProcesosList } from "./components/Procesos/ProcesosList";
 import { ProcesosDetail } from "./components/Procesos/ProcesosDetail";
 
+// Mantenimiento de Procesos
+import { TableProcesos } from "./components/Procesos/TableProcesos";
+import { CreateProceso } from "./components/Procesos/CreateProceso";
+import { UpdateProceso } from "./components/Procesos/UpdateProceso";
+
 import { ListMenus } from "./components/Menu/ListMenus";
 import { DetailMenu } from "./components/Menu/DetailMenu";
 import { AvailableMenu } from "./components/Menu/AvailableMenu";
@@ -43,6 +48,8 @@ import { CreatePedido } from "./components/Pedido/CreatePedido";
 import { ToastContainer } from "react-toastify";
 import { DetailPedido } from "./components/Pedido/DetailPedido";
 import { FacturaPedido } from "./components/Pedido/FacturaPedido";
+
+import "./i18n";
 
 import axios from "axios";
 
@@ -127,7 +134,9 @@ const rutas = createBrowserRouter([
         element: <Auth requiredRoles={["Administrador"]} />,
 
         children: [
-          // Mantenimiento de productos
+          // =================================================
+          // MANTENIMIENTO DE PRODUCTOS
+          // =================================================
 
           {
             path: "/producto-table",
@@ -144,7 +153,9 @@ const rutas = createBrowserRouter([
             element: <UpdateProduct />,
           },
 
-          // Mantenimiento de combos
+          // =================================================
+          // MANTENIMIENTO DE COMBOS
+          // =================================================
 
           {
             path: "/combo-table",
@@ -161,7 +172,28 @@ const rutas = createBrowserRouter([
             element: <UpdateCombo />,
           },
 
-          // Mantenimiento de menús
+          // =================================================
+          // MANTENIMIENTO DE PROCESOS
+          // =================================================
+
+          {
+            path: "/procesos/mantenimiento",
+            element: <TableProcesos />,
+          },
+
+          {
+            path: "/procesos/mantenimiento/crear",
+            element: <CreateProceso />,
+          },
+
+          {
+            path: "/procesos/mantenimiento/editar/:id",
+            element: <UpdateProceso />,
+          },
+
+          // =================================================
+          // MANTENIMIENTO DE MENÚS
+          // =================================================
 
           {
             path: "/menu/mantenimiento",
@@ -185,7 +217,9 @@ const rutas = createBrowserRouter([
       // =====================================================
 
       {
-        element: <Auth requiredRoles={["Administrador", "Empleado"]} />,
+        element: (
+          <Auth requiredRoles={["Administrador", "Empleado"]} />
+        ),
 
         children: [
           {
@@ -201,11 +235,19 @@ const rutas = createBrowserRouter([
       },
 
       // =====================================================
-      // CLIENTE
+      // CLIENTE, EMPLEADO Y ADMINISTRADOR
       // =====================================================
 
       {
-        element: <Auth requiredRoles={["Cliente"]} />,
+        element: (
+          <Auth
+            requiredRoles={[
+              "Cliente",
+              "Empleado",
+              "Administrador",
+            ]}
+          />
+        ),
 
         children: [
           {
@@ -226,7 +268,13 @@ const rutas = createBrowserRouter([
 
       {
         element: (
-          <Auth requiredRoles={["Cliente", "Empleado", "Administrador"]} />
+          <Auth
+            requiredRoles={[
+              "Cliente",
+              "Empleado",
+              "Administrador",
+            ]}
+          />
         ),
 
         children: [
@@ -234,10 +282,12 @@ const rutas = createBrowserRouter([
             path: "/pedido",
             element: <ListPedidos />,
           },
+
           {
             path: "/pedido/detalle/:id",
             element: <DetailPedido />,
           },
+
           {
             path: "/pedido/factura/:id",
             element: <FacturaPedido />,
@@ -272,6 +322,7 @@ axios.interceptors.request.use(
 
     return config;
   },
+
   (error) => {
     return Promise.reject(error);
   },

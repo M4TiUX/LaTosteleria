@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
+
 import {
   Box,
   Button,
@@ -10,6 +12,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+
 import { Link } from "react-router-dom";
 import MenuService from "../../services/MenuService";
 import { formatMenuDate, formatMenuTime } from "./menuUtils";
@@ -29,10 +32,16 @@ function MenuItemCard({ item }) {
           <Typography variant="subtitle1" fontWeight={700}>
             {item.nombre}
           </Typography>
+
           <Typography variant="body2" color="text.secondary">
             {item.descripcion}
           </Typography>
-          <Typography variant="subtitle2" fontWeight={700} color="primary">
+
+          <Typography
+            variant="subtitle2"
+            fontWeight={700}
+            color="primary"
+          >
             ₡{" "}
             {new Intl.NumberFormat("es-CR", {
               maximumFractionDigits: 0,
@@ -45,6 +54,12 @@ function MenuItemCard({ item }) {
 }
 
 function CategoryBlock({ category }) {
+  //const { t } = useTranslation();
+
+  const { t, i18n } = useTranslation();
+
+ console.log("Idioma actual:", i18n.language);
+
   const productos = category.productos ?? [];
   const combos = category.combos ?? [];
 
@@ -56,12 +71,27 @@ function CategoryBlock({ category }) {
 
       {productos.length > 0 && (
         <>
-          <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1 }}>
-            Productos
+          <Typography
+            variant="subtitle1"
+            fontWeight={700}
+            sx={{ mb: 1 }}
+          >
+            {t("menus.common.products")}
           </Typography>
-          <Grid container spacing={2} sx={{ mb: combos.length > 0 ? 3 : 0 }}>
+
+          <Grid
+            container
+            spacing={2}
+            sx={{ mb: combos.length > 0 ? 3 : 0 }}
+          >
             {productos.map((item) => (
-              <Grid item xs={12} sm={6} md={4} key={`producto-${item.id}`}>
+              <Grid
+                item
+                xs={12}
+                sm={6}
+                md={4}
+                key={`producto-${item.id}`}
+              >
                 <MenuItemCard item={item} />
               </Grid>
             ))}
@@ -71,12 +101,23 @@ function CategoryBlock({ category }) {
 
       {combos.length > 0 && (
         <>
-          <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1 }}>
-            Combos
+          <Typography
+            variant="subtitle1"
+            fontWeight={700}
+            sx={{ mb: 1 }}
+          >
+            {t("menus.common.combos")}
           </Typography>
+
           <Grid container spacing={2}>
             {combos.map((item) => (
-              <Grid item xs={12} sm={6} md={4} key={`combo-${item.id}`}>
+              <Grid
+                item
+                xs={12}
+                sm={6}
+                md={4}
+                key={`combo-${item.id}`}
+              >
                 <MenuItemCard item={item} />
               </Grid>
             ))}
@@ -91,7 +132,10 @@ MenuItemCard.propTypes = {
   item: PropTypes.shape({
     nombre: PropTypes.string,
     descripcion: PropTypes.string,
-    precio: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    precio: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.number,
+    ]),
   }).isRequired,
 };
 
@@ -104,6 +148,8 @@ CategoryBlock.propTypes = {
 };
 
 export function AvailableMenu() {
+  const { t } = useTranslation();
+
   const [menu, setMenu] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(null);
@@ -121,7 +167,7 @@ export function AvailableMenu() {
   }, []);
 
   if (!loaded) {
-    return <p>Cargando menú disponible...</p>;
+    return <p>{t("menus.available.loading")}</p>;
   }
 
   if (error) {
@@ -129,33 +175,73 @@ export function AvailableMenu() {
   }
 
   if (!menu) {
-    return <p>No hay un menú disponible en este momento.</p>;
+    return <p>{t("menus.available.noMenu")}</p>;
   }
 
   return (
     <Box>
-      <Typography variant="h3" sx={{ mb: 1, fontWeight: 700 }}>
-        Menús disponibles ahora
+      <Typography
+        variant="h3"
+        sx={{
+          mb: 1,
+          fontWeight: 700,
+        }}
+      >
+        {t("menus.available.title")}
       </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        El sistema muestra un único menú disponible según la fecha y hora actual.
+
+      <Typography
+        variant="body1"
+        color="text.secondary"
+        sx={{ mb: 3 }}
+      >
+        {t("menus.available.description")}
       </Typography>
 
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" sx={{ mb: 1, fontWeight: 700 }}>
+        <Typography
+          variant="h4"
+          sx={{
+            mb: 1,
+            fontWeight: 700,
+          }}
+        >
           {menu.nombre_menu}
         </Typography>
-        <Chip label="Disponible ahora" color="success" sx={{ mb: 2 }} />
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-          Disponible del {formatMenuDate(menu.fecha_inicio)} {formatMenuTime(menu.hora_inicio)} al {formatMenuDate(menu.fecha_fin)} {formatMenuTime(menu.hora_fin)}.
+
+        <Chip
+          label={t("menus.available.availableNow")}
+          color="success"
+          sx={{ mb: 2 }}
+        />
+
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          sx={{ mb: 3 }}
+        >
+          {t("menus.available.availability", {
+            startDate: formatMenuDate(menu.fecha_inicio),
+            startTime: formatMenuTime(menu.hora_inicio),
+            endDate: formatMenuDate(menu.fecha_fin),
+            endTime: formatMenuTime(menu.hora_fin),
+          })}
         </Typography>
 
-        <Button component={Link} to={`/menu/${menu.id_menu}`} variant="outlined" sx={{ mb: 3 }}>
-          Ver detalle completo
+        <Button
+          component={Link}
+          to={`/menu/${menu.id_menu}`}
+          variant="outlined"
+          sx={{ mb: 3 }}
+        >
+          {t("menus.available.viewDetail")}
         </Button>
 
         {menu.categorias?.map((category) => (
-          <CategoryBlock key={category.categoria_nombre} category={category} />
+          <CategoryBlock
+            key={category.categoria_nombre}
+            category={category}
+          />
         ))}
       </Box>
     </Box>

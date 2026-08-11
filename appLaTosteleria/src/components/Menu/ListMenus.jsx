@@ -1,5 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+
 import {
   Box,
   Button,
@@ -9,11 +11,18 @@ import {
   Grid,
   Stack,
   Typography,
-} from '@mui/material';
-import MenuService from '../../services/MenuService';
-import { formatMenuDate, formatMenuTime, isMenuAvailable } from './menuUtils';
+} from "@mui/material";
+
+import MenuService from "../../services/MenuService";
+import {
+  formatMenuDate,
+  formatMenuTime,
+  isMenuAvailable,
+} from "./menuUtils";
 
 export function ListMenus() {
+  const { t } = useTranslation();
+
   const [menus, setMenus] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(null);
@@ -49,7 +58,7 @@ export function ListMenus() {
   }, [menus, now, showOnlyAvailable]);
 
   if (!loaded) {
-    return <p>Cargando menús...</p>;
+    return <p>{t("menus.list.loading")}</p>;
   }
 
   if (error) {
@@ -59,93 +68,149 @@ export function ListMenus() {
   return (
     <Box>
       <Stack
-        direction={{ xs: 'column', md: 'row' }}
-        alignItems={{ xs: 'flex-start', md: 'center' }}
+        direction={{ xs: "column", md: "row" }}
+        alignItems={{ xs: "flex-start", md: "center" }}
         justifyContent="space-between"
         spacing={2}
         sx={{ mb: 2 }}
       >
         <Box>
-          <Typography variant="h3" sx={{ mb: 1, fontWeight: 700 }}>
-            Menús registrados
+          <Typography
+            variant="h3"
+            sx={{
+              mb: 1,
+              fontWeight: 700,
+            }}
+          >
+            {t("menus.list.title")}
           </Typography>
+
           <Typography variant="body1" color="text.secondary">
-            Consulta los menús registrados por fecha y horario.
+            {t("menus.list.description")}
           </Typography>
         </Box>
       </Stack>
 
       <Box
         sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
           gap: 2,
-          flexWrap: 'wrap',
+          flexWrap: "wrap",
           mb: 4,
         }}
       >
         <Typography variant="body1" color="text.secondary">
-          Consulta los menús disponibles en La Tostelería.
+          {t("menus.list.availableDescription")}
         </Typography>
 
         <Button
-          variant={showOnlyAvailable ? 'contained' : 'outlined'}
-          onClick={() => setShowOnlyAvailable((current) => !current)}
+          variant={showOnlyAvailable ? "contained" : "outlined"}
+          onClick={() =>
+            setShowOnlyAvailable((current) => !current)
+          }
         >
-          {showOnlyAvailable ? 'Mostrando solo disponibles' : 'Mostrar solo disponibles'}
+          {showOnlyAvailable
+            ? t("menus.list.showingAvailable")
+            : t("menus.list.showAvailable")}
         </Button>
       </Box>
 
       <Grid container spacing={3}>
         {visibleMenus.length > 0 ? (
-          visibleMenus.map((menu) => (
-            <Grid item xs={12} md={6} lg={4} key={menu.id_menu}>
-              <Card
-                sx={{
-                  height: '100%',
-                  borderRadius: '8px',
-                  boxShadow: 4,
-                  background: 'linear-gradient(180deg, #fffdf8 0%, #fff7ea 100%)'
-                }}
+          visibleMenus.map((menu) => {
+            const disponible = isMenuAvailable(menu, now);
+
+            return (
+              <Grid
+                item
+                xs={12}
+                md={6}
+                lg={4}
+                key={menu.id_menu}
               >
-                <CardContent>
-                  <Stack spacing={1.5}>
-                    <Typography variant="h5" fontWeight={700}>
-                      {menu.nombre_menu}
-                    </Typography>
-                    <Chip
-                      label={isMenuAvailable(menu, now) ? 'Disponible ahora' : 'Fuera de horario'}
-                      color={isMenuAvailable(menu, now) ? 'success' : 'default'}
-                      size="small"
-                      sx={{ alignSelf: 'flex-start' }}
-                    />
-                    <Typography variant="body2" color="text.secondary">
-                      Inicio: {formatMenuDate(menu.fecha_inicio)} {formatMenuTime(menu.hora_inicio)}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Fin: {formatMenuDate(menu.fecha_fin)} {formatMenuTime(menu.hora_fin)}
-                    </Typography>
-                  </Stack>
-                  <Stack direction="row" spacing={1.5} sx={{ mt: 3 }}>
-                    <Button
-                      component={Link}
-                      to={`/menu/${menu.id_menu}`}
-                      variant="contained"
-                      fullWidth
-                      sx={{ borderRadius: '8px' }}
+                <Card
+                  sx={{
+                    height: "100%",
+                    borderRadius: "8px",
+                    boxShadow: 4,
+                    background:
+                      "linear-gradient(180deg, #fffdf8 0%, #fff7ea 100%)",
+                  }}
+                >
+                  <CardContent>
+                    <Stack spacing={1.5}>
+                      <Typography
+                        variant="h5"
+                        fontWeight={700}
+                      >
+                        {menu.nombre_menu}
+                      </Typography>
+
+                      <Chip
+                        label={
+                          disponible
+                            ? t("menus.status.availableNow")
+                            : t("menus.status.unavailable")
+                        }
+                        color={
+                          disponible ? "success" : "default"
+                        }
+                        size="small"
+                        sx={{ alignSelf: "flex-start" }}
+                      />
+
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                      >
+                        {t("menus.common.start")}:{" "}
+                        {formatMenuDate(menu.fecha_inicio)}{" "}
+                        {formatMenuTime(menu.hora_inicio)}
+                      </Typography>
+
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                      >
+                        {t("menus.common.end")}:{" "}
+                        {formatMenuDate(menu.fecha_fin)}{" "}
+                        {formatMenuTime(menu.hora_fin)}
+                      </Typography>
+                    </Stack>
+
+                    <Stack
+                      direction="row"
+                      spacing={1.5}
+                      sx={{ mt: 3 }}
                     >
-                      Ver menú
-                    </Button>
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))
+                      <Button
+                        component={Link}
+                        to={`/menu/${menu.id_menu}`}
+                        variant="contained"
+                        fullWidth
+                        sx={{
+                          borderRadius: "8px",
+                        }}
+                      >
+                        {t("menus.list.viewMenu")}
+                      </Button>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Grid>
+            );
+          })
         ) : (
           <Grid item xs={12}>
-            <Typography variant="body1" color="text.secondary" align="center" sx={{ py: 4 }}>
-              No hay menús disponibles en este momento.
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              align="center"
+              sx={{ py: 4 }}
+            >
+              {t("menus.list.noAvailable")}
             </Typography>
           </Grid>
         )}

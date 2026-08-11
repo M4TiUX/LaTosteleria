@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import ComboService from "../../services/ComboService";
 
 import {
@@ -20,6 +21,8 @@ import RestaurantMenuOutlinedIcon from "@mui/icons-material/RestaurantMenuOutlin
 import SettingsIcon from "@mui/icons-material/Settings";
 
 export function ListCombo() {
+  const { t } = useTranslation();
+
   const [combos, setCombos] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
@@ -41,12 +44,12 @@ export function ListCombo() {
           );
         } else {
           setCombos([]);
-          setError("La API no devolvió una lista válida de combos.");
+          setError("invalidResponse");
         }
       })
       .catch((error) => {
         console.error("Error al cargar los combos:", error);
-        setError("No fue posible cargar los combos.");
+        setError("loadError");
       })
       .finally(() => {
         setCargando(false);
@@ -76,7 +79,7 @@ export function ListCombo() {
         <CircularProgress size={34} />
 
         <Typography variant="body2" color="text.secondary">
-          Cargando combos...
+          {t("combos.loading")}
         </Typography>
       </Box>
     );
@@ -85,7 +88,9 @@ export function ListCombo() {
   if (error) {
     return (
       <Box sx={{ py: 3 }}>
-        <Alert severity="error">{error}</Alert>
+        <Alert severity="error">
+          {t(`combos.${error}`)}
+        </Alert>
       </Box>
     );
   }
@@ -115,12 +120,12 @@ export function ListCombo() {
             />
 
             <Typography variant="h4" component="h1" fontWeight="bold">
-              Combos
+              {t("combos.title")}
             </Typography>
           </Stack>
 
           <Typography color="text.secondary" sx={{ mt: 1 }}>
-            Conozca los combos disponibles en La Tostelería.
+            {t("combos.subtitle")}
           </Typography>
         </Box>
 
@@ -137,7 +142,7 @@ export function ListCombo() {
             fontWeight: "bold",
           }}
         >
-          Mantenimiento de Combos
+          {t("combos.maintenanceButton")}
         </Button>
       </Box>
 
@@ -185,12 +190,13 @@ export function ListCombo() {
                       fontSize: "0.88rem",
                     }}
                   >
-                    {combo.descripcion || "Combo sin descripción."}
+                    {combo.descripcion || t("combos.noDescription")}
                   </Typography>
 
                   {combo.nombre_categoria && (
                     <Typography variant="body2" sx={{ mt: 2 }}>
-                      Categoría: <strong>{combo.nombre_categoria}</strong>
+                      {t("combos.category")}:{" "}
+                      <strong>{combo.nombre_categoria}</strong>
                     </Typography>
                   )}
 
@@ -203,7 +209,7 @@ export function ListCombo() {
                         mb: 0.25,
                       }}
                     >
-                      Precio especial
+                      {t("combos.specialPrice")}
                     </Typography>
 
                     <Typography
@@ -240,7 +246,7 @@ export function ListCombo() {
                       fontSize: "0.88rem",
                     }}
                   >
-                    Ver detalle
+                    {t("combos.viewDetail")}
                   </Button>
                 </CardActions>
               </Card>
@@ -257,7 +263,7 @@ export function ListCombo() {
           }}
         >
           <Typography variant="body1" color="text.secondary">
-            No hay combos disponibles en este momento.
+            {t("combos.noAvailable")}
           </Typography>
         </Box>
       )}

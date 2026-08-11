@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import { Box, CircularProgress, Container } from "@mui/material";
 
@@ -10,6 +11,7 @@ import { toast } from "react-toastify";
 export function UpdateProduct() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [producto, setProducto] = useState(null);
   const [cargando, setCargando] = useState(true);
@@ -62,9 +64,7 @@ export function UpdateProduct() {
 
       const response = await ProductService.updateProduct(formData);
 
-      toast.success(
-        response.data.message || "Producto actualizado correctamente.",
-      );
+      toast.success(response.data.message || t("products.form.updateSuccess"));
 
       navigate("/producto");
     } catch (error) {
@@ -74,8 +74,7 @@ export function UpdateProduct() {
       console.error("Estado HTTP:", error.response?.status);
 
       const mensaje =
-        error.response?.data?.message ||
-        "No fue posible comunicarse con el servidor.";
+        error.response?.data?.message || t("products.form.serverError");
 
       toast.error(mensaje);
     } finally {
@@ -103,7 +102,7 @@ export function UpdateProduct() {
         defaultValues={producto}
         onSubmit={actualizarProducto}
         loading={guardando}
-        buttonText="Actualizar producto"
+        buttonText={t("products.form.update")}
       />
     </Container>
   );

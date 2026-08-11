@@ -1,7 +1,12 @@
 import React from "react";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
+import { useTranslation } from "react-i18next";
+
 export function Home() {
+
+  const { t } = useTranslation();
+
   return (
     <Container sx={{ p: 2 }} maxWidth="sm">
       <Typography
@@ -30,7 +35,7 @@ export function Home() {
       align="center" 
       color="text.primary"
       sx={{fontWeight:700, letterSpacing: "0.02em"}}>
-        Descubre nuestros productos y combos especiales.
+        {t("home.slogan")}
       </Typography>
     </Container>
   );

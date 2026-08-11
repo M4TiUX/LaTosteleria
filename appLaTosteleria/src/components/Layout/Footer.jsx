@@ -3,7 +3,12 @@ import React from "react";
 import { Container, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import Toolbar from "@mui/material/Toolbar";
+import { useTranslation } from "react-i18next";
+
 export function Footer() {
+
+  const { t } = useTranslation();
+
   return (
     <Toolbar
       sx={{
@@ -35,7 +40,7 @@ export function Footer() {
           </Grid>
           <Grid size={12}>
             <Typography align="center" color="secondary.main" variant="body2">
-              Todos los derechos reservados
+              {t("footer.rights")}
             </Typography>
           </Grid>
           {/* <Grid size={12}>

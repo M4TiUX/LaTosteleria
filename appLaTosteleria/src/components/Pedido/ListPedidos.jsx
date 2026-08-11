@@ -89,6 +89,8 @@ export function ListPedidos() {
 
   const isAdministrador = roleName === "Administrador";
 
+  const canCreateOrder = isCliente || isEmpleado || isAdministrador;
+
   // ==========================================
   // ESTADOS
   // ==========================================
@@ -292,9 +294,9 @@ export function ListPedidos() {
           <Typography color="text.secondary">{description}</Typography>
         </Box>
 
-        {/* Nuevo pedido solamente para Cliente */}
+        {/* Nuevo pedido para roles habilitados */}
 
-        {isCliente && (
+        {canCreateOrder && (
           <Button
             component={Link}
             to="/pedido/crear"
@@ -322,13 +324,26 @@ export function ListPedidos() {
           boxShadow: 1,
         }}
       >
-        <CardContent>
+        <CardContent
+          sx={{
+            px: { xs: 2.5, md: 3 },
+            py: 3,
+          }}
+        >
           <Stack spacing={2}>
             <Typography variant="h6" fontWeight={700}>
               Filtros del historial
             </Typography>
 
-            <Grid container spacing={2}>
+            <Grid
+              container
+              spacing={2}
+              sx={{
+                width: "100%",
+                m: 0,
+                alignItems: "stretch",
+              }}
+            >
               {/* Estado */}
 
               <Grid item xs={12} md={4}>
@@ -386,12 +401,13 @@ export function ListPedidos() {
 
               {/* Limpiar */}
 
-              <Grid item xs={12} md={2}>
+              <Grid item xs={12} md={2} sx={{ display: "flex" }}>
                 <Button
                   variant="outlined"
                   fullWidth
                   sx={{
                     height: "100%",
+                    minHeight: 56,
                   }}
                   onClick={clearFilters}
                 >
@@ -424,9 +440,9 @@ export function ListPedidos() {
                 pedidos.
               </Typography>
 
-              {/* Crear pedido solo para Cliente */}
+              {/* Crear pedido para roles habilitados */}
 
-              {isCliente && (
+              {canCreateOrder && (
                 <Button component={Link} to="/pedido/crear" variant="outlined">
                   Crear pedido
                 </Button>
@@ -563,7 +579,7 @@ export function ListPedidos() {
                           ACCIONES DEL CLIENTE
                       ================================== */}
 
-                    {isCliente && (
+                    {canCreateOrder && (
                       <Stack
                         direction={{
                           xs: "column",
@@ -591,13 +607,7 @@ export function ListPedidos() {
                       </Stack>
                     )}
 
-                    {/* 
-                        Por ahora Administrador y Empleado
-                        solamente consultan el historial.
-
-                        En el siguiente paso agregaremos
-                        aquí el botón "Ver detalle".
-                      */}
+                    {/* Los roles habilitados pueden iniciar un nuevo pedido desde aquí. */}
                   </Stack>
                 </CardContent>
               </Card>

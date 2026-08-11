@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import ComboService from "../../services/ComboService";
 
 import {
@@ -13,8 +14,6 @@ import {
   Divider,
   List,
   ListItem,
-  ListItemIcon,
-  ListItemText,
   Stack,
   Typography,
 } from "@mui/material";
@@ -23,15 +22,15 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import RestaurantMenuOutlinedIcon from "@mui/icons-material/RestaurantMenuOutlined";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
 
 export function DetailCombo() {
   const { id } = useParams();
+  const { t } = useTranslation();
 
   const [combo, setCombo] = useState(null);
   const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     ComboService.getComboById(id)
@@ -46,7 +45,7 @@ export function DetailCombo() {
       })
       .catch((error) => {
         console.error("Error al cargar el combo:", error);
-        setError("No fue posible cargar la información del combo.");
+        setError(true);
       })
       .finally(() => {
         setCargando(false);
@@ -76,7 +75,7 @@ export function DetailCombo() {
         <CircularProgress size={36} />
 
         <Typography variant="body2" color="text.secondary">
-          Cargando información del combo...
+          {t("combos.detail.loading")}
         </Typography>
       </Box>
     );
@@ -86,7 +85,7 @@ export function DetailCombo() {
     return (
       <Box sx={{ maxWidth: 850, mx: "auto", py: 4 }}>
         <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
+          {t("combos.detail.loadError")}
         </Alert>
 
         <Button
@@ -99,7 +98,7 @@ export function DetailCombo() {
             fontWeight: "bold",
           }}
         >
-          Volver a combos
+          {t("combos.detail.backToCombos")}
         </Button>
       </Box>
     );
@@ -109,7 +108,7 @@ export function DetailCombo() {
     return (
       <Box sx={{ maxWidth: 850, mx: "auto", py: 4 }}>
         <Alert severity="warning" sx={{ mb: 3 }}>
-          No se encontró el combo solicitado.
+          {t("combos.detail.notFound")}
         </Alert>
 
         <Button
@@ -122,7 +121,7 @@ export function DetailCombo() {
             fontWeight: "bold",
           }}
         >
-          Volver a combos
+          {t("combos.detail.backToCombos")}
         </Button>
       </Box>
     );
@@ -153,7 +152,7 @@ export function DetailCombo() {
           fontWeight: "bold",
         }}
       >
-        Volver a combos
+        {t("combos.detail.backToCombos")}
       </Button>
 
       <Card
@@ -162,7 +161,7 @@ export function DetailCombo() {
           boxShadow: 4,
           overflow: "hidden",
           maxWidth: 700,
-          margin: "auto"
+          margin: "auto",
         }}
       >
         <Box
@@ -218,14 +217,17 @@ export function DetailCombo() {
               </Typography>
 
               <Typography variant="body2" color="text.secondary">
-                Combo especial
+                {t("combos.detail.specialCombo")}
               </Typography>
             </Box>
           </Stack>
 
           <Chip
             icon={<CategoryOutlinedIcon />}
-            label={combo.nombre_categoria || "Sin categoría"}
+            label={
+              combo.nombre_categoria ||
+              t("combos.noCategory")
+            }
             sx={{
               fontWeight: "bold",
               bgcolor: "background.paper",
@@ -261,7 +263,7 @@ export function DetailCombo() {
           >
             <Box>
               <Typography variant="caption" color="text.secondary">
-                Precio especial
+                {t("combos.detail.specialPrice")}
               </Typography>
 
               <Typography
@@ -281,7 +283,7 @@ export function DetailCombo() {
 
             <Chip
               icon={<LocalOfferOutlinedIcon />}
-              label="Precio promocional"
+              label={t("combos.detail.promotionalPrice")}
               variant="outlined"
             />
           </Stack>
@@ -297,7 +299,7 @@ export function DetailCombo() {
             <DescriptionOutlinedIcon />
 
             <Typography variant="h6" component="h2" fontWeight="bold">
-              Descripción
+              {t("combos.detail.description")}
             </Typography>
           </Stack>
 
@@ -308,7 +310,7 @@ export function DetailCombo() {
               lineHeight: 1.7,
             }}
           >
-            {combo.descripcion || "Combo sin descripción."}
+            {combo.descripcion || t("combos.detail.noDescription")}
           </Typography>
 
           <Divider sx={{ my: 3 }} />
@@ -322,7 +324,7 @@ export function DetailCombo() {
             <RestaurantMenuOutlinedIcon />
 
             <Typography variant="h6" component="h2" fontWeight="bold">
-              Productos incluidos
+              {t("combos.detail.includedProducts")}
             </Typography>
           </Stack>
 
@@ -385,7 +387,9 @@ export function DetailCombo() {
                     </Typography>
 
                     <Typography variant="body2" color="text.secondary">
-                      Cantidad: {producto.cantidad}
+                      {t("combos.detail.quantity", {
+                        count: producto.cantidad,
+                      })}
                     </Typography>
                   </Box>
 
@@ -411,14 +415,14 @@ export function DetailCombo() {
                       fontWeight: "bold",
                     }}
                   >
-                    Ver producto
+                    {t("combos.detail.viewProduct")}
                   </Button>
                 </ListItem>
               ))}
             </List>
           ) : (
             <Typography color="text.secondary">
-              No hay productos registrados en este combo.
+              {t("combos.detail.noProducts")}
             </Typography>
           )}
 
@@ -436,7 +440,7 @@ export function DetailCombo() {
               fontWeight: "bold",
             }}
           >
-            Volver al catálogo de combos
+            {t("combos.detail.backToCatalog")}
           </Button>
         </CardContent>
       </Card>

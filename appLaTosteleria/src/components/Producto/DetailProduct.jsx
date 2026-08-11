@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import ProductService from "../../services/ProductService";
 
 import {
@@ -23,6 +24,7 @@ import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
 
 export function DetailProduct() {
   const { id } = useParams();
+  const { t } = useTranslation();
 
   const [producto, setProducto] = useState(null);
   const [cargando, setCargando] = useState(true);
@@ -41,12 +43,12 @@ export function DetailProduct() {
       })
       .catch((error) => {
         console.error("Error al cargar el producto:", error);
-        setError("No fue posible cargar la información del producto.");
+        setError(t("products.detail.loadError"));
       })
       .finally(() => {
         setCargando(false);
       });
-  }, [id]);
+  }, [id, t]);
 
   const formatearPrecio = (precio) => {
     return new Intl.NumberFormat("es-CR", {
@@ -71,7 +73,7 @@ export function DetailProduct() {
         <CircularProgress />
 
         <Typography color="text.secondary">
-          Cargando información del producto...
+          {t("products.detail.loading")}
         </Typography>
       </Box>
     );
@@ -100,7 +102,7 @@ export function DetailProduct() {
             fontWeight: "bold",
           }}
         >
-          Volver a productos
+          {t("products.detail.backToProducts")}
         </Button>
       </Box>
     );
@@ -116,7 +118,7 @@ export function DetailProduct() {
         }}
       >
         <Alert severity="warning" sx={{ mb: 3 }}>
-          No se encontró el producto solicitado.
+          {t("products.detail.notFound")}
         </Alert>
 
         <Button
@@ -129,7 +131,7 @@ export function DetailProduct() {
             fontWeight: "bold",
           }}
         >
-          Volver a productos
+          {t("products.detail.backToProducts")}
         </Button>
       </Box>
     );
@@ -160,7 +162,7 @@ export function DetailProduct() {
           fontWeight: "bold",
         }}
       >
-        Volver a productos
+        {t("products.detail.backToProducts")}
       </Button>
 
       <Divider sx={{ mb: 4 }} />
@@ -221,7 +223,10 @@ export function DetailProduct() {
 
             <Chip
               icon={<CategoryOutlinedIcon />}
-              label={producto.nombre_categoria || "Sin categoría"}
+              label={
+                producto.nombre_categoria ||
+                t("products.detail.noCategory")
+              }
               sx={{
                 mt: 2.5,
                 fontWeight: "bold",
@@ -239,7 +244,7 @@ export function DetailProduct() {
               <DescriptionOutlinedIcon />
 
               <Typography variant="h5" component="h2" fontWeight="bold">
-                Descripción
+                {t("products.detail.description")}
               </Typography>
             </Stack>
 
@@ -250,7 +255,8 @@ export function DetailProduct() {
                 lineHeight: 1.8,
               }}
             >
-              {producto.descripcion || "Producto sin descripción."}
+              {producto.descripcion ||
+                t("products.detail.noDescription")}
             </Typography>
 
             <Divider sx={{ my: 4 }} />
@@ -264,12 +270,17 @@ export function DetailProduct() {
               <RestaurantOutlinedIcon />
 
               <Typography variant="h5" component="h2" fontWeight="bold">
-                Ingredientes
+                {t("products.detail.ingredients")}
               </Typography>
             </Stack>
 
             {producto.ingredientes?.length > 0 ? (
-              <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+              <Stack
+                direction="row"
+                spacing={1}
+                useFlexGap
+                flexWrap="wrap"
+              >
                 {producto.ingredientes.map((ingrediente) => (
                   <Chip
                     key={ingrediente.id_ingrediente}
@@ -284,7 +295,7 @@ export function DetailProduct() {
               </Stack>
             ) : (
               <Typography color="text.secondary">
-                No hay ingredientes registrados.
+                {t("products.detail.noIngredients")}
               </Typography>
             )}
           </Box>
@@ -315,7 +326,7 @@ export function DetailProduct() {
             fontWeight: "bold",
           }}
         >
-          Volver al catálogo
+          {t("products.detail.backToCatalog")}
         </Button>
       </Box>
     </Box>

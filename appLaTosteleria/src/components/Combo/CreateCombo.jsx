@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Box, Typography } from "@mui/material";
 import { toast } from "react-toastify";
 
@@ -8,6 +9,8 @@ import { ComboForm } from "./Form/ComboForm";
 
 export function CreateCombo() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
   const [guardando, setGuardando] = useState(false);
 
   const guardarCombo = async (combo) => {
@@ -18,7 +21,7 @@ export function CreateCombo() {
 
       toast.success(
         response.data?.message ||
-          "Combo registrado correctamente."
+          t("combos.form.createSuccess")
       );
 
       navigate("/combo-table");
@@ -27,7 +30,7 @@ export function CreateCombo() {
 
       toast.error(
         error.response?.data?.message ||
-          "Ocurrió un error al registrar el combo."
+          t("combos.form.createError")
       );
     } finally {
       setGuardando(false);
@@ -50,13 +53,13 @@ export function CreateCombo() {
           mb: 4,
         }}
       >
-        Crear Combo
+        {t("combos.form.createTitle")}
       </Typography>
 
       <ComboForm
         onSubmit={guardarCombo}
         guardando={guardando}
-        textoBoton="Registrar Combo"
+        textoBoton={t("combos.form.register")}
       />
     </Box>
   );

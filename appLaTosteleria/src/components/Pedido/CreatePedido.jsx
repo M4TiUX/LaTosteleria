@@ -1067,7 +1067,7 @@ export function CreatePedido() {
                         inputProps={{ min: 0, step: 100 }}
                       />
                       {amountReceived !== "" &&
-                        (Number(amountReceived) < totalAmountRounded ? (
+                        (Number(amountReceived) < totalAmount ? (
                           <Alert severity="warning">
                             El monto recibido es insuficiente.
                           </Alert>

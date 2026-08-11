@@ -255,6 +255,13 @@ class PedidoModel
                 throw new Exception('Debe iniciar sesion para registrar un pedido.');
             }
 
+            if (!$this->isCustomerUser($clienteId)) {
+                throw new Exception('El cliente seleccionado no es valido para registrar pedidos.');
+            }
+
+            $encargadoId = isset($pedido->encargado_id) ? (int) $pedido->encargado_id : 0;
+            $encargadoIdSql = $encargadoId > 0 ? $encargadoId : 'NULL';
+
             $metodoEntrega = isset($pedido->metodo_entrega) ? trim((string) $pedido->metodo_entrega) : 'Tienda';
             if (!in_array($metodoEntrega, ['Tienda', 'Domicilio'], true)) {
                 throw new Exception('El metodo de entrega debe ser "Tienda" o "Domicilio".');
@@ -297,9 +304,9 @@ class PedidoModel
             $direccionIdSql = $direccionId === null ? 'NULL' : (int) $direccionId;
 
             $sql = "INSERT INTO pedidos
-            (cliente_id, estado_id, metodo_entrega, direccion_id, observaciones, subtotal, impuestos, total, costo_envio, fecha_creacion)
+            (cliente_id, encargado_id, estado_id, metodo_entrega, direccion_id, observaciones, subtotal, impuestos, total, costo_envio, fecha_creacion)
             VALUES
-            ($clienteId, 1, '$metodoEntrega', $direccionIdSql, $observacionesSql, $subtotal, $impuestos, $total, $costoEnvio, '$fechaCreacion')";
+            ($clienteId, $encargadoIdSql, 1, '$metodoEntrega', $direccionIdSql, $observacionesSql, $subtotal, $impuestos, $total, $costoEnvio, '$fechaCreacion')";
 
             $pedidoId = $this->enlace->executeSQL_DML_last($sql);
 
@@ -328,7 +335,7 @@ class PedidoModel
             $trackingSql = "INSERT INTO seguimiento_pedido
             (pedido_id, estado_nombre, fecha_hora, comentario)
             VALUES
-            ($pedidoId, 'Recibido', '$fechaCreacion', 'Pedido creado y enviado a seguimiento automatico.')";
+            ($pedidoId, 'Pendiente de pago', '$fechaCreacion', 'Pedido registrado y pendiente de confirmacion de pago.')";
 
             $this->enlace->executeSQL_DML($trackingSql);
 
@@ -353,6 +360,24 @@ class PedidoModel
         $result = $this->enlace->executeSQL($sql);
 
         return (is_array($result) && !empty($result)) ? $result[0] : null;
+    }
+
+    private function isCustomerUser($userId)
+    {
+        $userId = (int) $userId;
+
+        if ($userId <= 0) {
+            return false;
+        }
+
+        $sql = "SELECT id_usuario
+        FROM usuarios
+        WHERE id_usuario = $userId AND rol_id = 2
+        LIMIT 1";
+
+        $result = $this->enlace->executeSQL($sql);
+
+        return is_array($result) && !empty($result);
     }
 
     // =========================================================
