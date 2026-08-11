@@ -1,4 +1,6 @@
+// src/components/Layout/Header.jsx
 import { useContext, useState } from "react";
+import { Link } from "react-router-dom";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -7,7 +9,6 @@ import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Menu, MenuItem } from "@mui/material";
-import { Link } from "react-router-dom";
 import Badge from "@mui/material/Badge";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import AccountCircle from "@mui/icons-material/AccountCircle";
@@ -18,9 +19,7 @@ import { useCart } from "../../hooks/useCart";
 import { UserContext } from "../../context/UserContext";
 
 export default function Header() {
-  const { decodeToken, autorize } = useContext(UserContext);
-  const userData = decodeToken();
-
+  const { user, autorize } = useContext(UserContext);
   const { cart, getCountItems } = useCart();
 
   const [anchorElUser, setAnchorEl] = useState(null);
@@ -122,29 +121,17 @@ export default function Header() {
       }}
     >
       {navItems.map((item, index) => {
-        // Si la opción tiene roles,
-        // solo mostrarla cuando el usuario esté autorizado.
         if (item.roles) {
-          if (!userData || Object.keys(userData).length === 0) {
-            return null;
-          }
-
-          if (!autorize(item.roles)) {
-            return null;
-          }
+          if (!user) return null;
+          if (!autorize(item.roles)) return null;
         }
-
         return (
           <Button
             key={index}
             component={Link}
             to={item.link}
             color="secondary"
-            sx={{
-              px: 1.5,
-              py: 0.8,
-              flexShrink: 0,
-            }}
+            sx={{ px: 1.5, py: 0.8, flexShrink: 0 }}
           >
             <Typography textAlign="center" noWrap>
               {item.name}
@@ -161,15 +148,9 @@ export default function Header() {
 
   const menuPrincipalMobile = navItems.map((page, index) => {
     if (page.roles) {
-      if (!userData || Object.keys(userData).length === 0) {
-        return null;
-      }
-
-      if (!autorize(page.roles)) {
-        return null;
-      }
+      if (!user) return null;
+      if (!autorize(page.roles)) return null;
     }
-
     return (
       <MenuItem
         key={index}
@@ -177,9 +158,7 @@ export default function Header() {
         to={page.link}
         onClick={handleClosePrincipalMenu}
       >
-        <Typography sx={{ textAlign: "center" }}>
-          {page.name}
-        </Typography>
+        <Typography sx={{ textAlign: "center" }}>{page.name}</Typography>
       </MenuItem>
     );
   });
@@ -208,32 +187,22 @@ export default function Header() {
         sx={{ mt: "45px" }}
         id="menu-appbar"
         anchorEl={anchorElUser}
-        anchorOrigin={{
-          vertical: "top",
-          horizontal: "right",
-        }}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
         keepMounted
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "right",
-        }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
         open={Boolean(anchorElUser)}
         onClose={handleUserMenuClose}
       >
-        {userData && Object.keys(userData).length > 0 && (
+        {user && (
           <MenuItem>
             <Typography variant="subtitle1" gutterBottom>
-              {userData?.email}
+              {user?.email}
             </Typography>
           </MenuItem>
         )}
 
         {userItems.map((setting, index) => {
-          if (
-            setting.login &&
-            userData &&
-            Object.keys(userData).length > 0
-          ) {
+          if (setting.login && user) {
             return (
               <MenuItem
                 key={index}
@@ -247,11 +216,7 @@ export default function Header() {
               </MenuItem>
             );
           }
-
-          if (
-            !setting.login &&
-            Object.keys(userData).length === 0
-          ) {
+          if (!setting.login && !user) {
             return (
               <MenuItem
                 key={index}
@@ -265,7 +230,6 @@ export default function Header() {
               </MenuItem>
             );
           }
-
           return null;
         })}
       </Menu>
@@ -281,59 +245,41 @@ export default function Header() {
   const menuOpcionesMobile = (
     <Menu
       anchorEl={mobileOpcionesAnchorEl}
-      anchorOrigin={{
-        vertical: "bottom",
-        horizontal: "right",
-      }}
-      transformOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
+      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      transformOrigin={{ vertical: "top", horizontal: "right" }}
       id={menuOpcionesId}
       keepMounted
       open={isMobileOpcionesMenuOpen}
       onClose={handleOpcionesMenuClose}
     >
-      {/* Carrito únicamente para Cliente */}
-
-      {userData &&
-        Object.keys(userData).length > 0 &&
-        autorize(["Cliente"]) && (
-          <MenuItem
-            component={Link}
-            to="/pedido/crear"
-            onClick={handleOpcionesMenuClose}
-          >
-            <IconButton
-              size="large"
-              sx={{ color: "secondary.main" }}
+      {user && autorize(["Cliente"]) && (
+        <MenuItem
+          component={Link}
+          to="/pedido/crear"
+          onClick={handleOpcionesMenuClose}
+        >
+          <IconButton size="large" sx={{ color: "secondary.main" }}>
+            <Badge
+              badgeContent={getCountItems(cart)}
+              sx={{
+                "& .MuiBadge-badge": {
+                  backgroundColor: "secondary.main",
+                  color: "primary.main",
+                },
+              }}
             >
-              <Badge
-                badgeContent={getCountItems(cart)}
-                sx={{
-                  "& .MuiBadge-badge": {
-                    backgroundColor: "secondary.main",
-                    color: "primary.main",
-                  },
-                }}
-              >
-                <ShoppingCartIcon
-                  sx={{ color: "secondary.main" }}
-                />
-              </Badge>
-            </IconButton>
-
-            <p>Nuevo pedido</p>
-          </MenuItem>
-        )}
-
+              <ShoppingCartIcon sx={{ color: "secondary.main" }} />
+            </Badge>
+          </IconButton>
+          <p>Nuevo pedido</p>
+        </MenuItem>
+      )}
       <MenuItem>
         <IconButton size="large" color="inherit">
           <Badge badgeContent={17} color="error">
             <NotificationsIcon />
           </Badge>
         </IconButton>
-
         <p>Notificaciones</p>
       </MenuItem>
     </Menu>
@@ -382,10 +328,7 @@ export default function Header() {
                 component="a"
                 href="/"
                 aria-label="La Tostelería"
-                sx={{
-                  p: 0.5,
-                  color: "secondary.main",
-                }}
+                sx={{ p: 0.5, color: "secondary.main" }}
               >
                 <img
                   src="/images/LogoLaTosteleria.jpeg"
@@ -407,10 +350,7 @@ export default function Header() {
               aria-haspopup="true"
               sx={{
                 mr: 2,
-                display: {
-                  xs: "inline-flex",
-                  lg: "none",
-                },
+                display: { xs: "inline-flex", lg: "none" },
               }}
               onClick={handleOpenPrincipalMenu}
             >
@@ -420,23 +360,12 @@ export default function Header() {
             <Menu
               id={menuIdPrincipal}
               anchorEl={anchorElPrincipal}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
-              }}
+              anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
               keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "left",
-              }}
+              transformOrigin={{ vertical: "top", horizontal: "left" }}
               open={Boolean(anchorElPrincipal)}
               onClose={handleClosePrincipalMenu}
-              sx={{
-                display: {
-                  xs: "block",
-                  lg: "none",
-                },
-              }}
+              sx={{ display: { xs: "block", lg: "none" } }}
             >
               {menuPrincipalMobile}
             </Menu>
@@ -455,47 +384,34 @@ export default function Header() {
           >
             <Box
               sx={{
-                display: {
-                  xs: "none",
-                  md: "flex",
-                },
+                display: { xs: "none", md: "flex" },
                 alignItems: "center",
               }}
             >
-              {/* Carrito únicamente para Cliente */}
-
-              {userData &&
-                Object.keys(userData).length > 0 &&
-                autorize(["Cliente"]) && (
-                  <Tooltip title="Mi carrito">
-                    <IconButton
-                      size="large"
-                      edge="end"
-                      component={Link}
-                      to="/pedido/crear"
-                      aria-label="Mi carrito"
+              {user && autorize(["Cliente"]) && (
+                <Tooltip title="Mi carrito">
+                  <IconButton
+                    size="large"
+                    edge="end"
+                    component={Link}
+                    to="/pedido/crear"
+                    aria-label="Mi carrito"
+                    sx={{ color: "secondary.main" }}
+                  >
+                    <Badge
+                      badgeContent={getCountItems(cart)}
                       sx={{
-                        color: "secondary.main",
+                        "& .MuiBadge-badge": {
+                          backgroundColor: "secondary.main",
+                          color: "primary.main",
+                        },
                       }}
                     >
-                      <Badge
-                        badgeContent={getCountItems(cart)}
-                        sx={{
-                          "& .MuiBadge-badge": {
-                            backgroundColor: "secondary.main",
-                            color: "primary.main",
-                          },
-                        }}
-                      >
-                        <ShoppingCartIcon
-                          sx={{
-                            color: "secondary.main",
-                          }}
-                        />
-                      </Badge>
-                    </IconButton>
-                  </Tooltip>
-                )}
+                      <ShoppingCartIcon sx={{ color: "secondary.main" }} />
+                    </Badge>
+                  </IconButton>
+                </Tooltip>
+              )}
 
               <IconButton size="large" color="inherit">
                 <Badge badgeContent={17} color="error">
@@ -506,14 +422,7 @@ export default function Header() {
 
             <div>{userMenu}</div>
 
-            <Box
-              sx={{
-                display: {
-                  xs: "flex",
-                  md: "none",
-                },
-              }}
-            >
+            <Box sx={{ display: { xs: "flex", md: "none" } }}>
               <IconButton
                 size="large"
                 aria-label="show more"

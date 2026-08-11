@@ -333,6 +333,7 @@ export function CreatePedido() {
       : 0;
 
   const totalAmount = subtotalAmount + taxAmount + shippingCost;
+  const totalAmountRounded = Math.round(totalAmount);
 
   // ==========================================================
   // VUELTO
@@ -343,11 +344,11 @@ export function CreatePedido() {
       return 0;
     }
     const received = Number(amountReceived);
-    if (Number.isNaN(received) || received < totalAmount) {
+    if (Number.isNaN(received) || received < totalAmountRounded) {
       return 0;
     }
-    return received - totalAmount;
-  }, [paymentMethod, amountReceived, totalAmount]);
+    return received - totalAmountRounded;
+  }, [paymentMethod, amountReceived, totalAmountRounded]);
 
   // ==========================================================
   // LIMPIAR OBSERVACIONES DE ITEMS ELIMINADOS
@@ -410,8 +411,9 @@ export function CreatePedido() {
 
     try {
       const payload = {
-        cliente_id: Number(userData.id),
+        usuario_id: Number(userData.id),
         detalles: newDireccionDetalle.trim(),
+        referencias: null,
         latitud: Number(selectedLocation.lat),
         longitud: Number(selectedLocation.lng),
         zona: "Por definir",
@@ -454,18 +456,10 @@ export function CreatePedido() {
       setError("Debe agregar al menos un producto o combo al pedido.");
       return;
     }
-    if (
-      deliveryMethod === "Domicilio" &&
-      !selectedDireccionId &&
-      !selectedLocation
-    ) {
+    if (deliveryMethod === "Domicilio" && !selectedDireccionId) {
       setError(
-        "Debe seleccionar una dirección de entrega o una ubicación en el mapa.",
+        "Debe guardar la ubicación seleccionada como dirección antes de continuar.",
       );
-      return;
-    }
-    if (!paymentMethod) {
-      setError("Debe seleccionar un metodo de pago.");
       return;
     }
 
@@ -475,7 +469,7 @@ export function CreatePedido() {
         setError("Debe indicar el monto recibido.");
         return;
       }
-      if (received < totalAmount) {
+      if (received < totalAmountRounded) {
         setError("El monto recibido es insuficiente para pagar el pedido.");
         return;
       }
@@ -1073,7 +1067,7 @@ export function CreatePedido() {
                         inputProps={{ min: 0, step: 100 }}
                       />
                       {amountReceived !== "" &&
-                        (Number(amountReceived) < totalAmount ? (
+                        (Number(amountReceived) < totalAmountRounded ? (
                           <Alert severity="warning">
                             El monto recibido es insuficiente.
                           </Alert>
@@ -1124,7 +1118,12 @@ export function CreatePedido() {
                   size="large"
                   startIcon={<ShoppingBagOutlinedIcon />}
                   onClick={handleSubmit}
-                  disabled={submitting || cart.length === 0 || !isAuthenticated}
+                  disabled={
+                    submitting ||
+                    cart.length === 0 ||
+                    !isAuthenticated ||
+                    (deliveryMethod === "Domicilio" && !selectedDireccionId)
+                  }
                 >
                   {submitting ? "Registrando pedido..." : "Confirmar pedido"}
                 </Button>

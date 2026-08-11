@@ -7,7 +7,7 @@ import { Home } from "./components/Home/Home";
 import { RouterProvider } from "react-router";
 import { PageNotFound } from "./components/Home/PageNotFound";
 
-import UserProvider from "./components/User/UserProvider";
+import {UserProvider} from "./context/UserContext";
 import { Unauthorized } from "./components/User/Unauthorized";
 import { Login } from "./components/User/Login";
 import { Logout } from "./components/User/Logout";
@@ -259,12 +259,15 @@ const rutas = createBrowserRouter([
 
 axios.interceptors.request.use(
   (config) => {
-    const storedUser = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
 
-    if (storedUser) {
-      const token = JSON.parse(storedUser);
-
+    // Solo adjuntamos el header si el token tiene forma de JWT valido
+    // (3 segmentos separados por punto). Si esta corrupto, lo
+    // eliminamos en vez de seguir reenviandolo roto en cada request.
+    if (token && token.split(".").length === 3) {
       config.headers.Authorization = `Bearer ${token}`;
+    } else if (token) {
+      localStorage.removeItem("token");
     }
 
     return config;

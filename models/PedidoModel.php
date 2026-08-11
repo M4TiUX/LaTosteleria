@@ -291,6 +291,7 @@ class PedidoModel
             $subtotal = round($subtotal, 2);
             $impuestos = 0.00;
             $total = round($subtotal + $impuestos + $costoEnvio, 2);
+            $pagoValidado = $this->validatePayment($pedido, $total);
             $fechaCreacion = $this->escape(date('Y-m-d H:i:s'));
             $observacionesSql = $observaciones === null ? 'NULL' : "'" . $this->escape($observaciones) . "'";
             $direccionIdSql = $direccionId === null ? 'NULL' : (int) $direccionId;
@@ -306,6 +307,8 @@ class PedidoModel
                 throw new Exception('No fue posible registrar el pedido.');
             }
 
+            $this->registerPayment($pedidoId, $pagoValidado, $total, $fechaCreacion);
+            
             foreach ($validatedItems as $item) {
                 $productoId = $item['item_type'] === 'producto' ? (int) $item['item_id'] : 'NULL';
                 $comboId = $item['item_type'] === 'combo' ? (int) $item['item_id'] : 'NULL';
