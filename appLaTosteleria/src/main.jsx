@@ -235,11 +235,19 @@ const rutas = createBrowserRouter([
       },
 
       // =====================================================
-      // CLIENTE
+      // CLIENTE, EMPLEADO Y ADMINISTRADOR
       // =====================================================
 
       {
-        element: <Auth requiredRoles={["Cliente"]} />,
+        element: (
+          <Auth
+            requiredRoles={[
+              "Cliente",
+              "Empleado",
+              "Administrador",
+            ]}
+          />
+        ),
 
         children: [
           {
