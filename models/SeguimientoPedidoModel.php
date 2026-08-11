@@ -4,6 +4,11 @@ class SeguimientoPedidoModel
 {
     private const STATES = [
         [
+            'name' => 'Pendiente de pago',
+            'progress' => 0,
+            'comment' => 'Pedido registrado y pendiente de confirmacion de pago.'
+        ],
+        [
             'name' => 'Recibido',
             'progress' => 25,
             'comment' => 'Pedido recibido y pendiente de preparacion.'
