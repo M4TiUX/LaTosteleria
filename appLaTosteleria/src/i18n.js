@@ -9,6 +9,7 @@ const resources = {
         mantenimientoProductos: "Mantenimiento Productos",
         combos: "Combos",
         procesos: "Procesos",
+        mantenimientoProcesos: "Mantenimiento Procesos",
         menus: "Menús",
         pedidos: "Pedidos",
         mantenimientoMenus: "Mantenimiento Menús",
@@ -399,6 +400,86 @@ const resources = {
           statusError: "No fue posible actualizar el estado del menú.",
         },
       },
+
+      processMaintenance: {
+        title: "Mantenimiento de procesos",
+        description:
+          "Administre los procesos de preparación asociados a los productos.",
+
+        newProcess: "Nuevo proceso",
+        search: "Buscar por producto...",
+        product: "Producto",
+        stations: "Estaciones",
+        actions: "Acciones",
+
+        detail: "Detalle",
+        edit: "Editar",
+        delete: "Eliminar",
+
+        loadingError: "No fue posible cargar los procesos.",
+        noResults: "No se encontraron procesos.",
+
+        deleteDialog: {
+          title: "Eliminar proceso",
+          message:
+            "¿Está seguro de eliminar el proceso de preparación de {{product}}? Esta acción eliminará todos sus pasos.",
+          cancel: "Cancelar",
+          delete: "Eliminar",
+          deleting: "Eliminando...",
+          error: "No fue posible eliminar el proceso.",
+        },
+
+        form: {
+          product: "Producto",
+          stepsTitle: "Pasos del proceso",
+          stepsDescription:
+            "Seleccione la estación y el tiempo estimado para cada paso.",
+          step: "Paso {{number}}",
+          station: "Estación",
+          estimatedTime: "Tiempo estimado (minutos)",
+          addStep: "Agregar paso",
+          save: "Guardar proceso",
+          saving: "Guardando...",
+
+          createSuccess: "Proceso registrado correctamente.",
+          updateSuccess: "Proceso actualizado correctamente.",
+          deleteSuccess: "Proceso eliminado correctamente.",
+
+          createError: "Ocurrió un error al registrar el proceso.",
+          updateError: "Ocurrió un error al actualizar el proceso.",
+          deleteError: "Ocurrió un error al eliminar el proceso.",
+
+          serverError: "No fue posible comunicarse con el servidor.",
+
+          loadOptionsError: "No fue posible cargar los productos y estaciones.",
+
+          validation: {
+            product: "Debe seleccionar un producto.",
+            minimumStep: "El proceso debe tener al menos una estación.",
+            station: "Debe seleccionar una estación en todos los pasos.",
+            time: "El tiempo estimado debe ser mayor a cero.",
+          },
+
+          saveError: "Ocurrió un error al guardar el proceso.",
+        },
+
+        create: {
+          title: "Crear proceso",
+          description:
+            "Seleccione el producto y defina las estaciones que forman su proceso de preparación.",
+          button: "Registrar proceso",
+          error: "No fue posible registrar el proceso.",
+        },
+
+        update: {
+          title: "Editar proceso",
+          description:
+            "Modifique las estaciones y tiempos del proceso de preparación.",
+          button: "Actualizar proceso",
+          loadError: "No fue posible cargar el proceso.",
+          updateError: "No fue posible actualizar el proceso.",
+        },
+      },
     },
   },
 
@@ -409,6 +490,7 @@ const resources = {
         mantenimientoProductos: "Product Management",
         combos: "Combos",
         procesos: "Processes",
+        mantenimientoProcesos: "Process Maintenance",
         menus: "Menus",
         pedidos: "Orders",
         mantenimientoMenus: "Menu Management",
@@ -796,6 +878,86 @@ const resources = {
           enableSuccess: "The menu was enabled successfully.",
           disableSuccess: "The menu was disabled successfully.",
           statusError: "Unable to update the menu status.",
+        },
+      },
+
+      processMaintenance: {
+        title: "Process maintenance",
+        description:
+          "Manage the preparation processes associated with products.",
+
+        newProcess: "New process",
+        search: "Search by product...",
+        product: "Product",
+        stations: "Stations",
+        actions: "Actions",
+
+        detail: "Details",
+        edit: "Edit",
+        delete: "Delete",
+
+        loadingError: "Unable to load the processes.",
+        noResults: "No processes were found.",
+
+        deleteDialog: {
+          title: "Delete process",
+          message:
+            "Are you sure you want to delete the preparation process for {{product}}? This action will delete all of its steps.",
+          cancel: "Cancel",
+          delete: "Delete",
+          deleting: "Deleting...",
+          error: "Unable to delete the process.",
+        },
+
+        form: {
+          product: "Product",
+          stepsTitle: "Process steps",
+          stepsDescription:
+            "Select the station and estimated time for each step.",
+          step: "Step {{number}}",
+          station: "Station",
+          estimatedTime: "Estimated time (minutes)",
+          addStep: "Add step",
+          save: "Save process",
+          saving: "Saving...",
+
+          createSuccess: "Process created successfully.",
+          updateSuccess: "Process updated successfully.",
+          deleteSuccess: "Process deleted successfully.",
+
+          createError: "An error occurred while creating the process.",
+          updateError: "An error occurred while updating the process.",
+          deleteError: "An error occurred while deleting the process.",
+
+          serverError: "Unable to communicate with the server.",
+
+          loadOptionsError: "Unable to load products and stations.",
+
+          validation: {
+            product: "You must select a product.",
+            minimumStep: "The process must have at least one station.",
+            station: "You must select a station for every step.",
+            time: "The estimated time must be greater than zero.",
+          },
+
+          saveError: "An error occurred while saving the process.",
+        },
+
+        create: {
+          title: "Create process",
+          description:
+            "Select the product and define the stations that make up its preparation process.",
+          button: "Create process",
+          error: "Unable to create the process.",
+        },
+
+        update: {
+          title: "Edit process",
+          description:
+            "Modify the stations and times of the preparation process.",
+          button: "Update process",
+          loadError: "Unable to load the process.",
+          updateError: "Unable to update the process.",
         },
       },
     },
