@@ -27,6 +27,9 @@ export default function Header() {
 
   const { decodeToken, autorize } = useContext(UserContext);
   const userData = decodeToken();
+  const isLoggedIn = Boolean(
+    userData && Object.keys(userData).length > 0
+  );
 
   const { cart, getCountItems } = useCart();
 
@@ -273,7 +276,7 @@ export default function Header() {
           )}
 
         {userItems.map((setting, index) => {
-          if (setting.login && user) {
+          if (setting.login && isLoggedIn) {
             return (
               <MenuItem
                 key={index}
@@ -289,7 +292,7 @@ export default function Header() {
               </MenuItem>
             );
           }
-          if (!setting.login && !user) {
+          if (!setting.login && !isLoggedIn) {
             return (
               <MenuItem
                 key={index}
