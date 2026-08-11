@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import {
@@ -55,7 +55,6 @@ L.Icon.Default.mergeOptions({
 import MenuService from "../../services/MenuService";
 import PedidoService from "../../services/PedidoService";
 import DireccionEnvioService from "../../services/DireccionEnvioService";
-import UserService from "../../services/UserService";
 
 import { UserContext } from "../../context/UserContext";
 import { useCart } from "../../hooks/useCart";
@@ -131,9 +130,6 @@ export function CreatePedido() {
   const navigate = useNavigate();
   const { decodeToken } = useContext(UserContext);
   const userData = decodeToken();
-  const roleName = userData?.rol?.name ?? "";
-  const isCliente = roleName === "Cliente";
-  const isEncargado = roleName === "Empleado" || roleName === "Administrador";
 
   const {
     cart,
@@ -146,14 +142,6 @@ export function CreatePedido() {
   } = useCart();
 
   const isAuthenticated = Boolean(userData?.id);
-
-  // ==========================================================
-  // CLIENTE Y ENCARGADO SEGUN ROL
-  // ==========================================================
-
-  const [clientes, setClientes] = useState([]);
-  const [loadingClientes, setLoadingClientes] = useState(false);
-  const [selectedClienteId, setSelectedClienteId] = useState("");
 
   // ==========================================================
   // MENÚ
@@ -212,92 +200,6 @@ export function CreatePedido() {
   const [loadingMenuDetail, setLoadingMenuDetail] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
-
-  // ==========================================================
-  // USUARIO EFECTIVO DEL PEDIDO
-  // ==========================================================
-
-  const clienteIdEfectivo = useMemo(() => {
-    if (isEncargado) {
-      return Number(selectedClienteId || 0);
-    }
-
-    return Number(userData?.id || 0);
-  }, [isEncargado, selectedClienteId, userData?.id]);
-
-  const clienteSeleccionado = useMemo(() => {
-    if (isCliente) {
-      return {
-        id: userData?.id,
-        name: userData?.name,
-        email: userData?.email,
-      };
-    }
-
-    return (
-      clientes.find((cliente) => Number(cliente.id) === Number(selectedClienteId)) ?? null
-    );
-  }, [isCliente, userData?.id, userData?.name, userData?.email, clientes, selectedClienteId]);
-
-  const fechaRegistroActual = useMemo(() => {
-    return new Intl.DateTimeFormat("es-CR", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    }).format(new Date());
-  }, []);
-
-  // ==========================================================
-  // AJUSTAR DATOS SI CAMBIA EL ROL
-  // ==========================================================
-
-  useEffect(() => {
-    if (isCliente) {
-      setSelectedClienteId(String(userData?.id ?? ""));
-      return;
-    }
-
-    if (!isEncargado) {
-      setSelectedClienteId(String(userData?.id ?? ""));
-      return;
-    }
-
-    setSelectedClienteId("");
-  }, [isCliente, isEncargado, userData?.id]);
-
-  // ==========================================================
-  // CARGAR CLIENTES SI ES ENCARGADO
-  // ==========================================================
-
-  useEffect(() => {
-    if (!isAuthenticated || !isEncargado) {
-      setClientes([]);
-      return;
-    }
-
-    setLoadingClientes(true);
-
-    UserService.getAllCustomer()
-      .then((response) => {
-        const lista = Array.isArray(response.data) ? response.data : [];
-        setClientes(lista);
-
-        if (lista.length > 0) {
-          setSelectedClienteId((prev) => {
-            if (prev && lista.some((cliente) => String(cliente.id) === String(prev))) {
-              return prev;
-            }
-
-            return String(lista[0].id);
-          });
-        }
-      })
-      .catch(() => {
-        setError("No fue posible cargar la lista de clientes.");
-      })
-      .finally(() => {
-        setLoadingClientes(false);
-      });
-  }, [isAuthenticated, isEncargado]);
 
   // ==========================================================
   // CARGAR MENÚS
@@ -366,14 +268,14 @@ export function CreatePedido() {
   // ==========================================================
 
   useEffect(() => {
-    if (deliveryMethod !== "Domicilio" || !clienteIdEfectivo) {
+    if (deliveryMethod !== "Domicilio" || !userData?.id) {
       return;
     }
 
     setLoadingDirecciones(true);
     setError(null);
 
-    DireccionEnvioService.getDirecciones(clienteIdEfectivo)
+    DireccionEnvioService.getDirecciones(userData.id)
       .then((response) => {
         const lista = Array.isArray(response.data) ? response.data : [];
         setDirecciones(lista);
@@ -391,7 +293,7 @@ export function CreatePedido() {
       .finally(() => {
         setLoadingDirecciones(false);
       });
-  }, [deliveryMethod, clienteIdEfectivo]);
+  }, [deliveryMethod, userData?.id]);
 
   // ==========================================================
   // ITEMS DISPONIBLES
@@ -431,6 +333,7 @@ export function CreatePedido() {
       : 0;
 
   const totalAmount = subtotalAmount + taxAmount + shippingCost;
+  const totalAmountRounded = Math.round(totalAmount);
 
   // ==========================================================
   // VUELTO
@@ -441,11 +344,11 @@ export function CreatePedido() {
       return 0;
     }
     const received = Number(amountReceived);
-    if (Number.isNaN(received) || received < totalAmount) {
+    if (Number.isNaN(received) || received < totalAmountRounded) {
       return 0;
     }
-    return received - totalAmount;
-  }, [paymentMethod, amountReceived, totalAmount]);
+    return received - totalAmountRounded;
+  }, [paymentMethod, amountReceived, totalAmountRounded]);
 
   // ==========================================================
   // LIMPIAR OBSERVACIONES DE ITEMS ELIMINADOS
@@ -498,10 +401,6 @@ export function CreatePedido() {
       setError("Primero selecciona una ubicación en el mapa.");
       return;
     }
-    if (!clienteIdEfectivo) {
-      setError("Debe seleccionar un cliente para guardar una dirección.");
-      return;
-    }
     if (!newDireccionDetalle.trim()) {
       setError("Debes escribir una descripción o referencia de la dirección.");
       return;
@@ -512,8 +411,9 @@ export function CreatePedido() {
 
     try {
       const payload = {
-        usuario_id: Number(clienteIdEfectivo),
+        usuario_id: Number(userData.id),
         detalles: newDireccionDetalle.trim(),
+        referencias: null,
         latitud: Number(selectedLocation.lat),
         longitud: Number(selectedLocation.lng),
         zona: "Por definir",
@@ -552,26 +452,14 @@ export function CreatePedido() {
       setError("Debe seleccionar un menu antes de crear el pedido.");
       return;
     }
-    if (isEncargado && !clienteIdEfectivo) {
-      setError("Debe seleccionar el cliente para registrar el pedido.");
-      return;
-    }
     if (cart.length === 0) {
       setError("Debe agregar al menos un producto o combo al pedido.");
       return;
     }
-    if (
-      deliveryMethod === "Domicilio" &&
-      !selectedDireccionId &&
-      !selectedLocation
-    ) {
+    if (deliveryMethod === "Domicilio" && !selectedDireccionId) {
       setError(
-        "Debe seleccionar una dirección de entrega o una ubicación en el mapa.",
+        "Debe guardar la ubicación seleccionada como dirección antes de continuar.",
       );
-      return;
-    }
-    if (!paymentMethod) {
-      setError("Debe seleccionar un metodo de pago.");
       return;
     }
 
@@ -581,7 +469,7 @@ export function CreatePedido() {
         setError("Debe indicar el monto recibido.");
         return;
       }
-      if (received < totalAmount) {
+      if (received < totalAmountRounded) {
         setError("El monto recibido es insuficiente para pagar el pedido.");
         return;
       }
@@ -619,7 +507,7 @@ export function CreatePedido() {
       setError(null);
 
       const payload = {
-        cliente_id: clienteIdEfectivo,
+        cliente_id: Number(userData?.id),
         menu_id: Number(selectedMenuId),
         metodo_entrega: deliveryMethod,
         direccion_id:
@@ -720,95 +608,6 @@ export function CreatePedido() {
           <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
             <CardContent>
               <Stack spacing={3}>
-                {/* DATOS DEL REGISTRO */}
-                <Grid container spacing={2}>
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      fullWidth
-                      label="Fecha de registro"
-                      value={fechaRegistroActual}
-                      InputProps={{ readOnly: true }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      fullWidth
-                      label="Estado inicial"
-                      value="Pendiente de pago"
-                      InputProps={{ readOnly: true }}
-                    />
-                  </Grid>
-                </Grid>
-
-                {/* CLIENTE Y ENCARGADO */}
-                <Grid container spacing={2}>
-                  <Grid item xs={12} md={isEncargado ? 6 : 12}>
-                    {isEncargado ? (
-                      <FormControl fullWidth disabled={loadingClientes}>
-                        <InputLabel id="cliente-select-label">Cliente</InputLabel>
-                        <Select
-                          labelId="cliente-select-label"
-                          value={selectedClienteId}
-                          label="Cliente"
-                          onChange={(event) => {
-                            setSelectedClienteId(String(event.target.value));
-                            setSelectedDireccionId("");
-                            setDirecciones([]);
-                          }}
-                        >
-                          {clientes.map((cliente) => (
-                            <MenuItem key={cliente.id} value={String(cliente.id)}>
-                              {cliente.name}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    ) : (
-                      <TextField
-                        fullWidth
-                        label="Cliente"
-                        value={clienteSeleccionado?.name ?? ""}
-                        InputProps={{ readOnly: true }}
-                      />
-                    )}
-
-                    {isEncargado && !loadingClientes && clientes.length === 0 && (
-                      <Alert sx={{ mt: 1.5 }} severity="warning">
-                        No hay clientes disponibles para registrar el pedido.
-                      </Alert>
-                    )}
-                  </Grid>
-
-                  <Grid item xs={12} md={isEncargado ? 6 : 12}>
-                    <TextField
-                      fullWidth
-                      label="Identificador cliente"
-                      value={clienteSeleccionado?.id ? `ID ${clienteSeleccionado.id}` : ""}
-                      InputProps={{ readOnly: true }}
-                    />
-                  </Grid>
-
-                  <Grid item xs={12}>
-                    <TextField
-                      fullWidth
-                      label="Correo cliente"
-                      value={clienteSeleccionado?.email ?? ""}
-                      InputProps={{ readOnly: true }}
-                    />
-                  </Grid>
-
-                  {isEncargado && (
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Encargado que registra"
-                        value={`${userData?.name ?? ""}${userData?.email ? ` (${userData.email})` : ""}`}
-                        InputProps={{ readOnly: true }}
-                      />
-                    </Grid>
-                  )}
-                </Grid>
-
                 {/* MENÚ Y ENTREGA */}
                 <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
                   <FormControl fullWidth>
@@ -1319,7 +1118,12 @@ export function CreatePedido() {
                   size="large"
                   startIcon={<ShoppingBagOutlinedIcon />}
                   onClick={handleSubmit}
-                  disabled={submitting || cart.length === 0 || !isAuthenticated}
+                  disabled={
+                    submitting ||
+                    cart.length === 0 ||
+                    !isAuthenticated ||
+                    (deliveryMethod === "Domicilio" && !selectedDireccionId)
+                  }
                 >
                   {submitting ? "Registrando pedido..." : "Confirmar pedido"}
                 </Button>

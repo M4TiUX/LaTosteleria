@@ -1,4 +1,6 @@
+// src/components/Layout/Header.jsx
 import { useContext, useState } from "react";
+import { Link } from "react-router-dom";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -7,7 +9,6 @@ import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Menu, MenuItem } from "@mui/material";
-import { Link } from "react-router-dom";
 import Badge from "@mui/material/Badge";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import AccountCircle from "@mui/icons-material/AccountCircle";
@@ -161,8 +162,6 @@ export default function Header() {
       }}
     >
       {navItems.map((item, index) => {
-        // Si la opción tiene roles,
-        // solo mostrarla cuando el usuario esté autorizado.
         if (item.roles) {
           if (
             !userData ||
@@ -175,18 +174,13 @@ export default function Header() {
             return null;
           }
         }
-
         return (
           <Button
             key={index}
             component={Link}
             to={item.link}
             color="secondary"
-            sx={{
-              px: 1.5,
-              py: 0.8,
-              flexShrink: 0,
-            }}
+            sx={{ px: 1.5, py: 0.8, flexShrink: 0 }}
           >
             <Typography
               textAlign="center"
@@ -260,15 +254,9 @@ export default function Header() {
         sx={{ mt: "45px" }}
         id="menu-appbar"
         anchorEl={anchorElUser}
-        anchorOrigin={{
-          vertical: "top",
-          horizontal: "right",
-        }}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
         keepMounted
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "right",
-        }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
         open={Boolean(anchorElUser)}
         onClose={handleUserMenuClose}
       >
@@ -285,11 +273,7 @@ export default function Header() {
           )}
 
         {userItems.map((setting, index) => {
-          if (
-            setting.login &&
-            userData &&
-            Object.keys(userData).length > 0
-          ) {
+          if (setting.login && user) {
             return (
               <MenuItem
                 key={index}
@@ -305,11 +289,7 @@ export default function Header() {
               </MenuItem>
             );
           }
-
-          if (
-            !setting.login &&
-            Object.keys(userData).length === 0
-          ) {
+          if (!setting.login && !user) {
             return (
               <MenuItem
                 key={index}
@@ -325,7 +305,6 @@ export default function Header() {
               </MenuItem>
             );
           }
-
           return null;
         })}
       </Menu>
@@ -342,14 +321,8 @@ export default function Header() {
   const menuOpcionesMobile = (
     <Menu
       anchorEl={mobileOpcionesAnchorEl}
-      anchorOrigin={{
-        vertical: "bottom",
-        horizontal: "right",
-      }}
-      transformOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
+      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      transformOrigin={{ vertical: "top", horizontal: "right" }}
       id={menuOpcionesId}
       keepMounted
       open={isMobileOpcionesMenuOpen}
@@ -405,7 +378,6 @@ export default function Header() {
             <NotificationsIcon />
           </Badge>
         </IconButton>
-
         <p>Notificaciones</p>
       </MenuItem>
     </Menu>
@@ -491,10 +463,7 @@ export default function Header() {
               aria-haspopup="true"
               sx={{
                 mr: 2,
-                display: {
-                  xs: "inline-flex",
-                  lg: "none",
-                },
+                display: { xs: "inline-flex", lg: "none" },
               }}
               onClick={
                 handleOpenPrincipalMenu
@@ -548,10 +517,7 @@ export default function Header() {
           >
             <Box
               sx={{
-                display: {
-                  xs: "none",
-                  md: "flex",
-                },
+                display: { xs: "none", md: "flex" },
                 alignItems: "center",
               }}
             >
@@ -654,14 +620,7 @@ export default function Header() {
 
             <div>{userMenu}</div>
 
-            <Box
-              sx={{
-                display: {
-                  xs: "flex",
-                  md: "none",
-                },
-              }}
-            >
+            <Box sx={{ display: { xs: "flex", md: "none" } }}>
               <IconButton
                 size="large"
                 aria-label="show more"
