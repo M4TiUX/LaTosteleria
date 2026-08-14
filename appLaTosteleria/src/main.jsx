@@ -13,6 +13,8 @@ import { Login } from "./components/User/Login";
 import { Logout } from "./components/User/Logout";
 import { Signup } from "./components/User/Signup";
 import { Auth } from "./components/User/Auth";
+import { UserManagement } from "./components/User/UserManagement";
+import { Dashboard } from "./components/Dashboard/Dashboard";
 
 import { ListProduct } from "./components/Producto/ListProduct";
 import { DetailProduct } from "./components/Producto/DetailProduct";
@@ -131,7 +133,7 @@ const rutas = createBrowserRouter([
       // =====================================================
 
       {
-        element: <Auth requiredRoles={["Administrador"]} />,
+        element: <Auth requiredRoles={["Administrador", "Encargado"]} />,
 
         children: [
           // =================================================
@@ -212,13 +214,35 @@ const rutas = createBrowserRouter([
         ],
       },
 
+      {
+        element: (
+          <Auth requiredRoles={["Administrador", "Encargado"]} />
+        ),
+        children: [
+          {
+            path: "/dashboard",
+            element: <Dashboard />,
+          },
+        ],
+      },
+
+      {
+        element: <Auth requiredRoles={["Administrador", "Encargado"]} />,
+        children: [
+          {
+            path: "/user/gestion",
+            element: <UserManagement />,
+          },
+        ],
+      },
+
       // =====================================================
-      // ADMINISTRADOR Y EMPLEADO
+      // ADMINISTRADOR, ENCARGADO Y COCINA
       // =====================================================
 
       {
         element: (
-          <Auth requiredRoles={["Administrador", "Empleado"]} />
+          <Auth requiredRoles={["Administrador", "Encargado", "Cocina"]} />
         ),
 
         children: [
@@ -235,7 +259,7 @@ const rutas = createBrowserRouter([
       },
 
       // =====================================================
-      // CLIENTE, EMPLEADO Y ADMINISTRADOR
+      // CLIENTE Y ENCARGADO
       // =====================================================
 
       {
@@ -243,8 +267,7 @@ const rutas = createBrowserRouter([
           <Auth
             requiredRoles={[
               "Cliente",
-              "Empleado",
-              "Administrador",
+              "Encargado",
             ]}
           />
         ),
@@ -263,7 +286,7 @@ const rutas = createBrowserRouter([
       },
 
       // =====================================================
-      // CLIENTE, EMPLEADO Y ADMINISTRADOR
+      // CLIENTE, ENCARGADO Y ADMINISTRADOR
       // =====================================================
 
       {
@@ -271,7 +294,7 @@ const rutas = createBrowserRouter([
           <Auth
             requiredRoles={[
               "Cliente",
-              "Empleado",
+              "Encargado",
               "Administrador",
             ]}
           />

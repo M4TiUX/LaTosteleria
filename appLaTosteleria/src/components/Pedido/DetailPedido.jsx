@@ -24,6 +24,8 @@ import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import NotesOutlinedIcon from "@mui/icons-material/NotesOutlined";
 
 import PedidoService from "../../services/PedidoService";
+import { FacturaDetalleItems } from "./FacturaDetalleItems";
+import { ResumenFactura } from "./ResumenFactura";
 import { UserContext } from "../../context/UserContext";
 
 function formatCurrency(value) {
@@ -329,12 +331,51 @@ export function DetailPedido() {
                 <Grid item xs={12} md={6}>
                   <Box>
                     <Typography variant="caption" color="text.secondary">
+                      {t("orders.common.paymentMethod")}
+                    </Typography>
+
+                    <Typography fontWeight={600} variant="body2">
+                      {pedido.metodo_pago ?? t("orders.invoice.notRegistered")}
+                    </Typography>
+                  </Box>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">
                       {t("orders.common.createdAt")}
                     </Typography>
 
                     <Typography fontWeight={600} variant="body2">
                       {formatDateTime(pedido.fecha_creacion)}
                     </Typography>
+                  </Box>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">
+                      {t("orders.invoice.manager")}
+                    </Typography>
+
+                    <Typography fontWeight={600} variant="body2">
+                      {pedido.encargado_nombre ?? t("orders.invoice.notApplicable")}
+                    </Typography>
+                  </Box>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">
+                      {t("orders.common.status")}
+                    </Typography>
+
+                    <Box sx={{ mt: 0.5 }}>
+                      <Chip
+                        size="small"
+                        label={pedido.estado_actual ?? t("orders.common.noTracking")}
+                      />
+                    </Box>
                   </Box>
                 </Grid>
               </Grid>
@@ -387,89 +428,7 @@ export function DetailPedido() {
                 </Typography>
               </Stack>
 
-              {!pedido.items || pedido.items.length === 0 ? (
-                <Alert severity="info">
-                  {t("orders.detail.noItems")}
-                </Alert>
-              ) : (
-                <Stack spacing={1.5} divider={<Divider />}>
-                  {pedido.items.map((item) => (
-                    <Stack key={item.id_detalle} spacing={0.8}>
-                      <Stack
-                        direction={{
-                          xs: "column",
-                          sm: "row",
-                        }}
-                        justifyContent="space-between"
-                        spacing={1}
-                      >
-                        <Box>
-                          <Stack
-                            direction="row"
-                            spacing={1}
-                            alignItems="center"
-                          >
-                            <Typography fontWeight={700} variant="body2">
-                              {item.nombre}
-                            </Typography>
-
-                            <Chip
-                              size="small"
-                              variant="outlined"
-                              label={
-                                item.item_type === "combo"
-                                  ? t("orders.common.combo")
-                                  : t("orders.common.product")
-                              }
-                            />
-                          </Stack>
-
-                          <Typography variant="body2" color="text.secondary">
-                            {t("orders.common.quantity", { count: item.cantidad })}
-                          </Typography>
-                        </Box>
-
-                        <Box
-                          sx={{
-                            textAlign: {
-                              xs: "left",
-                              sm: "right",
-                            },
-                          }}
-                        >
-                          <Typography variant="caption" color="text.secondary">
-                            {t("orders.detail.unitPrice")}
-                          </Typography>
-
-                          <Typography variant="body2" fontWeight={600}>
-                            {formatCurrency(item.precio_unitario)}
-                          </Typography>
-
-                          <Typography
-                            variant="body2"
-                            color="primary"
-                            fontWeight={700}
-                          >
-                            {t("orders.common.subtotal")}: {formatCurrency(item.subtotal)}
-                          </Typography>
-                        </Box>
-                      </Stack>
-
-                      <Box>
-                        <Typography variant="caption" color="text.secondary">
-                          {t("orders.common.notes")}
-                        </Typography>
-
-                        <Typography variant="body2">
-                          {item.observaciones
-                            ? item.observaciones
-                            : t("orders.common.noNotes")}
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  ))}
-                </Stack>
-              )}
+              <FacturaDetalleItems items={pedido.items} />
             </Stack>
           </CardContent>
         </Card>
@@ -478,55 +437,7 @@ export function DetailPedido() {
             RESUMEN
         ====================================== */}
 
-        <Card
-          sx={{
-            borderRadius: 3,
-            boxShadow: 2,
-          }}
-        >
-          <CardContent
-            sx={{
-              p: 2.5,
-              "&:last-child": {
-                pb: 2.5,
-              },
-            }}
-          >
-            <Stack spacing={1.5}>
-              <Typography variant="h6" fontWeight={700}>
-                {t("orders.common.summary")}
-              </Typography>
-
-              <Stack direction="row" justifyContent="space-between">
-                <Typography variant="body2">{t("orders.common.subtotal")}</Typography>
-
-                <Typography variant="body2">
-                  {formatCurrency(pedido.subtotal)}
-                </Typography>
-              </Stack>
-
-              <Stack direction="row" justifyContent="space-between">
-                <Typography variant="body2">{t("orders.common.taxes")}</Typography>
-
-                <Typography variant="body2">
-                  {formatCurrency(pedido.impuestos)}
-                </Typography>
-              </Stack>
-
-              <Divider />
-
-              <Stack direction="row" justifyContent="space-between">
-                <Typography variant="h6" fontWeight={700}>
-                  {t("orders.common.total")}
-                </Typography>
-
-                <Typography variant="h6" color="primary" fontWeight={700}>
-                  {formatCurrency(pedido.total)}
-                </Typography>
-              </Stack>
-            </Stack>
-          </CardContent>
-        </Card>
+        <ResumenFactura pedido={pedido} />
       </Stack>
     </Box>
   );

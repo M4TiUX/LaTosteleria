@@ -47,6 +47,12 @@ class PedidoService {
       order,
     );
   }
+
+  getDashboardSummary() {
+    return axios.get(
+      `${BASE_URL}/dashboard`,
+    );
+  }
 }
 
 export default new PedidoService();

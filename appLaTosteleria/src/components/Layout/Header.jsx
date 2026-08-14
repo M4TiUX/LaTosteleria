@@ -93,6 +93,11 @@ export default function Header() {
 
   const navItems = [
     {
+      name: "Dashboard",
+      link: "/dashboard",
+      roles: ["Administrador", "Encargado"],
+    },
+    {
       name: t("nav.productos"),
       link: "/producto",
       roles: null,
@@ -100,7 +105,7 @@ export default function Header() {
     {
       name: t("nav.mantenimientoProductos"),
       link: "/producto-table",
-      roles: ["Administrador"],
+      roles: ["Administrador", "Encargado"],
     },
     {
       name: t("nav.combos"),
@@ -110,14 +115,14 @@ export default function Header() {
     {
       name: t("nav.procesos"),
       link: "/Procesos",
-      roles: ["Administrador", "Empleado"],
+      roles: ["Administrador", "Encargado", "Cocina"],
     },
 
     // NUEVO: Mantenimiento de procesos
     {
       name: t("nav.mantenimientoProcesos"),
       link: "/procesos/mantenimiento",
-      roles: ["Administrador"],
+      roles: ["Administrador", "Encargado"],
     },
 
     {
@@ -130,14 +135,19 @@ export default function Header() {
       link: "/pedido",
       roles: [
         "Cliente",
-        "Empleado",
+        "Encargado",
         "Administrador",
       ],
     },
     {
       name: t("nav.mantenimientoMenus"),
       link: "/menu/mantenimiento",
-      roles: ["Administrador"],
+      roles: ["Administrador", "Encargado"],
+    },
+    {
+      name: "Usuarios",
+      link: "/user/gestion",
+      roles: ["Administrador", "Encargado"],
     },
   ];
 

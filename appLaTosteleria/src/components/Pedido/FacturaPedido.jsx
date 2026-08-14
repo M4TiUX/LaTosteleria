@@ -11,177 +11,71 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
-
-import {
-  Link,
-  useParams,
-} from "react-router-dom";
-
-import {
-  useEffect,
-  useState,
-} from "react";
+import { Link, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 import PedidoService from "../../services/PedidoService";
+import { FacturaDetalleItems } from "./FacturaDetalleItems";
 import { ResumenFactura } from "./ResumenFactura";
-
-
-// ============================================================
-// MONEDA
-// ============================================================
-
-function formatCurrency(value) {
-  return new Intl.NumberFormat(
-    "es-CR",
-    {
-      style: "currency",
-      currency: "CRC",
-      maximumFractionDigits: 0,
-    }
-  ).format(
-    Number(value ?? 0)
-  );
-}
-
-
-// ============================================================
-// FECHA
-// ============================================================
 
 function formatDateTime(value) {
   if (!value) {
     return "-";
   }
 
-  const date =
-    new Date(
-      String(value).replace(
-        " ",
-        "T"
-      )
-    );
+  const date = new Date(String(value).replace(" ", "T"));
 
-  if (
-    Number.isNaN(
-      date.getTime()
-    )
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return value;
   }
 
-  return new Intl.DateTimeFormat(
-    "es-CR",
-    {
-      dateStyle: "medium",
-      timeStyle: "short",
-    }
-  ).format(date);
+  return new Intl.DateTimeFormat("es-CR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
 }
-
-
-// ============================================================
-// FACTURA
-// ============================================================
 
 export function FacturaPedido() {
   const { t } = useTranslation();
+  const { id } = useParams();
 
-  const { id } =
-    useParams();
-
-  const [
-    pedido,
-    setPedido,
-  ] = useState(null);
-
-  const [
-    loading,
-    setLoading,
-  ] = useState(true);
-
-  const [
-    error,
-    setError,
-  ] = useState(null);
-
-
-  // ==========================================================
-  // CARGAR PEDIDO
-  // ==========================================================
+  const [pedido, setPedido] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-
     setLoading(true);
     setError(null);
 
-    PedidoService
-      .getOrderById(id)
-      .then(
-        (response) => {
-
-          setPedido(
-            response.data ??
-            null
-          );
-        }
-      )
-      .catch(
-        (requestError) => {
-
-          setError(
-            requestError
-              ?.response
-              ?.data
-              ?.message ??
-            requestError
-              ?.response
-              ?.data
-              ?.result ??
-            requestError
-              ?.message ??
-            t("orders.invoice.loadError")
-          );
-        }
-      )
+    PedidoService.getOrderById(id)
+      .then((response) => {
+        setPedido(response.data ?? null);
+      })
+      .catch((requestError) => {
+        setError(
+          requestError?.response?.data?.message ??
+            requestError?.response?.data?.result ??
+            requestError?.message ??
+            t("orders.invoice.loadError"),
+        );
+      })
       .finally(() => {
-
         setLoading(false);
       });
-
-  }, [id]);
-
-
-  // ==========================================================
-  // CARGANDO
-  // ==========================================================
+  }, [id, t]);
 
   if (loading) {
-
     return (
-      <Stack
-        spacing={2}
-        alignItems="center"
-        sx={{ py: 6 }}
-      >
+      <Stack spacing={2} alignItems="center" sx={{ py: 6 }}>
         <CircularProgress />
-
-        <Typography>
-          {t("orders.invoice.loading")}
-        </Typography>
+        <Typography>{t("orders.invoice.loading")}</Typography>
       </Stack>
     );
   }
 
-
-  // ==========================================================
-  // ERROR
-  // ==========================================================
-
   if (error) {
-
     return (
       <Box
         sx={{
@@ -191,20 +85,12 @@ export function FacturaPedido() {
           py: 3,
         }}
       >
-        <Alert severity="error">
-          {error}
-        </Alert>
+        <Alert severity="error">{error}</Alert>
       </Box>
     );
   }
-
-
-  // ==========================================================
-  // NO ENCONTRADO
-  // ==========================================================
 
   if (!pedido) {
-
     return (
       <Box
         sx={{
@@ -214,17 +100,10 @@ export function FacturaPedido() {
           py: 3,
         }}
       >
-        <Alert severity="warning">
-          {t("orders.invoice.notFound")}
-        </Alert>
+        <Alert severity="warning">{t("orders.invoice.notFound")}</Alert>
       </Box>
     );
   }
-
-
-  // ==========================================================
-  // VISTA
-  // ==========================================================
 
   return (
     <Box
@@ -235,545 +114,168 @@ export function FacturaPedido() {
         py: 3,
       }}
     >
-
       <Stack spacing={2.5}>
-
-        {/* ===================================================
-            ENCABEZADO PRINCIPAL
-        =================================================== */}
-
         <Stack
-          direction={{
-            xs: "column",
-            sm: "row",
-          }}
+          direction={{ xs: "column", sm: "row" }}
           justifyContent="space-between"
-          alignItems={{
-            xs: "flex-start",
-            sm: "center",
-          }}
+          alignItems={{ xs: "flex-start", sm: "center" }}
           spacing={2}
         >
-
           <Box>
-
-            <Typography
-              variant="h4"
-              fontWeight={700}
-            >
+            <Typography variant="h4" fontWeight={700}>
               {t("orders.invoice.title", { id: pedido.id_pedido })}
             </Typography>
 
-            <Typography
-              color="text.secondary"
-            >
-              La Tostelería
-            </Typography>
-
+            <Typography color="text.secondary">La Tostelería</Typography>
           </Box>
-
 
           <Button
             component={Link}
             to={`/pedido/detalle/${pedido.id_pedido}`}
             variant="outlined"
-            startIcon={
-              <ArrowBackOutlinedIcon />
-            }
+            startIcon={<ArrowBackOutlinedIcon />}
           >
             {t("orders.common.back")}
           </Button>
-
         </Stack>
 
-
-        {/* ===================================================
-            INFORMACIÓN GENERAL
-        =================================================== */}
-
-        <Card
-          sx={{
-            borderRadius: 3,
-            boxShadow: 2,
-          }}
-        >
-
+        <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
           <CardContent
             sx={{
               p: 2.5,
-
               "&:last-child": {
                 pb: 2.5,
               },
             }}
           >
-
             <Stack spacing={2}>
-
-              <Typography
-                variant="h6"
-                fontWeight={700}
-              >
+              <Typography variant="h6" fontWeight={700}>
                 {t("orders.invoice.generalInfo")}
               </Typography>
 
-
-              {/* =============================================
-                  CLIENTE
-              ============================================= */}
-
               <Stack
-                direction={{
-                  xs: "column",
-                  sm: "row",
-                }}
+                direction={{ xs: "column", sm: "row" }}
                 justifyContent="space-between"
                 spacing={2}
               >
-
                 <Box>
-
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                  >
+                  <Typography variant="caption" color="text.secondary">
                     {t("orders.common.client")}
                   </Typography>
 
-                  <Typography
-                    fontWeight={600}
-                  >
-                    {
-                      pedido
-                        .cliente_nombre
-                    }
-                  </Typography>
-
+                  <Typography fontWeight={600}>{pedido.cliente_nombre}</Typography>
                 </Box>
 
-
                 <Box>
-
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                  >
+                  <Typography variant="caption" color="text.secondary">
                     {t("orders.common.email")}
                   </Typography>
 
-                  <Typography
-                    fontWeight={600}
-                  >
-                    {
-                      pedido
-                        .cliente_correo
-                    }
-                  </Typography>
-
+                  <Typography fontWeight={600}>{pedido.cliente_correo}</Typography>
                 </Box>
-
               </Stack>
 
-
-              {/* =============================================
-                  ENCARGADO
-              ============================================= */}
-
               <Box>
-
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                >
+                <Typography variant="caption" color="text.secondary">
                   {t("orders.invoice.manager")}
                 </Typography>
 
-                <Typography
-                  fontWeight={600}
-                >
-                  {
-                    pedido
-                      .encargado_nombre ??
-                    t("orders.invoice.notApplicable")
-                  }
+                <Typography fontWeight={600}>
+                  {pedido.encargado_nombre ?? t("orders.invoice.notApplicable")}
                 </Typography>
-
               </Box>
 
-
-              {/* =============================================
-                  FECHA / ENTREGA
-              ============================================= */}
-
               <Stack
-                direction={{
-                  xs: "column",
-                  sm: "row",
-                }}
+                direction={{ xs: "column", sm: "row" }}
                 justifyContent="space-between"
                 spacing={2}
               >
-
                 <Box>
-
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                  >
+                  <Typography variant="caption" color="text.secondary">
                     {t("orders.common.date")}
                   </Typography>
 
-                  <Typography>
-                    {
-                      formatDateTime(
-                        pedido
-                          .fecha_creacion
-                      )
-                    }
-                  </Typography>
-
+                  <Typography>{formatDateTime(pedido.fecha_creacion)}</Typography>
                 </Box>
 
-
                 <Box>
-
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                  >
+                  <Typography variant="caption" color="text.secondary">
                     {t("orders.common.deliveryMethod")}
                   </Typography>
 
-                  <Typography>
-                    {
-                      pedido
-                        .metodo_entrega
-                    }
-                  </Typography>
-
+                  <Typography>{pedido.metodo_entrega}</Typography>
                 </Box>
-
               </Stack>
 
-
-              {/* =============================================
-                  MÉTODO DE PAGO / ESTADO
-              ============================================= */}
-
               <Stack
-                direction={{
-                  xs: "column",
-                  sm: "row",
-                }}
+                direction={{ xs: "column", sm: "row" }}
                 justifyContent="space-between"
-                alignItems={{
-                  xs: "flex-start",
-                  sm: "center",
-                }}
+                alignItems={{ xs: "flex-start", sm: "center" }}
                 spacing={2}
               >
-
                 <Box>
-
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                  >
+                  <Typography variant="caption" color="text.secondary">
                     {t("orders.common.paymentMethod")}
                   </Typography>
 
-                  <Typography
-                    fontWeight={600}
-                  >
-                    {
-                      pedido
-                        .metodo_pago ??
-                      t("orders.invoice.notRegistered")
-                    }
+                  <Typography fontWeight={600}>
+                    {pedido.metodo_pago ?? t("orders.invoice.notRegistered")}
                   </Typography>
-
                 </Box>
 
-
                 <Box>
-
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                  >
+                  <Typography variant="caption" color="text.secondary">
                     {t("orders.common.status")}
                   </Typography>
 
-                  <Box
-                    sx={{
-                      mt: 0.5,
-                    }}
-                  >
+                  <Box sx={{ mt: 0.5 }}>
                     <Chip
-                      label={
-                        pedido
-                          .estado_actual ??
-                        t("orders.common.noTracking")
-                      }
+                      label={pedido.estado_actual ?? t("orders.common.noTracking")}
                       size="small"
                     />
                   </Box>
-
                 </Box>
-
               </Stack>
-
-
-              {/* =============================================
-                  OBSERVACIONES GENERALES
-              ============================================= */}
 
               <Divider />
 
-
               <Box>
-
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                >
+                <Typography variant="caption" color="text.secondary">
                   {t("orders.common.notes")}
                 </Typography>
 
                 <Typography>
-                  {
-                    pedido
-                      .observaciones
-                      ? pedido
-                          .observaciones
-                      : "Sin observaciones."
-                  }
+                  {pedido.observaciones ? pedido.observaciones : t("orders.common.noNotes")}
                 </Typography>
-
               </Box>
-
             </Stack>
-
           </CardContent>
-
         </Card>
 
-
-        {/* ===================================================
-            DETALLE
-        =================================================== */}
-
-        <Card
-          sx={{
-            borderRadius: 3,
-            boxShadow: 2,
-          }}
-        >
-
+        <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
           <CardContent
             sx={{
               p: 2.5,
-
               "&:last-child": {
                 pb: 2.5,
               },
             }}
           >
-
             <Stack spacing={2}>
-
-              <Stack
-                direction="row"
-                spacing={1}
-                alignItems="center"
-              >
-
+              <Stack direction="row" spacing={1} alignItems="center">
                 <ReceiptLongOutlinedIcon />
-
-
-                <Typography
-                  variant="h6"
-                  fontWeight={700}
-                >
+                <Typography variant="h6" fontWeight={700}>
                   {t("orders.invoice.detailTitle")}
                 </Typography>
-
               </Stack>
 
-
-              {!pedido.items ||
-              pedido.items.length ===
-                0 ? (
-
-                <Alert
-                  severity="info"
-                >
-                  {t("orders.invoice.noItems")}
-                </Alert>
-
-              ) : (
-
-                <Stack
-                  spacing={1.5}
-                  divider={
-                    <Divider />
-                  }
-                >
-
-                  {
-                    pedido.items.map(
-                      (item) => (
-
-                        <Stack
-                          key={
-                            item.id_detalle
-                          }
-                          spacing={1}
-                        >
-
-                          <Stack
-                            direction={{
-                              xs:
-                                "column",
-
-                              sm:
-                                "row",
-                            }}
-                            justifyContent="space-between"
-                            spacing={1}
-                          >
-
-                            <Box>
-
-                              <Typography
-                                fontWeight={
-                                  700
-                                }
-                              >
-                                {
-                                  item.nombre
-                                }
-                              </Typography>
-
-
-                              <Typography
-                                variant="body2"
-                                color="text.secondary"
-                              >
-                                {
-                                  item
-                                    .item_type ===
-                                  "combo"
-                                    ? t("orders.common.combo")
-                                    : t("orders.common.product")
-                                }
-
-                                {" · "}
-
-                                {t("orders.common.quantityLabel")}:{" "}
-                                {
-                                  item.cantidad
-                                }
-                              </Typography>
-
-                            </Box>
-
-
-                            <Box
-                              sx={{
-                                textAlign:
-                                  {
-                                    xs:
-                                      "left",
-
-                                    sm:
-                                      "right",
-                                  },
-                              }}
-                            >
-
-                              <Typography
-                                variant="body2"
-                                color="text.secondary"
-                              >
-                                {
-                                  formatCurrency(
-                                    item
-                                      .precio_unitario
-                                  )
-                                }{" "}
-                                {t("orders.invoice.each")}
-                              </Typography>
-
-
-                              <Typography
-                                fontWeight={
-                                  700
-                                }
-                              >
-                                {
-                                  formatCurrency(
-                                    item
-                                      .subtotal
-                                  )
-                                }
-                              </Typography>
-
-                            </Box>
-
-                          </Stack>
-
-
-                          <Box>
-
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                            >
-                              {t("orders.common.notes")}
-                            </Typography>
-
-                            <Typography
-                              variant="body2"
-                            >
-                              {
-                                item
-                                  .observaciones
-                                  ? item
-                                      .observaciones
-                                  : "Sin observaciones."
-                              }
-                            </Typography>
-
-                          </Box>
-
-                        </Stack>
-
-                      )
-                    )
-                  }
-
-                </Stack>
-
-              )}
-
+              <FacturaDetalleItems items={pedido.items} />
             </Stack>
-
           </CardContent>
-
         </Card>
 
-
-        {/* ===================================================
-            RESUMEN
-        =================================================== */}
-
-        <ResumenFactura
-          pedido={pedido}
-        />
-
+        <ResumenFactura pedido={pedido} />
       </Stack>
-
     </Box>
   );
 }

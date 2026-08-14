@@ -152,7 +152,7 @@ export function CreatePedido() {
   const userData = decodeToken();
   const roleName = userData?.rol?.name ?? "";
   const isCliente = roleName === "Cliente";
-  const isStaff = roleName === "Empleado" || roleName === "Administrador";
+  const isStaff = roleName === "Encargado";
 
   const {
     cart,
@@ -485,6 +485,11 @@ export function CreatePedido() {
   // ==========================================================
 
   const handleSaveLocationAsDireccion = async () => {
+    if (!isCliente) {
+      setError("Solo los clientes pueden guardar direcciones desde este formulario.");
+      return;
+    }
+
     if (!selectedLocation) {
       setError(t("orders.create.errors.selectMapLocation"));
       return;
@@ -718,7 +723,7 @@ export function CreatePedido() {
                         label="Funcionario encargado"
                         value={userData?.name ?? "-"}
                         InputProps={{ readOnly: true }}
-                        helperText={roleName || "Empleado"}
+                        helperText={roleName || "Encargado"}
                       />
                     </Grid>
                   )}
@@ -915,6 +920,7 @@ export function CreatePedido() {
                               <Button
                                 variant="outlined"
                                 size="small"
+                                disabled={!isCliente}
                                 onClick={() => setOpenSaveDialog(true)}
                               >
                                 {t("orders.create.saveAsAddress")}

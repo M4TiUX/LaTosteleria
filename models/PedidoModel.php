@@ -40,6 +40,7 @@ class PedidoModel
                     p.subtotal,
                     p.impuestos,
                     p.total,
+                    p.costo_envio,
                     p.fecha_creacion,
 
                     latest.estado_nombre AS estado_actual,
@@ -159,6 +160,7 @@ class PedidoModel
                     p.subtotal,
                     p.impuestos,
                     p.total,
+                    p.costo_envio,
                     p.fecha_creacion,
 
                     latest.estado_nombre AS estado_actual,
@@ -737,7 +739,19 @@ class PedidoModel
                         c.precio_especial
                     ) *
                     dp.cantidad
-                ) AS subtotal
+                ) AS subtotal,
+
+                ROUND(
+                    (
+                        COALESCE(
+                            p.precio,
+                            c.precio_especial
+                        ) *
+                        dp.cantidad
+                    ) *
+                    0.13,
+                    2
+                ) AS impuesto
 
             FROM detalle_pedido dp
 
@@ -1025,6 +1039,99 @@ class PedidoModel
             0,
             300
         );
+    }
+
+    // =========================================================
+    // DASHBOARD
+    // =========================================================
+
+    public function getDashboardSummary()
+    {
+        return [
+            'top_productos' => $this->getTopSellingProducts(),
+            'pedidos_hoy_por_estado' => $this->getTodayOrdersByStatus(),
+            'fecha' => date('Y-m-d')
+        ];
+    }
+
+    private function getTopSellingProducts()
+    {
+        $sql = "SELECT
+                    p.id_producto,
+                    p.nombre_producto,
+                    SUM(sales.unidades) AS total_unidades
+                FROM (
+                    SELECT
+                        dp.producto_id,
+                        dp.cantidad AS unidades
+                    FROM detalle_pedido dp
+                    WHERE dp.producto_id IS NOT NULL
+
+                    UNION ALL
+
+                    SELECT
+                        cp.producto_id,
+                        (dp.cantidad * cp.cantidad) AS unidades
+                    FROM detalle_pedido dp
+                    INNER JOIN combo_producto cp
+                        ON cp.combo_id = dp.combo_id
+                    WHERE dp.combo_id IS NOT NULL
+                ) AS sales
+                INNER JOIN productos p
+                    ON p.id_producto = sales.producto_id
+                GROUP BY p.id_producto, p.nombre_producto
+                ORDER BY total_unidades DESC, p.nombre_producto ASC
+                LIMIT 3";
+
+        $result = $this->enlace->executeSQL($sql);
+
+        if (!is_array($result)) {
+            return [];
+        }
+
+        usort($result, function ($a, $b) {
+            return ((int) $b->total_unidades) <=> ((int) $a->total_unidades);
+        });
+
+        return $result;
+    }
+
+    private function getTodayOrdersByStatus()
+    {
+        $sql = "SELECT
+                    COALESCE(latest.estado_nombre, 'Sin estado') AS estado,
+                    COUNT(*) AS total
+                FROM pedidos p
+                LEFT JOIN (
+                    SELECT
+                        sp1.pedido_id,
+                        sp1.estado_nombre
+                    FROM seguimiento_pedido sp1
+                    INNER JOIN (
+                        SELECT
+                            pedido_id,
+                            MAX(id_seguimiento) AS last_id
+                        FROM seguimiento_pedido
+                        GROUP BY pedido_id
+                    ) latest_by_order
+                        ON latest_by_order.last_id = sp1.id_seguimiento
+                ) latest
+                    ON latest.pedido_id = p.id_pedido
+                WHERE DATE(p.fecha_creacion) = CURDATE()
+                GROUP BY COALESCE(latest.estado_nombre, 'Sin estado')
+                ORDER BY total DESC, estado ASC";
+
+        $result = $this->enlace->executeSQL($sql);
+
+        if (!is_array($result)) {
+            return [];
+        }
+
+        usort($result, function ($a, $b) {
+            return ((int) $b->total) <=> ((int) $a->total);
+        });
+
+        return $result;
     }
 
     // =========================================================

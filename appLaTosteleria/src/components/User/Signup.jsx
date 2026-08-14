@@ -1,91 +1,98 @@
-/* eslint-disable no-unused-vars */
-import React from 'react';
-import { useEffect, useState } from 'react';
-import FormControl from '@mui/material/FormControl';
-import Grid from '@mui/material/Grid2';
-import Typography from '@mui/material/Typography';
-import { useForm, Controller } from 'react-hook-form';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import * as yup from 'yup';
-import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
-import UserService from '../../services/UserService';
-import { yupResolver } from '@hookform/resolvers/yup';
+import { useState } from "react";
+import FormControl from "@mui/material/FormControl";
+import Grid from "@mui/material/Grid2";
+import Typography from "@mui/material/Typography";
+import { useForm, Controller } from "react-hook-form";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import Alert from "@mui/material/Alert";
+import * as yup from "yup";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import UserService from "../../services/UserService";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 export function Signup() {
   const navigate = useNavigate();
-  // Esquema de validación
-  const loginSchema = yup.object({
-    name: yup.string().required('El nombre es requerido'),
+  const [error, setError] = useState("");
+
+  const signupSchema = yup.object({
+    name: yup
+      .string()
+      .trim()
+      .required("El nombre es requerido")
+      .min(3, "El nombre debe tener al menos 3 caracteres"),
     email: yup
       .string()
-      .required('El email es requerido')
-      .email('Formato email'),
-    password: yup.string().required('El password es requerido'),
-    rol_id: yup.number().required('El rol es requerido'),
+      .trim()
+      .required("El email es requerido")
+      .email("Formato de email invalido"),
+    password: yup
+      .string()
+      .required("La contrasena es requerida")
+      .min(8, "La contrasena debe tener al menos 8 caracteres"),
   });
+
   const {
     control,
     handleSubmit,
-    setValue,
+    reset,
     formState: { errors },
   } = useForm({
-    // Valores iniciales
     defaultValues: {
-      name: '',
-      email: '',
-      password: '',
+      name: "",
+      email: "",
+      password: "",
       rol_id: 2,
     },
-    // Asignación de validaciones
-    resolver: yupResolver(loginSchema),
+    resolver: yupResolver(signupSchema),
   });
 
-  const [error, setError] = useState(null);
-  const notify = () =>
-    toast.success('Usuario registrado', {
-      duration: 4000,
-      position: 'top-center',
-    });
-  // Accion submit
-  const onSubmit = (DataForm) => {
+  const onSubmit = async (dataForm) => {
     try {
-      console.log(DataForm);
-      //Registrar usuario
-      //Asignar por defector rol
-      setValue('rol_id', 2);
-      UserService.createUser(DataForm)
-        .then((response) => {
-          console.log(response);
-          notify();
-          return navigate('/user/login/');
-        })
-        .catch((error) => {
-          if (error instanceof SyntaxError) {
-            console.log(error);
-            setError(error);
-            throw new Error('Respuesta no válida del servidor');
-          }
-        });
+      setError("");
+      await UserService.createUser({
+        ...dataForm,
+        rol_id: 2,
+      });
+
+      toast.success("Registro exitoso. Ahora puede iniciar sesion.", {
+        duration: 3000,
+        position: "top-center",
+      });
+
+      reset({ name: "", email: "", password: "", rol_id: 2 });
+      navigate("/user/login", { replace: true });
     } catch (e) {
-      // handle your error
+      const message =
+        e?.response?.data?.message ||
+        e?.response?.data?.error ||
+        e?.message ||
+        "No fue posible completar el registro.";
+
+      setError(message);
+      toast.error(message);
     }
   };
 
-  // Si ocurre error al realizar el submit
   const onError = (errors, e) => console.log(errors, e);
 
-  if (error) return <p>Error: {error.message}</p>;
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit, onError)} noValidate>
         <Grid container spacing={1}>
           <Grid size={12} sm={12}>
             <Typography variant="h5" gutterBottom>
-              Registrar Usuario
+              Registro de cliente
             </Typography>
           </Grid>
+
+          {error && (
+            <Grid size={12} sm={12}>
+              <Alert severity="error">{error}</Alert>
+            </Grid>
+          )}
+
           <Grid size={12} sm={12}>
             <FormControl variant="standard" fullWidth sx={{ m: 1 }}>
               <Controller
@@ -97,7 +104,7 @@ export function Signup() {
                     id="name"
                     label="Nombre"
                     error={Boolean(errors.name)}
-                    helperText={errors.name ? errors.name.message : ' '}
+                    helperText={errors.name ? errors.name.message : " "}
                   />
                 )}
               />
@@ -114,7 +121,7 @@ export function Signup() {
                     id="email"
                     label="Email"
                     error={Boolean(errors.email)}
-                    helperText={errors.email ? errors.email.message : ' '}
+                    helperText={errors.email ? errors.email.message : " "}
                   />
                 )}
               />
@@ -129,10 +136,10 @@ export function Signup() {
                   <TextField
                     {...field}
                     id="password"
-                    label="Password"
+                    label="Contrasena"
                     type="password"
                     error={Boolean(errors.password)}
-                    helperText={errors.password ? errors.password.message : ' '}
+                    helperText={errors.password ? errors.password.message : " "}
                   />
                 )}
               />
@@ -145,7 +152,7 @@ export function Signup() {
               color="secondary"
               sx={{ m: 1 }}
             >
-              Login
+              Registrarme
             </Button>
           </Grid>
         </Grid>

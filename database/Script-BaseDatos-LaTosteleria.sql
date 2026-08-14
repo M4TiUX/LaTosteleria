@@ -263,7 +263,11 @@ INSERT INTO `menus` VALUES (1,'Menú Desayuno','2026-06-01','2026-12-31','07:00:
 INSERT INTO `repartidores` (`id_repartidor`,`nombre`,`telefono`,`vehiculo`,`disponible`) VALUES (1,'Carlos Ramirez','8888-8888','Motocicleta',1),(2,'Ana Mora','8777-7777','Automovil',1);
 
 -- Datos: roles
-INSERT INTO `roles` VALUES (1,'Administrador'),(2,'Cliente');
+INSERT INTO `roles` VALUES
+(1,'Administrador'),
+(2,'Cliente'),
+(3,'Encargado'),
+(4,'Cocina');
 
 -- Datos: usuarios
 -- Credenciales iniciales del administrador:
@@ -272,9 +276,17 @@ INSERT INTO `roles` VALUES (1,'Administrador'),(2,'Cliente');
 -- Credenciales iniciales del cliente:
 -- correo: cliente@latosteleria.com
 -- contrasena: Cliente123!
+-- Credenciales iniciales del encargado:
+-- correo: encargado@latosteleria.com
+-- contrasena: Encargado123!
+-- Credenciales iniciales de cocina:
+-- correo: cocina@latosteleria.com
+-- contrasena: Cocina123!
 INSERT INTO `usuarios` VALUES
 (1,1,'Administrador General','admin@latosteleria.com','$2y$10$ZKc.NCagjTWKETLuR71YtOkAEX9ybXBQJ7gyAhJnq4dW2P4xxrPxO',NULL,NULL),
-(2,2,'Cliente Demo','cliente@latosteleria.com','$2y$10$soR8dBLDIblltcguYhhKLOy9cxCWUV3y21G.eGSUFDZpXkgthnDGS',NULL,NULL);
+(2,2,'Cliente Demo','cliente@latosteleria.com','$2y$10$soR8dBLDIblltcguYhhKLOy9cxCWUV3y21G.eGSUFDZpXkgthnDGS',NULL,NULL),
+(3,3,'Encargado Demo','encargado@latosteleria.com','$2y$10$KuaE4FY.ch6xfduFJ6.nCej.4gF3CIg30OyjyuyDF1rPPjmWulhde',NULL,NULL),
+(4,4,'Cocina Demo','cocina@latosteleria.com','$2y$10$ViCGWyoTQghrT4m6l/NMhuFOXXPB.wyroH32Y66kCMENbDMDtpkra',NULL,NULL);
 
 -- Datos: combos
 INSERT INTO `combos` VALUES (1,1,'Combo Desayuno Tostelero','Incluye café latte, tostada de aguacate y cheesecake.',6500.00,1),(2,1,'Combo Dulce Café','Incluye café latte y cheesecake.',4000.00,1),(3,2,'Combo Merienda','Incluye café latte y brownie de chocolate',2800.00,1),(4,3,'Combo Postres','Incluye cheesecake y brownie',3500.00,1);
@@ -331,15 +343,7 @@ INSERT INTO repartidores (`id_repartidor`,`nombre`,`telefono`,`vehiculo`,`dispon
 (3,'Luis Hernández','8666-1111','Motocicleta',1),
 (4,'María Gómez','8555-2222','Bicicleta',1);
 
--- Nuevo rol
-INSERT INTO roles VALUES
-(3,'Empleado');
-
--- Usuario para el rol Empleado
--- correo: empleado@latosteleria.com
--- contrasena: Empleado123!
-INSERT INTO usuarios VALUES
-(3,3,'Empleado Demo','empleado@latosteleria.com','$2y$10$z9DtusWwAIFjhPLR3YgqruXBPOiVuYxU/VtsqjEoWVwWcV2YuC.Eq',NULL,NULL);
+-- Roles oficiales ya insertados en la seccion inicial (1-4).
 
 -- Nuevos productos
 INSERT INTO productos VALUES
@@ -410,6 +414,37 @@ INSERT INTO producto_ingrediente VALUES
 (10,2),
 (10,17),
 (10,18);
+
+-- Crear el menu 24/7
+INSERT INTO menus (
+  nombre_menu,
+  fecha_inicio,
+  fecha_fin,
+  hora_inicio,
+  hora_fin,
+  activo
+) VALUES (
+  'Menú 24/7',
+  '2026-01-01',
+  '2035-12-31',
+  '00:00:00',
+  '23:59:59',
+  1
+);
+
+SET @menu_id = LAST_INSERT_ID();
+
+-- Agregar todos los productos activos
+INSERT INTO menu_items (menu_id, producto_id, combo_id)
+SELECT @menu_id, p.id_producto, NULL
+FROM productos p
+WHERE p.activo = 1;
+
+-- Agregar todos los combos activos
+INSERT INTO menu_items (menu_id, producto_id, combo_id)
+SELECT @menu_id, NULL, c.id_combo
+FROM combos c
+WHERE c.activo = 1;
 
 SET FOREIGN_KEY_CHECKS = 1;
 

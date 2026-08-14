@@ -7,15 +7,28 @@ export function Auth({ requiredRoles }) {
   const location = useLocation();
   const { user, decodeToken, autorize } = useContext(UserContext);
   const activeUser = user ?? decodeToken();
-  let render = null;
-  // Especificar el render si el usuario esta autorizado
-  if (activeUser && autorize(requiredRoles)) {
-    render = <Outlet />;
-  } else {
-    render = <Navigate to="/unauthorized" state={{ from: location }} />;
+
+  if (!activeUser) {
+    return (
+      <Navigate
+        to="/user/login"
+        replace
+        state={{ from: location }}
+      />
+    );
   }
 
-  return <div>{render}</div>;
+  if (!autorize(requiredRoles)) {
+    return (
+      <Navigate
+        to="/unauthorized"
+        replace
+        state={{ from: location }}
+      />
+    );
+  }
+
+  return <Outlet />;
 }
 
 Auth.propTypes = {

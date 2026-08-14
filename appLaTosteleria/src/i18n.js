@@ -655,14 +655,21 @@ const resources = {
           detailTitle: "Detalle de la factura",
           noItems: "No hay elementos registrados.",
           each: "c/u",
+          linePrice: "Precio",
+          lineSubtotal: "Subtotal",
+          lineTax: "Impuesto",
         },
 
         summary: {
           title: "Resumen de factura",
           amountPaid: "Monto pagado",
+          amountReceived: "Monto recibido",
           change: "Vuelto",
           brand: "Marca",
           card: "Tarjeta",
+          totalBeforeTax: "Total sin impuesto",
+          shippingCost: "Costo de envío",
+          totalWithTax: "Total con impuesto",
         },
 
         tracking: {

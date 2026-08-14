@@ -45,11 +45,20 @@ class RoutesController
 
             if ($method === 'GET') {
 
+                if ($action === 'dashboard') {
+                    return $this
+                        ->authMiddleware
+                        ->handle([
+                            'Administrador',
+                            'Encargado'
+                        ]);
+                }
+
                 return $this
                     ->authMiddleware
                     ->handle([
                         'Administrador',
-                        'Empleado',
+                        'Encargado',
                         'Cliente'
                     ]);
             }
@@ -63,15 +72,14 @@ class RoutesController
                 return $this
                     ->authMiddleware
                     ->handle([
-                        'Administrador',
-                        'Empleado',
+                        'Encargado',
                         'Cliente'
                     ]);
             }
 
             // -----------------------------------------------
             // ACTUALIZAR ESTADO
-            // SOLO ADMIN / EMPLEADO
+            // SOLO ADMIN / ENCARGADO
             // -----------------------------------------------
 
             if (
@@ -83,7 +91,7 @@ class RoutesController
                     ->authMiddleware
                     ->handle([
                         'Administrador',
-                        'Empleado'
+                        'Encargado'
                     ]);
             }
 
@@ -108,6 +116,7 @@ class RoutesController
         $adminControllers = [
             'producto',
             'categoria',
+            'ingrediente',
             'combo',
             'menu',
             'estacion',
@@ -140,7 +149,140 @@ class RoutesController
                 return $this
                     ->authMiddleware
                     ->handle([
-                        'Administrador'
+                        'Administrador',
+                        'Encargado'
+                    ]);
+            }
+        }
+
+        // =====================================================
+        // DIRECCIONES DE ENVIO
+        // =====================================================
+
+        if ($controller === 'direccionenvio') {
+
+            if (
+                $method === 'GET' ||
+                $method === 'POST' ||
+                $method === 'PUT' ||
+                $method === 'PATCH' ||
+                $method === 'DELETE'
+            ) {
+
+                return $this
+                    ->authMiddleware
+                    ->handle([
+                        'Administrador',
+                        'Encargado',
+                        'Cliente',
+                        'Cocina'
+                    ]);
+            }
+        }
+
+        // =====================================================
+        // SEGUIMIENTO DE PEDIDOS
+        // =====================================================
+
+        if ($controller === 'seguimientopedido') {
+
+            if ($method === 'GET') {
+
+                return $this
+                    ->authMiddleware
+                    ->handle([
+                        'Administrador',
+                        'Encargado',
+                        'Cliente',
+                        'Cocina'
+                    ]);
+            }
+
+            if (
+                $method === 'PUT' ||
+                $method === 'PATCH'
+            ) {
+
+                return $this
+                    ->authMiddleware
+                    ->handle([
+                        'Administrador',
+                        'Encargado',
+                        'Cocina'
+                    ]);
+            }
+
+            if (
+                $method === 'POST' &&
+                $action === 'createdemo'
+            ) {
+
+                return $this
+                    ->authMiddleware
+                    ->handle([
+                        'Administrador',
+                        'Encargado'
+                    ]);
+            }
+        }
+
+        // =====================================================
+        // USUARIOS
+        // =====================================================
+
+        if ($controller === 'user') {
+
+            // Login publico
+            if (
+                $method === 'POST' &&
+                $action === 'login'
+            ) {
+                return true;
+            }
+
+            // Registro publico (el rol se valida en controlador)
+            if (
+                $method === 'POST' &&
+                !$action
+            ) {
+                return true;
+            }
+
+            if ($method === 'GET') {
+
+                // Listado completo de usuarios: Administrador y Encargado
+                if (!$action) {
+
+                    return $this
+                        ->authMiddleware
+                        ->handle([
+                            'Administrador',
+                            'Encargado'
+                        ]);
+                }
+
+                // Catalogo de clientes para operativa de pedidos
+                if (
+                    $action === 'allcustomer' ||
+                    $action === 'customerbyshoprental'
+                ) {
+
+                    return $this
+                        ->authMiddleware
+                        ->handle([
+                            'Administrador',
+                            'Encargado'
+                        ]);
+                }
+
+                // Consulta puntual: el controlador valida propiedad
+                return $this
+                    ->authMiddleware
+                    ->handle([
+                        'Administrador',
+                        'Encargado',
+                        'Cliente',
+                        'Cocina'
                     ]);
             }
         }
