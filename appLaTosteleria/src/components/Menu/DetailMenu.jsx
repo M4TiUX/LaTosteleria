@@ -7,6 +7,7 @@ import {
   Button,
   Card,
   CardContent,
+  CardMedia,
   Chip,
   Grid,
   Stack,
@@ -155,6 +156,14 @@ export function DetailMenu() {
                         boxShadow: 2,
                       }}
                     >
+                      {item.imagen && (
+                        <CardMedia
+                          component="img"
+                          height="180"
+                          image={`/images/${item.imagen}`}
+                          alt={item.nombre}
+                        />
+                      )}
                       <CardContent>
                         <Stack spacing={1}>
                           <Typography

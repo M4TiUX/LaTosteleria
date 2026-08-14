@@ -5,10 +5,11 @@ import { UserContext } from '../../context/UserContext';
 
 export function Auth({ requiredRoles }) {
   const location = useLocation();
-  const { user, autorize } = useContext(UserContext);
+  const { user, decodeToken, autorize } = useContext(UserContext);
+  const activeUser = user ?? decodeToken();
   let render = null;
   // Especificar el render si el usuario esta autorizado
-  if (user && autorize(requiredRoles)) {
+  if (activeUser && autorize(requiredRoles)) {
     render = <Outlet />;
   } else {
     render = <Navigate to="/unauthorized" state={{ from: location }} />;

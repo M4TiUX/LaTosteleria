@@ -58,7 +58,7 @@ export function Login() {
       // ✅ 3. Si hay token válido, guardar y redirigir
       if (token) {
         login(token);
-        toast.success("Bienvenido, usuario", { duration: 4000 });
+        toast.success("Bienvenido, usuario", { duration: 500 });
         navigate("/");
       } else {
         // Si no hay token, mostramos el mensaje de error que venga del backend

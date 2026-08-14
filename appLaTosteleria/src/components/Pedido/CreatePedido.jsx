@@ -8,6 +8,7 @@ import {
   Button,
   Card,
   CardContent,
+  CardMedia,
   Chip,
   CircularProgress,
   Dialog,
@@ -56,9 +57,13 @@ L.Icon.Default.mergeOptions({
 import MenuService from "../../services/MenuService";
 import PedidoService from "../../services/PedidoService";
 import DireccionEnvioService from "../../services/DireccionEnvioService";
+import UserService from "../../services/UserService";
 
 import { UserContext } from "../../context/UserContext";
 import { useCart } from "../../hooks/useCart";
+import { formatMenuTime, isMenuAvailable } from "../Menu/menuUtils";
+
+const TAX_RATE = 0.13;
 
 // ============================================================
 // FORMATO DE MONEDA
@@ -90,6 +95,7 @@ function normalizeMenuItems(menu) {
         description: item.descripcion,
         price: Number(item.precio),
         category: category.categoria_nombre,
+        image: item.imagen ?? null,
       });
     });
     category.combos?.forEach((item) => {
@@ -101,10 +107,22 @@ function normalizeMenuItems(menu) {
         description: item.descripcion,
         price: Number(item.precio),
         category: category.categoria_nombre,
+        image: item.imagen ?? null,
       });
     });
   });
   return normalized;
+}
+
+function formatDateTime(value) {
+  if (!value) {
+    return "-";
+  }
+
+  return new Intl.DateTimeFormat("es-CR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(value);
 }
 
 // ============================================================
@@ -132,6 +150,9 @@ export function CreatePedido() {
   const navigate = useNavigate();
   const { decodeToken } = useContext(UserContext);
   const userData = decodeToken();
+  const roleName = userData?.rol?.name ?? "";
+  const isCliente = roleName === "Cliente";
+  const isStaff = roleName === "Empleado" || roleName === "Administrador";
 
   const {
     cart,
@@ -152,6 +173,17 @@ export function CreatePedido() {
   const [menus, setMenus] = useState([]);
   const [selectedMenuId, setSelectedMenuId] = useState("");
   const [selectedMenu, setSelectedMenu] = useState(null);
+  const [currentDateTime] = useState(() => new Date());
+
+  // ==========================================================
+  // CLIENTE / ENCARGADO
+  // ==========================================================
+
+  const [customers, setCustomers] = useState([]);
+  const [selectedCustomerId, setSelectedCustomerId] = useState(
+    isCliente ? String(userData?.id ?? "") : "",
+  );
+  const [loadingCustomers, setLoadingCustomers] = useState(false);
 
   // ==========================================================
   // OBSERVACIONES
@@ -211,13 +243,19 @@ export function CreatePedido() {
     MenuService.getMenus()
       .then((response) => {
         const catalog = Array.isArray(response.data) ? response.data : [];
-        const visibleMenus = catalog.filter(
-          (menu) => Number(menu.activo) === 1,
-        );
+        const now = new Date();
+        const visibleMenus = catalog.filter((menu) => isMenuAvailable(menu, now));
         setMenus(visibleMenus);
-        if (visibleMenus.length > 0) {
-          setSelectedMenuId(String(visibleMenus[0].id_menu));
-        }
+        setSelectedMenuId((previousMenuId) => {
+          if (
+            previousMenuId &&
+            visibleMenus.some((menu) => String(menu.id_menu) === previousMenuId)
+          ) {
+            return previousMenuId;
+          }
+
+          return visibleMenus.length > 0 ? String(visibleMenus[0].id_menu) : "";
+        });
       })
       .catch((requestError) => {
         setError(
@@ -230,6 +268,31 @@ export function CreatePedido() {
         setLoadingMenus(false);
       });
   }, []);
+
+  useEffect(() => {
+    if (!isStaff) {
+      setCustomers([]);
+      return;
+    }
+
+    setLoadingCustomers(true);
+
+    UserService.getAllCustomer()
+      .then((response) => {
+        const list = Array.isArray(response.data) ? response.data : [];
+        setCustomers(list);
+      })
+      .catch((requestError) => {
+        setError(
+          requestError?.response?.data?.message ??
+            requestError?.message ??
+            "No fue posible cargar los clientes disponibles.",
+        );
+      })
+      .finally(() => {
+        setLoadingCustomers(false);
+      });
+  }, [isStaff]);
 
   // ==========================================================
   // CARGAR DETALLE DEL MENÚ (CORREGIDO: sin cleanCart en dependencias)
@@ -270,14 +333,19 @@ export function CreatePedido() {
   // ==========================================================
 
   useEffect(() => {
-    if (deliveryMethod !== "Domicilio" || !userData?.id) {
+    const activeCustomerId =
+      isCliente ? Number(userData?.id ?? 0) : Number(selectedCustomerId ?? 0);
+
+    if (deliveryMethod !== "Domicilio" || activeCustomerId <= 0) {
+      setDirecciones([]);
+      setSelectedDireccionId("");
       return;
     }
 
     setLoadingDirecciones(true);
     setError(null);
 
-    DireccionEnvioService.getDirecciones(userData.id)
+    DireccionEnvioService.getDirecciones(activeCustomerId)
       .then((response) => {
         const lista = Array.isArray(response.data) ? response.data : [];
         setDirecciones(lista);
@@ -295,7 +363,7 @@ export function CreatePedido() {
       .finally(() => {
         setLoadingDirecciones(false);
       });
-  }, [deliveryMethod, userData?.id]);
+  }, [deliveryMethod, isCliente, selectedCustomerId, userData?.id]);
 
   // ==========================================================
   // ITEMS DISPONIBLES
@@ -319,7 +387,10 @@ export function CreatePedido() {
   // ==========================================================
 
   const subtotalAmount = useMemo(() => getTotal(cart), [cart, getTotal]);
-  const taxAmount = 0;
+  const taxAmount = useMemo(
+    () => Number((subtotalAmount * TAX_RATE).toFixed(2)),
+    [subtotalAmount],
+  );
 
   const selectedDireccion = useMemo(() => {
     return (
@@ -336,6 +407,21 @@ export function CreatePedido() {
 
   const totalAmount = subtotalAmount + taxAmount + shippingCost;
   const totalAmountRounded = Math.round(totalAmount);
+
+  const selectedCustomer = useMemo(() => {
+    if (isCliente) {
+      return {
+        id: userData?.id ?? null,
+        name: userData?.name ?? "-",
+        email: userData?.email ?? "-",
+        rol: roleName,
+      };
+    }
+
+    return (
+      customers.find((customer) => String(customer.id) === selectedCustomerId) ?? null
+    );
+  }, [customers, isCliente, roleName, selectedCustomerId, userData?.email, userData?.id, userData?.name]);
 
   // ==========================================================
   // VUELTO
@@ -509,7 +595,7 @@ export function CreatePedido() {
       setError(null);
 
       const payload = {
-        cliente_id: Number(userData?.id),
+        cliente_id: isCliente ? Number(userData?.id) : Number(selectedCustomerId),
         menu_id: Number(selectedMenuId),
         metodo_entrega: deliveryMethod,
         direccion_id:
@@ -602,6 +688,12 @@ export function CreatePedido() {
       {/* ERROR */}
       {error && <Alert severity="error">{error}</Alert>}
 
+      {menus.length === 0 && !loadingMenus && (
+        <Alert severity="warning">
+          No hay menús disponibles en este momento según el horario configurado.
+        </Alert>
+      )}
+
       {/* CONTENIDO */}
       <Grid container spacing={3}>
         {/* CATÁLOGO */}
@@ -609,9 +701,78 @@ export function CreatePedido() {
           <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
             <CardContent>
               <Stack spacing={3}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Fecha y hora del pedido"
+                      value={formatDateTime(currentDateTime)}
+                      InputProps={{ readOnly: true }}
+                    />
+                  </Grid>
+
+                  {isStaff && (
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        fullWidth
+                        label="Funcionario encargado"
+                        value={userData?.name ?? "-"}
+                        InputProps={{ readOnly: true }}
+                        helperText={roleName || "Empleado"}
+                      />
+                    </Grid>
+                  )}
+
+                  <Grid item xs={12} md={6}>
+                    {isCliente ? (
+                      <TextField
+                        fullWidth
+                        label="Cliente"
+                        value={userData?.name ?? "-"}
+                        InputProps={{ readOnly: true }}
+                        helperText={userData?.email ?? ""}
+                      />
+                    ) : (
+                      <FormControl fullWidth disabled={loadingCustomers}>
+                        <InputLabel id="customer-select-label">Cliente</InputLabel>
+                        <Select
+                          labelId="customer-select-label"
+                          value={selectedCustomerId}
+                          label="Cliente"
+                          onChange={(event) => setSelectedCustomerId(String(event.target.value))}
+                        >
+                          {customers.map((customer) => (
+                            <MenuItem key={customer.id} value={String(customer.id)}>
+                              {customer.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    )}
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Detalle del cliente"
+                      value={
+                        selectedCustomer
+                          ? `${selectedCustomer.name ?? "-"} · ${selectedCustomer.email ?? "-"}`
+                          : "Seleccione un cliente"
+                      }
+                      InputProps={{ readOnly: true }}
+                      helperText={
+                        selectedCustomer?.id
+                          ? `ID ${selectedCustomer.id}`
+                          : "Debe seleccionar el cliente para continuar"
+                      }
+                    />
+                  </Grid>
+                </Grid>
+
                 {/* MENÚ Y ENTREGA */}
                 <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
-                  <FormControl fullWidth>
+                  <FormControl fullWidth disabled={menus.length === 0}>
                     <InputLabel id="menu-select-label">{t("orders.create.menu")}</InputLabel>
                     <Select
                       labelId="menu-select-label"
@@ -798,11 +959,11 @@ export function CreatePedido() {
                       sx={{ mb: 2, flexWrap: "wrap" }}
                     >
                       <Chip
-                        label={`${t("orders.create.start")} ${selectedMenu.fecha_inicio}`}
+                        label={`${t("orders.create.start")} ${formatMenuTime(selectedMenu.hora_inicio)}`}
                         size="small"
                       />
                       <Chip
-                        label={`${t("orders.create.end")} ${selectedMenu.fecha_fin}`}
+                        label={`${t("orders.create.end")} ${formatMenuTime(selectedMenu.hora_fin)}`}
                         size="small"
                       />
                     </Stack>
@@ -827,6 +988,14 @@ export function CreatePedido() {
                             variant="outlined"
                             sx={{ height: "100%", borderRadius: 3 }}
                           >
+                            {item.image && (
+                              <CardMedia
+                                component="img"
+                                height="180"
+                                image={`/images/${item.image}`}
+                                alt={item.title}
+                              />
+                            )}
                             <CardContent>
                               <Stack spacing={1.5} sx={{ height: "100%" }}>
                                 <Stack
@@ -1121,6 +1290,7 @@ export function CreatePedido() {
                     submitting ||
                     cart.length === 0 ||
                     !isAuthenticated ||
+                    (isStaff && !selectedCustomerId) ||
                     (deliveryMethod === "Domicilio" && !selectedDireccionId)
                   }
                 >

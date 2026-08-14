@@ -2,6 +2,8 @@
 
 class PedidoModel
 {
+    private const TAX_RATE = 0.13;
+
     public $enlace;
 
     public function __construct()
@@ -296,7 +298,7 @@ class PedidoModel
             }
 
             $subtotal = round($subtotal, 2);
-            $impuestos = 0.00;
+            $impuestos = round($subtotal * self::TAX_RATE, 2);
             $total = round($subtotal + $impuestos + $costoEnvio, 2);
             $pagoValidado = $this->validatePayment($pedido, $total);
             $fechaCreacion = $this->escape(date('Y-m-d H:i:s'));
