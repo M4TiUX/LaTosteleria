@@ -50,7 +50,7 @@ const iconoDestino = new L.Icon({
   iconUrl: "/images/Destino.png",
   shadowUrl: iconShadow,
   iconSize: [25, 41],
-  iconAnchor: [12, 41],
+  iconAnchor: [25, 41],
   className: "marker-destino",
 });
 
