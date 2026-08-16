@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import ProductService from "../../services/ProductService";
+import { UserContext } from "../../context/UserContext";
+import { toast } from "react-toastify";
 
 import {
   Box,
@@ -32,6 +34,11 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 export function TableProduct() {
   const { t } = useTranslation();
 
+  const { decodeToken } = useContext(UserContext);
+  const userData = decodeToken();
+  const roleName = userData?.rol?.name ?? "";
+  const isAdministrador = roleName === "Administrador";
+
   const [data, setData] = useState([]);
   const [busqueda, setBusqueda] = useState("");
   const [categoria, setCategoria] = useState("");
@@ -51,16 +58,26 @@ export function TableProduct() {
         activo: nuevoEstado,
       });
 
-      // Actualizar la tabla sin recargar la página
       setData((productosActuales) =>
         productosActuales.map((producto) =>
           producto.id_producto === item.id_producto
-            ? { ...producto, activo: nuevoEstado }
+            ? {
+                ...producto,
+                activo: nuevoEstado,
+              }
             : producto,
         ),
       );
+
+      toast.success(
+        nuevoEstado === 1
+          ? t("products.maintenance.statusEnabledSuccess")
+          : t("products.maintenance.statusDisabledSuccess"),
+      );
     } catch (error) {
       console.error("Error al cambiar el estado del producto:", error);
+
+      toast.error(t("products.maintenance.statusChangeError"));
     }
   };
 
@@ -112,27 +129,30 @@ export function TableProduct() {
           </Typography>
         </Box>
 
-        <Button
-          component={Link}
-          to="/producto/create"
-          variant="contained"
-          startIcon={<AddCircleIcon />}
-          sx={{
-            backgroundColor: "#9b1209",
-            px: 3,
-            py: 1.5,
-            borderRadius: 2,
-            textTransform: "none",
-            fontSize: "1rem",
-            fontWeight: 600,
+        {/* Solo el administrador puede crear productos */}
+        {isAdministrador && (
+          <Button
+            component={Link}
+            to="/producto/create"
+            variant="contained"
+            startIcon={<AddCircleIcon />}
+            sx={{
+              backgroundColor: "#9b1209",
+              px: 3,
+              py: 1.5,
+              borderRadius: 2,
+              textTransform: "none",
+              fontSize: "1rem",
+              fontWeight: 600,
 
-            "&:hover": {
-              backgroundColor: "#7d0e07",
-            },
-          }}
-        >
-          {t("products.maintenance.newProduct")}
-        </Button>
+              "&:hover": {
+                backgroundColor: "#7d0e07",
+              },
+            }}
+          >
+            {t("products.maintenance.newProduct")}
+          </Button>
+        )}
       </Box>
 
       {/* Contenedor principal */}
@@ -322,6 +342,7 @@ export function TableProduct() {
                         gap: 1,
                       }}
                     >
+                      {/* Administrador y Encargado pueden consultar */}
                       <Button
                         component={Link}
                         to={`/producto/${item.id_producto}`}
@@ -336,48 +357,55 @@ export function TableProduct() {
                         {t("products.maintenance.detail")}
                       </Button>
 
-                      <Button
-                        component={Link}
-                        to={`/producto/update/${item.id_producto}`}
-                        variant="outlined"
-                        startIcon={<EditIcon />}
-                        size="small"
-                        sx={{
-                          textTransform: "none",
-                          borderRadius: 2,
-                          borderColor: "#b71c1c",
-                          color: "#b71c1c",
+                      {/* Solo el administrador puede modificar */}
+                      {isAdministrador && (
+                        <>
+                          <Button
+                            component={Link}
+                            to={`/producto/update/${item.id_producto}`}
+                            variant="outlined"
+                            startIcon={<EditIcon />}
+                            size="small"
+                            sx={{
+                              textTransform: "none",
+                              borderRadius: 2,
+                              borderColor: "#b71c1c",
+                              color: "#b71c1c",
 
-                          "&:hover": {
-                            borderColor: "#8e0000",
-                            backgroundColor: "#fff4f4",
-                          },
-                        }}
-                      >
-                        {t("products.maintenance.edit")}
-                      </Button>
+                              "&:hover": {
+                                borderColor: "#8e0000",
+                                backgroundColor: "#fff4f4",
+                              },
+                            }}
+                          >
+                            {t("products.maintenance.edit")}
+                          </Button>
 
-                      <Button
-                        onClick={() => cambiarEstado(item)}
-                        variant="outlined"
-                        startIcon={
-                          Number(item.activo) === 1 ? (
-                            <BlockIcon />
-                          ) : (
-                            <CheckCircleIcon />
-                          )
-                        }
-                        size="small"
-                        color={Number(item.activo) === 1 ? "error" : "success"}
-                        sx={{
-                          textTransform: "none",
-                          borderRadius: 2,
-                        }}
-                      >
-                        {Number(item.activo) === 1
-                          ? t("products.maintenance.disable")
-                          : t("products.maintenance.enable")}
-                      </Button>
+                          <Button
+                            onClick={() => cambiarEstado(item)}
+                            variant="outlined"
+                            startIcon={
+                              Number(item.activo) === 1 ? (
+                                <BlockIcon />
+                              ) : (
+                                <CheckCircleIcon />
+                              )
+                            }
+                            size="small"
+                            color={
+                              Number(item.activo) === 1 ? "error" : "success"
+                            }
+                            sx={{
+                              textTransform: "none",
+                              borderRadius: 2,
+                            }}
+                          >
+                            {Number(item.activo) === 1
+                              ? t("products.maintenance.disable")
+                              : t("products.maintenance.enable")}
+                          </Button>
+                        </>
+                      )}
                     </Box>
                   </TableCell>
                 </TableRow>

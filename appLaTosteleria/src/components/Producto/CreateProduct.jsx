@@ -38,13 +38,18 @@ export function CreateProduct() {
       toast.success(response.data.message || t("products.form.createSuccess"));
 
       navigate("/producto");
+      
     } catch (error) {
       console.error("Error al guardar el producto:", error);
 
-      if (error.response) {
-        toast.error(
-          error.response?.data.message || t("products.form.createError"),
-        );
+      const mensajeServidor = error.response?.data?.message;
+
+      if (
+        mensajeServidor === "Ya existe un producto registrado con ese nombre."
+      ) {
+        toast.error(t("products.form.validation.duplicateName"));
+      } else if (error.response) {
+        toast.error(mensajeServidor || t("products.form.createError"));
       } else {
         toast.error(t("products.form.serverError"));
       }

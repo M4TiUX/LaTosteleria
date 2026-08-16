@@ -81,6 +81,9 @@ const resources = {
           disable: "Inhabilitar",
           enable: "Habilitar",
           noProducts: "No se encontraron productos",
+          statusEnabledSuccess: "Producto activado correctamente.",
+          statusDisabledSuccess: "Producto desactivado correctamente.",
+          statusChangeError: "No fue posible cambiar el estado del producto.",
         },
 
         form: {
@@ -127,6 +130,12 @@ const resources = {
             categorySelect: "Debe seleccionar una categoría",
             categoryRequired: "La categoría es obligatoria",
             ingredientRequired: "Debe seleccionar al menos un ingrediente",
+            imageRequired: "Debe seleccionar una imagen para el producto.",
+            invalidImage:
+              "Debe seleccionar una imagen en formato PNG, JPG, JPEG o WEBP.",
+            nameLetters:
+              "El nombre del producto debe contener al menos una letra.",
+            duplicateName: "Ya existe un producto registrado con ese nombre.",
           },
 
           createSuccess: "Producto registrado correctamente.",
@@ -782,6 +791,9 @@ const resources = {
           disable: "Disable",
           enable: "Enable",
           noProducts: "No products found",
+          statusEnabledSuccess: "Product enabled successfully.",
+          statusDisabledSuccess: "Product disabled successfully.",
+          statusChangeError: "Unable to change the product status.",
         },
 
         form: {
@@ -828,6 +840,11 @@ const resources = {
             categorySelect: "You must select a category",
             categoryRequired: "Category is required",
             ingredientRequired: "You must select at least one ingredient",
+            imageRequired: "You must select an image for the product.",
+            invalidImage:
+              "You must select an image in PNG, JPG, JPEG, or WEBP format.",
+            nameLetters: "The product name must contain at least one letter.",
+            duplicateName: "A product with that name already exists.",
           },
 
           createSuccess: "Product registered successfully.",

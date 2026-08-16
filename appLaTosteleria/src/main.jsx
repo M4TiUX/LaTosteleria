@@ -7,7 +7,7 @@ import { Home } from "./components/Home/Home";
 import { RouterProvider } from "react-router";
 import { PageNotFound } from "./components/Home/PageNotFound";
 
-import {UserProvider} from "./context/UserContext";
+import { UserProvider } from "./context/UserContext";
 import { Unauthorized } from "./components/User/Unauthorized";
 import { Login } from "./components/User/Login";
 import { Logout } from "./components/User/Logout";
@@ -133,28 +133,41 @@ const rutas = createBrowserRouter([
       // =====================================================
 
       {
-        element: <Auth requiredRoles={["Administrador", "Encargado"]} />,
-
+        element: <Auth requiredRoles={["Administrador"]} />,
         children: [
-          // =================================================
-          // MANTENIMIENTO DE PRODUCTOS
-          // =================================================
-
-          {
-            path: "/producto-table",
-            element: <TableProduct />,
-          },
-
           {
             path: "/producto/create",
             element: <CreateProduct />,
           },
-
           {
             path: "/producto/update/:id",
             element: <UpdateProduct />,
           },
+        ],
+      },
 
+      // =====================================================
+      // MANTENIMIENTO DE PRODUCTOS - ADMINISTRADOR Y EMPLEADO
+      // =====================================================
+
+      {
+        element: <Auth requiredRoles={["Administrador", "Empleado"]} />,
+        children: [
+          {
+            path: "/producto-table",
+            element: <TableProduct />,
+          },
+        ],
+      },
+
+      // =================================================
+      // Administrador y Encargado
+     // =================================================
+
+      {
+        element: <Auth requiredRoles={["Administrador", "Encargado"]} />,
+
+        children: [
           // =================================================
           // MANTENIMIENTO DE COMBOS
           // =================================================
@@ -215,9 +228,7 @@ const rutas = createBrowserRouter([
       },
 
       {
-        element: (
-          <Auth requiredRoles={["Administrador", "Encargado"]} />
-        ),
+        element: <Auth requiredRoles={["Administrador", "Encargado"]} />,
         children: [
           {
             path: "/dashboard",
@@ -263,14 +274,7 @@ const rutas = createBrowserRouter([
       // =====================================================
 
       {
-        element: (
-          <Auth
-            requiredRoles={[
-              "Cliente",
-              "Encargado",
-            ]}
-          />
-        ),
+        element: <Auth requiredRoles={["Cliente", "Encargado"]} />,
 
         children: [
           {
@@ -291,13 +295,7 @@ const rutas = createBrowserRouter([
 
       {
         element: (
-          <Auth
-            requiredRoles={[
-              "Cliente",
-              "Encargado",
-              "Administrador",
-            ]}
-          />
+          <Auth requiredRoles={["Cliente", "Encargado", "Administrador"]} />
         ),
 
         children: [

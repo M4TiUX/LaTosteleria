@@ -67,16 +67,21 @@ export function UpdateProduct() {
       toast.success(response.data.message || t("products.form.updateSuccess"));
 
       navigate("/producto");
+      
     } catch (error) {
       console.error("Error al actualizar el producto:", error);
-      console.error("Error completo:", error);
-      console.error("Respuesta del servidor:", error.response?.data);
-      console.error("Estado HTTP:", error.response?.status);
 
-      const mensaje =
-        error.response?.data?.message || t("products.form.serverError");
+      const mensajeServidor = error.response?.data?.message;
 
-      toast.error(mensaje);
+      if (
+        mensajeServidor === "Ya existe un producto registrado con ese nombre."
+      ) {
+        toast.error(t("products.form.validation.duplicateName"));
+      } else if (error.response) {
+        toast.error(mensajeServidor || t("products.form.updateError"));
+      } else {
+        toast.error(t("products.form.serverError"));
+      }
     } finally {
       setGuardando(false);
     }

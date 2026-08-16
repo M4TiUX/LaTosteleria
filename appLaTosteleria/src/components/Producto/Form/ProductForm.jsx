@@ -24,12 +24,16 @@ import * as yup from "yup";
 import CategoryService from "../../../services/CategoryService";
 import IngredientService from "../../../services/IngredientService";
 
-const crearProductSchema = (t) =>
+const crearProductSchema = (t, esActualizacion) =>
   yup.object({
     nombre_producto: yup
       .string()
       .required(t("products.form.validation.nameRequired"))
-      .min(3, t("products.form.validation.nameMin")),
+      .min(3, t("products.form.validation.nameMin"))
+      .matches(
+        /[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/,
+        t("products.form.validation.nameLetters"),
+      ),
 
     descripcion: yup
       .string()
@@ -53,7 +57,39 @@ const crearProductSchema = (t) =>
       .min(1, t("products.form.validation.ingredientRequired"))
       .required(t("products.form.validation.ingredientRequired")),
 
-    imagen: yup.string().nullable(),
+    archivoImagen: esActualizacion
+      ? yup
+          .mixed()
+          .nullable()
+          .test(
+            "fileType",
+            t("products.form.validation.invalidImage"),
+            (archivo) => {
+              if (!archivo) {
+                return true;
+              }
+
+              return ["image/png", "image/jpeg", "image/webp"].includes(
+                archivo.type,
+              );
+            },
+          )
+      : yup
+          .mixed()
+          .required(t("products.form.validation.imageRequired"))
+          .test(
+            "fileType",
+            t("products.form.validation.invalidImage"),
+            (archivo) => {
+              if (!archivo) {
+                return true;
+              }
+
+              return ["image/png", "image/jpeg", "image/webp"].includes(
+                archivo.type,
+              );
+            },
+          ),
   });
 
 export default function ProductForm({
@@ -64,9 +100,11 @@ export default function ProductForm({
 }) {
   const { t, i18n } = useTranslation();
 
+  const esActualizacion = Boolean(defaultValues);
+
   const productSchema = useMemo(
-    () => crearProductSchema(t),
-    [t, i18n.language],
+    () => crearProductSchema(t, esActualizacion),
+    [t, i18n.language, esActualizacion],
   );
 
   const [categorias, setCategorias] = useState([]);
@@ -81,8 +119,6 @@ export default function ProductForm({
 
   const [archivoImagen, setArchivoImagen] = useState(null);
 
-  const esActualizacion = Boolean(defaultValues);
-
   const valoresIniciales = {
     nombre_producto: "",
     descripcion: "",
@@ -90,6 +126,7 @@ export default function ProductForm({
     categoria_id: "",
     ingredientes: [],
     imagen: "",
+    archivoImagen: null,
     ...defaultValues,
   };
 
@@ -97,6 +134,7 @@ export default function ProductForm({
     control,
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm({
     defaultValues: valoresIniciales,
@@ -106,6 +144,10 @@ export default function ProductForm({
   useEffect(() => {
     cargarDatosFormulario();
   }, []);
+
+  useEffect(() => {
+    register("archivoImagen");
+  }, [register]);
 
   const cargarDatosFormulario = async () => {
     try {
@@ -135,8 +177,25 @@ export default function ProductForm({
       return;
     }
 
-    if (!archivo.type.startsWith("image/")) {
-      alert(t("products.form.invalidImage"));
+    /*
+     * Guardamos el archivo en React Hook Form.
+     * Yup se encarga de validar si el formato es válido.
+     */
+    setValue("archivoImagen", archivo, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+
+    /*
+     * Solo mostramos la vista previa cuando
+     * realmente es un formato permitido.
+     */
+    const tiposPermitidos = ["image/png", "image/jpeg", "image/webp"];
+
+    if (!tiposPermitidos.includes(archivo.type)) {
+      setArchivoImagen(null);
+      setNombreImagen("");
+      setVistaPrevia(null);
       return;
     }
 
@@ -210,6 +269,7 @@ export default function ProductForm({
           onSubmit={handleSubmit(enviarFormulario)}
         >
           <Grid container spacing={3}>
+            {/* Nombre */}
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
@@ -220,6 +280,7 @@ export default function ProductForm({
               />
             </Grid>
 
+            {/* Precio */}
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
@@ -237,6 +298,7 @@ export default function ProductForm({
               />
             </Grid>
 
+            {/* Descripción */}
             <Grid item xs={12}>
               <TextField
                 fullWidth
@@ -249,6 +311,7 @@ export default function ProductForm({
               />
             </Grid>
 
+            {/* Categoría */}
             <Grid item xs={12} md={6}>
               <Controller
                 name="categoria_id"
@@ -287,6 +350,7 @@ export default function ProductForm({
               />
             </Grid>
 
+            {/* Ingredientes */}
             <Grid item xs={12} md={6}>
               <Controller
                 name="ingredientes"
@@ -345,11 +409,12 @@ export default function ProductForm({
               />
             </Grid>
 
+            {/* Imagen */}
             <Grid item xs={12}>
               <Box
                 sx={{
                   border: "1px dashed",
-                  borderColor: errors.imagen ? "error.main" : "divider",
+                  borderColor: errors.archivoImagen ? "error.main" : "divider",
                   borderRadius: 3,
                   p: 3,
                 }}
@@ -424,18 +489,23 @@ export default function ProductForm({
                   </Box>
                 )}
 
-                {errors.imagen && (
+                {/* Validación Yup de la imagen */}
+                {errors.archivoImagen && (
                   <Typography
                     variant="caption"
                     color="error"
-                    sx={{ display: "block", mt: 1 }}
+                    sx={{
+                      display: "block",
+                      mt: 1,
+                    }}
                   >
-                    {errors.imagen.message}
+                    {errors.archivoImagen.message}
                   </Typography>
                 )}
               </Box>
             </Grid>
 
+            {/* Botón Guardar */}
             <Grid item xs={12}>
               <Box
                 sx={{

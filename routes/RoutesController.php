@@ -110,11 +110,33 @@ class RoutesController
         }
 
         // =====================================================
+        // GESTIÓN DE PRODUCTOS
+        // =====================================================
+
+        if ($controller === 'producto') {
+
+            // Solo el Administrador puede crear,
+            // actualizar o eliminar productos.
+            if (
+                $method === 'POST' ||
+                $method === 'PUT' ||
+                $method === 'PATCH' ||
+                $method === 'DELETE'
+            ) {
+
+                return $this
+                    ->authMiddleware
+                    ->handle([
+                        'Administrador'
+                    ]);
+            }
+        }
+
+        // =====================================================
         // MANTENIMIENTOS ADMINISTRATIVOS
         // =====================================================
 
         $adminControllers = [
-            'producto',
             'categoria',
             'ingrediente',
             'combo',
@@ -131,13 +153,13 @@ class RoutesController
             )
         ) {
             /*
-             * Por ahora protegemos únicamente
-             * las operaciones que modifican datos.
-             *
-             * Los GET pueden seguir siendo públicos
-             * porque el menú necesita consultar
-             * productos, combos, categorías, etc.
-             */
+     * Por ahora protegemos únicamente
+     * las operaciones que modifican datos.
+     *
+     * Los GET pueden seguir siendo públicos
+     * porque el menú necesita consultar
+     * productos, combos, categorías, etc.
+     */
 
             if (
                 $method === 'POST' ||
@@ -347,9 +369,9 @@ class RoutesController
 
                     header(
                         'Content-Type: ' .
-                        mime_content_type(
-                            $filePath
-                        )
+                            mime_content_type(
+                                $filePath
+                            )
                     );
 
                     readfile(
@@ -357,7 +379,6 @@ class RoutesController
                     );
 
                     exit;
-
                 } else {
 
                     http_response_code(
@@ -365,7 +386,7 @@ class RoutesController
                     );
 
                     echo
-                        'Archivo no encontrado.';
+                    'Archivo no encontrado.';
 
                     return;
                 }
@@ -376,9 +397,7 @@ class RoutesController
             // =================================================
 
             if (
-                $_SERVER[
-                    'REQUEST_METHOD'
-                ] === 'OPTIONS'
+                $_SERVER['REQUEST_METHOD'] === 'OPTIONS'
             ) {
 
                 http_response_code(
@@ -412,7 +431,7 @@ class RoutesController
                 $json = [
                     'status' => 404,
                     'result' =>
-                        'Controlador no especificado'
+                    'Controlador no especificado'
                 ];
 
                 echo json_encode(
@@ -427,16 +446,12 @@ class RoutesController
 
             if (
                 isset(
-                    $_SERVER[
-                        'REQUEST_METHOD'
-                    ]
+                    $_SERVER['REQUEST_METHOD']
                 )
             ) {
 
                 $method =
-                    $_SERVER[
-                        'REQUEST_METHOD'
-                    ];
+                    $_SERVER['REQUEST_METHOD'];
 
                 /*
                  * Ejemplo:
@@ -470,7 +485,7 @@ class RoutesController
                     $json = [
                         'status' => 404,
                         'result' =>
-                            'Controlador o acción no especificados'
+                        'Controlador o acción no especificados'
                     ];
 
                     echo json_encode(
@@ -527,7 +542,6 @@ class RoutesController
                                             $param1,
                                             $param2
                                         );
-
                                 } elseif (
                                     $param1 &&
                                     !isset(
@@ -539,7 +553,6 @@ class RoutesController
                                         ->get(
                                             $param1
                                         );
-
                                 } elseif (
                                     $param1 &&
                                     isset(
@@ -551,7 +564,6 @@ class RoutesController
                                         ->$action(
                                             $param1
                                         );
-
                                 } elseif (
                                     !isset(
                                         $action
@@ -560,7 +572,6 @@ class RoutesController
 
                                     $response
                                         ->index();
-
                                 } elseif (
                                     $action
                                 ) {
@@ -574,7 +585,6 @@ class RoutesController
 
                                         $response
                                             ->$action();
-
                                     } elseif (
                                         count(
                                             $routesArray
@@ -585,23 +595,20 @@ class RoutesController
                                             ->get(
                                                 $action
                                             );
-
                                     } else {
 
                                         $json = [
                                             'status' =>
-                                                404,
+                                            404,
 
                                             'result' =>
-                                                'Acción no encontrada'
+                                            'Acción no encontrada'
                                         ];
 
                                         echo json_encode(
                                             $json,
                                             http_response_code(
-                                                $json[
-                                                    'status'
-                                                ]
+                                                $json['status']
                                             )
                                         );
                                     }
@@ -627,27 +634,23 @@ class RoutesController
 
                                         $response
                                             ->$action();
-
                                     } else {
 
                                         $json = [
                                             'status' =>
-                                                404,
+                                            404,
 
                                             'result' =>
-                                                'Acción no encontrada'
+                                            'Acción no encontrada'
                                         ];
 
                                         echo json_encode(
                                             $json,
                                             http_response_code(
-                                                $json[
-                                                    'status'
-                                                ]
+                                                $json['status']
                                             )
                                         );
                                     }
-
                                 } else {
 
                                     $response
@@ -679,7 +682,6 @@ class RoutesController
                                         ->update(
                                             $param1
                                         );
-
                                 } elseif (
                                     $action
                                 ) {
@@ -693,27 +695,23 @@ class RoutesController
 
                                         $response
                                             ->$action();
-
                                     } else {
 
                                         $json = [
                                             'status' =>
-                                                404,
+                                            404,
 
                                             'result' =>
-                                                'Acción no encontrada'
+                                            'Acción no encontrada'
                                         ];
 
                                         echo json_encode(
                                             $json,
                                             http_response_code(
-                                                $json[
-                                                    'status'
-                                                ]
+                                                $json['status']
                                             )
                                         );
                                     }
-
                                 } else {
 
                                     $response
@@ -735,7 +733,6 @@ class RoutesController
                                         ->delete(
                                             $param1
                                         );
-
                                 } elseif (
                                     $action
                                 ) {
@@ -749,27 +746,23 @@ class RoutesController
 
                                         $response
                                             ->$action();
-
                                     } else {
 
                                         $json = [
                                             'status' =>
-                                                404,
+                                            404,
 
                                             'result' =>
-                                                'Acción no encontrada'
+                                            'Acción no encontrada'
                                         ];
 
                                         echo json_encode(
                                             $json,
                                             http_response_code(
-                                                $json[
-                                                    'status'
-                                                ]
+                                                $json['status']
                                             )
                                         );
                                     }
-
                                 } else {
 
                                     $response
@@ -787,42 +780,36 @@ class RoutesController
 
                                 $json = [
                                     'status' =>
-                                        405,
+                                    405,
 
                                     'result' =>
-                                        'Método HTTP no permitido'
+                                    'Método HTTP no permitido'
                                 ];
 
                                 echo json_encode(
                                     $json,
                                     http_response_code(
-                                        $json[
-                                            'status'
-                                        ]
+                                        $json['status']
                                     )
                                 );
 
                                 break;
                         }
-
                     } else {
 
                         $json = [
                             'status' => 404,
                             'result' =>
-                                'Controlador no encontrado'
+                            'Controlador no encontrado'
                         ];
 
                         echo json_encode(
                             $json,
                             http_response_code(
-                                $json[
-                                    'status'
-                                ]
+                                $json['status']
                             )
                         );
                     }
-
                 } catch (
                     \Throwable $th
                 ) {
@@ -830,15 +817,13 @@ class RoutesController
                     $json = [
                         'status' => 404,
                         'result' =>
-                            $th->getMessage()
+                        $th->getMessage()
                     ];
 
                     echo json_encode(
                         $json,
                         http_response_code(
-                            $json[
-                                'status'
-                            ]
+                            $json['status']
                         )
                     );
                 }

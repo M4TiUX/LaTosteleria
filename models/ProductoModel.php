@@ -213,30 +213,89 @@ class ProductoModel
     public function update($producto)
     {
         try {
+            // Validar que existan todos los datos obligatorios
+            if (
+                !isset($producto->id_producto) ||
+                !isset($producto->nombre_producto) ||
+                !isset($producto->descripcion) ||
+                !isset($producto->precio) ||
+                !isset($producto->categoria_id) ||
+                !isset($producto->ingredientes)
+            ) {
+                throw new Exception(
+                    "Faltan datos obligatorios para actualizar el producto."
+                );
+            }
+
             $idProducto = (int) $producto->id_producto;
-            $nombre = $producto->nombre_producto;
-            $descripcion = $producto->descripcion;
-            $precio = $producto->precio;
+            $nombre = $this->escapar($producto->nombre_producto);
+            $descripcion = $this->escapar($producto->descripcion);
+            $precio = (float) $producto->precio;
             $categoriaId = (int) $producto->categoria_id;
 
-            $imagen = isset($producto->imagen)
-                ? $producto->imagen
-                : null;
+            // Validar ID
+            if ($idProducto <= 0) {
+                throw new Exception(
+                    "El identificador del producto no es válido."
+                );
+            }
 
-            // Validar nombre único, excluyendo el producto actual.
-            $sqlValidar = "SELECT id_producto
-                       FROM productos
-                       WHERE LOWER(nombre_producto) = LOWER('$nombre')
-                       AND id_producto <> $idProducto";
+            // Validar nombre
+            if ($nombre === "") {
+                throw new Exception(
+                    "El nombre del producto es obligatorio."
+                );
+            }
 
-            $productoExistente = $this->enlace->ExecuteSQL($sqlValidar);
+            // Validar descripción
+            if ($descripcion === "") {
+                throw new Exception(
+                    "La descripción del producto es obligatoria."
+                );
+            }
 
-            if (!empty($productoExistente)) {
+            // Validar precio
+            if ($precio <= 0) {
+                throw new Exception(
+                    "El precio debe ser mayor que cero."
+                );
+            }
+
+            // Validar categoría
+            if ($categoriaId <= 0) {
+                throw new Exception(
+                    "Debe seleccionar una categoría válida."
+                );
+            }
+
+            // Validar ingredientes
+            if (
+                !is_array($producto->ingredientes) ||
+                count($producto->ingredientes) === 0
+            ) {
+                throw new Exception(
+                    "Debe seleccionar al menos un ingrediente."
+                );
+            }
+
+            // Validar nombre único excluyendo el producto actual
+            if ($this->nombreExiste($nombre, $idProducto)) {
                 throw new Exception(
                     "Ya existe otro producto registrado con ese nombre."
                 );
             }
 
+            // Imagen
+            $imagen = null;
+
+            if (
+                isset($producto->imagen) &&
+                trim($producto->imagen) !== ""
+            ) {
+                $imagen = $this->escapar($producto->imagen);
+            }
+
+            // Actualizar producto
             $sql = "UPDATE productos
                 SET
                     nombre_producto = '$nombre',
@@ -244,7 +303,8 @@ class ProductoModel
                     precio = $precio,
                     categoria_id = $categoriaId";
 
-            if ($imagen !== null && $imagen !== "") {
+            // Solamente modificar la imagen si se envió una nueva
+            if ($imagen !== null) {
                 $sql .= ", imagen = '$imagen'";
             }
 
@@ -252,33 +312,32 @@ class ProductoModel
 
             $this->enlace->executeSQL_DML($sql);
 
-            // Eliminar ingredientes anteriores.
+            // Eliminar ingredientes anteriores
             $sqlEliminar = "DELETE FROM producto_ingrediente
                         WHERE producto_id = $idProducto";
 
             $this->enlace->executeSQL_DML($sqlEliminar);
 
-            // Insertar ingredientes nuevos.
-            if (
-                isset($producto->ingredientes) &&
-                is_array($producto->ingredientes)
-            ) {
-                foreach ($producto->ingredientes as $ingredienteId) {
-                    $ingredienteId = (int) $ingredienteId;
+            // Registrar los nuevos ingredientes
+            foreach ($producto->ingredientes as $ingredienteId) {
+                $ingredienteId = (int) $ingredienteId;
 
-                    $sqlIngrediente = "INSERT INTO producto_ingrediente
-                                      (
-                                          producto_id,
-                                          ingrediente_id
-                                      )
-                                  VALUES
-                                      (
-                                          $idProducto,
-                                          $ingredienteId
-                                      )";
-
-                    $this->enlace->executeSQL_DML($sqlIngrediente);
+                if ($ingredienteId <= 0) {
+                    continue;
                 }
+
+                $sqlIngrediente = "INSERT INTO producto_ingrediente
+                              (
+                                  producto_id,
+                                  ingrediente_id
+                              )
+                              VALUES
+                              (
+                                  $idProducto,
+                                  $ingredienteId
+                              )";
+
+                $this->enlace->executeSQL_DML($sqlIngrediente);
             }
 
             return $this->get($idProducto);

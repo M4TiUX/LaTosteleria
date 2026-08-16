@@ -1,4 +1,3 @@
-// src/components/Layout/Header.jsx
 import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import AppBar from "@mui/material/AppBar";
@@ -105,7 +104,7 @@ export default function Header() {
     {
       name: t("nav.mantenimientoProductos"),
       link: "/producto-table",
-      roles: ["Administrador", "Encargado"],
+      roles: ["Administrador", "Empleado"],
     },
     {
       name: t("nav.combos"),
