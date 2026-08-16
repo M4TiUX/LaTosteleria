@@ -5,16 +5,30 @@ import { UserContext } from '../../context/UserContext';
 
 export function Auth({ requiredRoles }) {
   const location = useLocation();
-  const { user, autorize } = useContext(UserContext);
-  let render = null;
-  // Especificar el render si el usuario esta autorizado
-  if (user && autorize(requiredRoles)) {
-    render = <Outlet />;
-  } else {
-    render = <Navigate to="/unauthorized" state={{ from: location }} />;
+  const { user, decodeToken, autorize } = useContext(UserContext);
+  const activeUser = user ?? decodeToken();
+
+  if (!activeUser) {
+    return (
+      <Navigate
+        to="/user/login"
+        replace
+        state={{ from: location }}
+      />
+    );
   }
 
-  return <div>{render}</div>;
+  if (!autorize(requiredRoles)) {
+    return (
+      <Navigate
+        to="/unauthorized"
+        replace
+        state={{ from: location }}
+      />
+    );
+  }
+
+  return <Outlet />;
 }
 
 Auth.propTypes = {

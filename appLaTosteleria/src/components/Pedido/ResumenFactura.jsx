@@ -22,6 +22,13 @@ export function ResumenFactura({ pedido }) {
     return null;
   }
 
+  const shippingCost = Number(pedido.costo_envio ?? 0);
+  const showShipping = shippingCost > 0;
+  const receivedLabel =
+    pedido.metodo_pago === "Efectivo"
+      ? t("orders.summary.amountReceived")
+      : t("orders.summary.amountPaid");
+
   return (
     <Card
       sx={{
@@ -51,7 +58,7 @@ export function ResumenFactura({ pedido }) {
               justifyContent="space-between"
             >
               <Typography color="text.secondary">
-                {t("orders.common.subtotal")}
+                {t("orders.summary.totalBeforeTax")}
               </Typography>
 
               <Typography>
@@ -76,6 +83,21 @@ export function ResumenFactura({ pedido }) {
               </Typography>
             </Stack>
 
+            {showShipping && (
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+              >
+                <Typography color="text.secondary">
+                  {t("orders.summary.shippingCost")}
+                </Typography>
+
+                <Typography>
+                  {formatCurrency(shippingCost)}
+                </Typography>
+              </Stack>
+            )}
+
             <Divider />
 
             <Stack
@@ -86,7 +108,7 @@ export function ResumenFactura({ pedido }) {
                 variant="h6"
                 fontWeight={700}
               >
-                {t("orders.common.total")}
+                {t("orders.summary.totalWithTax")}
               </Typography>
 
               <Typography
@@ -122,7 +144,7 @@ export function ResumenFactura({ pedido }) {
               justifyContent="space-between"
             >
               <Typography color="text.secondary">
-                {t("orders.summary.amountPaid")}
+                {receivedLabel}
               </Typography>
 
               <Typography>

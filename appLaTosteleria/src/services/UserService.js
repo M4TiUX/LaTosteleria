@@ -15,10 +15,10 @@ class UserService {
     return axios.get(BASE_URL + '/customerbyShopRental/'+ ShopRentalId);
   }
   createUser(User) {
-    return axios.post(BASE_URL, JSON.stringify(User));
+    return axios.post(BASE_URL, User);
   }
   loginUser(User) {
-    return axios.post(BASE_URL + '/login/', JSON.stringify(User));
+    return axios.post(BASE_URL + '/login/', User);
   }
 }
 

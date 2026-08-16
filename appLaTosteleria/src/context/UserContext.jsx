@@ -5,20 +5,24 @@ import { jwtDecode } from "jwt-decode";
 
 export const UserContext = createContext();
 
+function getStoredUser() {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) return null;
+    return jwtDecode(token);
+  } catch (error) {
+    console.warn("Token inválido, limpiando...");
+    localStorage.removeItem("token");
+    return null;
+  }
+}
+
 export const UserProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(() => getStoredUser());
+  const [isAuthenticated, setIsAuthenticated] = useState(() => Boolean(getStoredUser()));
 
   const decodeToken = useCallback(() => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) return null;
-      return jwtDecode(token);
-    } catch (error) {
-      console.warn("Token inválido, limpiando...");
-      localStorage.removeItem("token");
-      return null;
-    }
+    return getStoredUser();
   }, []);
 
   useEffect(() => {
@@ -46,8 +50,9 @@ export const UserProvider = ({ children }) => {
   };
 
   const autorize = (requiredRoles = []) => {
-    if (!user || !requiredRoles || requiredRoles.length === 0) return false;
-    return requiredRoles.includes(user?.rol?.name);
+    const activeUser = user ?? decodeToken();
+    if (!activeUser || !requiredRoles || requiredRoles.length === 0) return false;
+    return requiredRoles.includes(activeUser?.rol?.name);
   };
 
   const value = {

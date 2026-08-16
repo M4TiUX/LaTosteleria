@@ -93,6 +93,20 @@ function formatDateTime(value) {
   }).format(date);
 }
 
+function getTrackingLegend(tracking, t) {
+  if (!tracking) {
+    return "";
+  }
+
+  if (tracking.estado_actual === "En camino") {
+    return tracking.metodo_entrega === "Domicilio"
+      ? t("orders.tracking.outForDelivery")
+      : t("orders.tracking.readyForPickup");
+  }
+
+  return tracking.comentario_actual;
+}
+
 export function SeguimientoPedido() {
   const { t } = useTranslation();
   const { id } = useParams();
@@ -339,7 +353,7 @@ export function SeguimientoPedido() {
               </Box>
 
               <Alert severity={tracking.progreso === 100 ? "success" : "info"}>
-                {tracking.comentario_actual}
+                {getTrackingLegend(tracking, t)}
               </Alert>
 
               {/* =====================================================

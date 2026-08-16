@@ -9,7 +9,6 @@ import {
 } from '../reducers/cart';
 import PropTypes from 'prop-types';
 import toast from 'react-hot-toast';
-import DeleteIcon from '@mui/icons-material/Delete';
 import RemoveShoppingCartIcon from '@mui/icons-material/RemoveShoppingCart';
 
 export const CartContext = createContext();
@@ -50,11 +49,6 @@ export function CartProvider({ children }) {
     dispatch({
       type: CART_ACTION.CLEAN_CART,
     });
-    toast(`El pedido fue reiniciado`,
-      {
-        icon: <DeleteIcon color='warning' />
-      }
-    )
   }
   return (
     <CartContext.Provider

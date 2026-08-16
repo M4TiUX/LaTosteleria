@@ -5,6 +5,18 @@ use Firebase\JWT\Key;
 
 class pedido
 {
+    public function dashboard()
+    {
+        try {
+            $response = new Response();
+            $pedidoModel = new PedidoModel();
+            $result = $pedidoModel->getDashboardSummary();
+            $response->toJSON($result);
+        } catch (Exception $e) {
+            handleException($e);
+        }
+    }
+
     // =========================================================
     // LISTAR PEDIDOS
     // =========================================================
@@ -63,12 +75,12 @@ class pedido
             }
 
             // =================================================
-            // EMPLEADO / ADMINISTRADOR
+            // ENCARGADO / ADMINISTRADOR
             // Pueden consultar todos
             // =================================================
 
             if (
-                $role === 'Empleado' ||
+                $role === 'Encargado' ||
                 $role === 'Administrador'
             ) {
 
@@ -218,7 +230,7 @@ class pedido
 
             if (
                 $role !== 'Cliente' &&
-                $role !== 'Empleado' &&
+                $role !== 'Encargado' &&
                 $role !== 'Administrador'
             ) {
 
@@ -339,12 +351,12 @@ class pedido
             }
 
             // =================================================
-            // EMPLEADO
+            // ENCARGADO
             // Puede crear pedido para cliente
             // y queda registrado como encargado
             // =================================================
 
-            elseif ($role === 'Empleado') {
+            elseif ($role === 'Encargado') {
 
                 if (
                     !isset(
@@ -373,7 +385,7 @@ class pedido
 
             // =================================================
             // ADMINISTRADOR
-            // Puede registrar pedidos
+            // No puede registrar pedidos
             // =================================================
 
             elseif (
@@ -381,35 +393,14 @@ class pedido
                 'Administrador'
             ) {
 
-                if (
-                    !isset(
-                        $inputJSON
-                            ->cliente_id
-                    ) ||
-                    (int)
-                    $inputJSON
-                        ->cliente_id <= 0
-                ) {
+                $response
+                    ->status(403)
+                    ->toJSON([
+                        'message' =>
+                            'El rol Administrador no puede registrar pedidos.'
+                    ]);
 
-                    $response
-                        ->status(400)
-                        ->toJSON([
-                            'message' =>
-                                'Debe seleccionar el cliente del pedido.'
-                        ]);
-
-                    return;
-                }
-
-                /*
-                 * Si el administrador registra
-                 * el pedido, también queda
-                 * registrado como encargado.
-                 */
-
-                $inputJSON
-                    ->encargado_id =
-                    $userId;
+                return;
             }
 
             else {

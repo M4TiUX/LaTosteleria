@@ -5,16 +5,18 @@ import Typography from "@mui/material/Typography";
 import { useForm, Controller } from "react-hook-form";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
+import Alert from "@mui/material/Alert";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import UserService from "../../services/UserService";
 import { UserContext } from "../../context/UserContext";
 
 export function Login() {
   const navigate = useNavigate();
-  const { login } = useContext(UserContext);
+  const location = useLocation();
+  const { login, decodeToken } = useContext(UserContext);
   const [error, setError] = useState(null);
 
   const loginSchema = yup.object({
@@ -33,8 +35,8 @@ export function Login() {
 
   const onSubmit = async (dataForm) => {
     try {
+      setError(null);
       const response = await UserService.loginUser(dataForm);
-      console.log("Respuesta del login:", response);
 
       const data = response.data;
 
@@ -58,8 +60,20 @@ export function Login() {
       // ✅ 3. Si hay token válido, guardar y redirigir
       if (token) {
         login(token);
-        toast.success("Bienvenido, usuario", { duration: 4000 });
-        navigate("/");
+        const activeUser = decodeToken();
+        const roleName = activeUser?.rol?.name ?? "";
+        toast.success("Inicio de sesion exitoso.", { duration: 2000 });
+
+        const requestedPath = location.state?.from?.pathname;
+        const canRespectRequestedPath = Boolean(requestedPath && requestedPath !== "/unauthorized");
+
+        if (roleName === "Cocina") {
+          navigate(canRespectRequestedPath ? requestedPath : "/procesos", { replace: true });
+        } else if (roleName === "Administrador" || roleName === "Encargado") {
+          navigate(canRespectRequestedPath ? requestedPath : "/dashboard", { replace: true });
+        } else {
+          navigate(canRespectRequestedPath ? requestedPath : "/", { replace: true });
+        }
       } else {
         // Si no hay token, mostramos el mensaje de error que venga del backend
         const msg = data?.message || data?.error || "Credenciales incorrectas";
@@ -75,16 +89,20 @@ export function Login() {
 
   const onError = (errors) => console.log(errors);
 
-  if (error) return <p style={{ color: "red" }}>Error: {error}</p>;
-
   return (
     <form onSubmit={handleSubmit(onSubmit, onError)} noValidate>
       <Grid container spacing={1}>
         <Grid size={12} sm={12}>
           <Typography variant="h5" gutterBottom>
-            Login
+            Iniciar sesion
           </Typography>
         </Grid>
+
+        {error && (
+          <Grid size={12} sm={12}>
+            <Alert severity="error">{error}</Alert>
+          </Grid>
+        )}
 
         <Grid size={{ xs: 12, sm: 4 }}>
           <FormControl variant="standard" fullWidth sx={{ m: 1 }}>
@@ -113,7 +131,7 @@ export function Login() {
                 <TextField
                   {...field}
                   id="password"
-                  label="Password"
+                  label="Contrasena"
                   type="password"
                   error={Boolean(errors.password)}
                   helperText={errors.password ? errors.password.message : " "}
@@ -125,7 +143,7 @@ export function Login() {
 
         <Grid size={12} sm={12}>
           <Button type="submit" variant="contained" color="secondary" sx={{ m: 1 }}>
-            Login
+            Ingresar
           </Button>
         </Grid>
       </Grid>

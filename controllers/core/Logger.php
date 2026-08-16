@@ -17,7 +17,11 @@ class Logger implements LoggerInterface
         // Build the message with the current date, log level, 
         // and the string from the arguments
         
-        $user=preg_replace('/\r\n|\r|\n/', '',shell_exec("echo %username%"));
+        $user = (string) getenv('USERNAME');
+        if ($user === '') {
+            $user = 'unknown';
+        }
+
         $message = sprintf(
             '[%s] [%s] %s: %s%s ',
             $dateFormatted,$user,
@@ -25,9 +29,20 @@ class Logger implements LoggerInterface
             $message,
             PHP_EOL // Line break
         );
+
         $dateF = (new \DateTime())->format('d-m-Y');
-        $logfilename = $this->logpath."/log-$dateF.log";
-        file_put_contents($logfilename , $message, FILE_APPEND);
+        $logDirectory = rtrim((string) $this->logpath, '/\\');
+
+        if ($logDirectory === '') {
+            return;
+        }
+
+        if (!is_dir($logDirectory) && !@mkdir($logDirectory, 0777, true) && !is_dir($logDirectory)) {
+            return;
+        }
+
+        $logfilename = $logDirectory . "/log-$dateF.log";
+        @file_put_contents($logfilename, $message, FILE_APPEND);
         
         
     }

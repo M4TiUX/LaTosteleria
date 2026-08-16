@@ -87,11 +87,11 @@ export function ListPedidos() {
 
   const isCliente = roleName === "Cliente";
 
-  const isEmpleado = roleName === "Empleado";
+  const isEncargado = roleName === "Encargado";
 
   const isAdministrador = roleName === "Administrador";
 
-  const canCreateOrder = isCliente || isEmpleado || isAdministrador;
+  const canCreateOrder = isCliente || isEncargado;
 
   // ==========================================
   // ESTADOS
@@ -128,7 +128,7 @@ export function ListPedidos() {
       Se envía su ID para obtener
       únicamente sus pedidos.
 
-      Empleado / Administrador:
+      Encargado / Administrador:
       No se envía cliente_id para
       obtener todos los pedidos.
     */
@@ -165,24 +165,24 @@ export function ListPedidos() {
       return t("orders.list.titles.client");
     }
 
-    if (isEmpleado || isAdministrador) {
+    if (isEncargado || isAdministrador) {
       return t("orders.list.titles.staff");
     }
 
     return t("orders.list.titles.default");
-  }, [isCliente, isEmpleado, isAdministrador, t]);
+  }, [isCliente, isEncargado, isAdministrador, t]);
 
   const description = useMemo(() => {
     if (isCliente) {
       return t("orders.list.descriptions.client");
     }
 
-    if (isEmpleado || isAdministrador) {
+    if (isEncargado || isAdministrador) {
       return t("orders.list.descriptions.staff");
     }
 
     return t("orders.list.descriptions.default");
-  }, [isCliente, isEmpleado, isAdministrador, t]);
+  }, [isCliente, isEncargado, isAdministrador, t]);
 
   // ==========================================
   // ESTADOS DISPONIBLES PARA FILTRAR

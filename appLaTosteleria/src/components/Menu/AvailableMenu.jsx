@@ -54,11 +54,7 @@ function MenuItemCard({ item }) {
 }
 
 function CategoryBlock({ category }) {
-  //const { t } = useTranslation();
-
-  const { t, i18n } = useTranslation();
-
- console.log("Idioma actual:", i18n.language);
+  const { t } = useTranslation();
 
   const productos = category.productos ?? [];
   const combos = category.combos ?? [];
