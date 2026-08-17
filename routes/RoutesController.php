@@ -133,13 +133,35 @@ class RoutesController
         }
 
         // =====================================================
+        // GESTIÓN DE COMBOS
+        // =====================================================
+
+        if ($controller === 'combo') {
+
+            // Solo el Administrador puede crear,
+            // actualizar o cambiar información de los combos.
+            if (
+                $method === 'POST' ||
+                $method === 'PUT' ||
+                $method === 'PATCH' ||
+                $method === 'DELETE'
+            ) {
+
+                return $this
+                    ->authMiddleware
+                    ->handle([
+                        'Administrador'
+                    ]);
+            }
+        }
+
+        // =====================================================
         // MANTENIMIENTOS ADMINISTRATIVOS
         // =====================================================
 
         $adminControllers = [
             'categoria',
             'ingrediente',
-            'combo',
             'menu',
             'estacion',
             'procesopreparacion'

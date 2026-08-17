@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { UserContext } from "../../context/UserContext";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import ComboService from "../../services/ComboService";
@@ -10,6 +11,7 @@ import {
   Card,
   CardActions,
   CardContent,
+  CardMedia,
   CircularProgress,
   Grid,
   Stack,
@@ -22,6 +24,10 @@ import SettingsIcon from "@mui/icons-material/Settings";
 
 export function ListCombo() {
   const { t } = useTranslation();
+
+  const { autorize } = useContext(UserContext);
+
+  const puedeVerMantenimiento = autorize(["Administrador", "Empleado"]);
 
   const [combos, setCombos] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -49,6 +55,7 @@ export function ListCombo() {
       })
       .catch((error) => {
         console.error("Error al cargar los combos:", error);
+
         setError("loadError");
       })
       .finally(() => {
@@ -88,15 +95,14 @@ export function ListCombo() {
   if (error) {
     return (
       <Box sx={{ py: 3 }}>
-        <Alert severity="error">
-          {t(`combos.${error}`)}
-        </Alert>
+        <Alert severity="error">{t(`combos.${error}`)}</Alert>
       </Box>
     );
   }
 
   return (
     <Box sx={{ py: 2 }}>
+      {/* Encabezado */}
       <Box
         sx={{
           mb: 3,
@@ -129,23 +135,26 @@ export function ListCombo() {
           </Typography>
         </Box>
 
-        <Button
-          component={Link}
-          to="/combo-table"
-          variant="contained"
-          startIcon={<SettingsIcon />}
-          sx={{
-            px: 3,
-            py: 1.2,
-            borderRadius: 2,
-            textTransform: "none",
-            fontWeight: "bold",
-          }}
-        >
-          {t("combos.maintenanceButton")}
-        </Button>
+        {puedeVerMantenimiento && (
+          <Button
+            component={Link}
+            to="/combo-table"
+            variant="contained"
+            startIcon={<SettingsIcon />}
+            sx={{
+              px: 3,
+              py: 1.2,
+              borderRadius: 2,
+              textTransform: "none",
+              fontWeight: "bold",
+            }}
+          >
+            {t("combos.maintenanceButton")}
+          </Button>
+        )}
       </Box>
 
+      {/* Tarjetas */}
       {combos.length > 0 ? (
         <Grid container spacing={3}>
           {combos.map((combo) => (
@@ -157,14 +166,55 @@ export function ListCombo() {
                   flexDirection: "column",
                   borderRadius: 2,
                   boxShadow: 3,
+                  overflow: "hidden",
                   transition: "0.3s",
+
                   "&:hover": {
                     transform: "translateY(-6px)",
                     boxShadow: 8,
                   },
                 }}
               >
-                <CardContent sx={{ flexGrow: 1 }}>
+                {/* Imagen del combo */}
+                {combo.imagen ? (
+                  <CardMedia
+                    component="img"
+                    height="220"
+                    image={`/images/${combo.imagen}`}
+                    alt={combo.nombre_combo}
+                    sx={{
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : (
+                  /*
+                   * Los combos antiguos pueden no
+                   * tener imagen porque la columna
+                   * permite NULL.
+                   */
+                  <Box
+                    sx={{
+                      height: 220,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: "#f5f5f5",
+                    }}
+                  >
+                    <RestaurantMenuOutlinedIcon
+                      sx={{
+                        fontSize: 70,
+                        color: "text.disabled",
+                      }}
+                    />
+                  </Box>
+                )}
+
+                <CardContent
+                  sx={{
+                    flexGrow: 1,
+                  }}
+                >
                   <Typography
                     variant="h6"
                     component="h2"
@@ -237,7 +287,13 @@ export function ListCombo() {
                     to={`/combo/${combo.id_combo}`}
                     variant="contained"
                     fullWidth
-                    endIcon={<ArrowForwardIcon sx={{ fontSize: 18 }} />}
+                    endIcon={
+                      <ArrowForwardIcon
+                        sx={{
+                          fontSize: 18,
+                        }}
+                      />
+                    }
                     sx={{
                       py: 0.8,
                       borderRadius: 2,

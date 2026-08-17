@@ -26,22 +26,16 @@ export default function Header() {
 
   const { decodeToken, autorize } = useContext(UserContext);
   const userData = decodeToken();
-  const isLoggedIn = Boolean(
-    userData && Object.keys(userData).length > 0
-  );
+  const isLoggedIn = Boolean(userData && Object.keys(userData).length > 0);
 
   const { cart, getCountItems } = useCart();
 
   const [anchorElUser, setAnchorEl] = useState(null);
-  const [mobileOpcionesAnchorEl, setMobileMoreAnchorEl] =
-    useState(null);
+  const [mobileOpcionesAnchorEl, setMobileMoreAnchorEl] = useState(null);
 
-  const isMobileOpcionesMenuOpen = Boolean(
-    mobileOpcionesAnchorEl
-  );
+  const isMobileOpcionesMenuOpen = Boolean(mobileOpcionesAnchorEl);
 
-  const [anchorElPrincipal, setAnchorElPrincipal] =
-    useState(null);
+  const [anchorElPrincipal, setAnchorElPrincipal] = useState(null);
 
   const handleUserMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -112,12 +106,17 @@ export default function Header() {
       roles: null,
     },
     {
+      name: t("nav.mantenimientoCombos"),
+      link: "/combo-table",
+      roles: ["Administrador", "Empleado"],
+    },
+    {
       name: t("nav.procesos"),
       link: "/Procesos",
       roles: ["Administrador", "Encargado", "Cocina"],
     },
 
-    // NUEVO: Mantenimiento de procesos
+    // Mantenimiento de procesos
     {
       name: t("nav.mantenimientoProcesos"),
       link: "/procesos/mantenimiento",
@@ -132,11 +131,7 @@ export default function Header() {
     {
       name: t("nav.pedidos"),
       link: "/pedido",
-      roles: [
-        "Cliente",
-        "Encargado",
-        "Administrador",
-      ],
+      roles: ["Cliente", "Encargado", "Administrador"],
     },
     {
       name: t("nav.mantenimientoMenus"),
@@ -175,10 +170,7 @@ export default function Header() {
     >
       {navItems.map((item, index) => {
         if (item.roles) {
-          if (
-            !userData ||
-            Object.keys(userData).length === 0
-          ) {
+          if (!userData || Object.keys(userData).length === 0) {
             return null;
           }
 
@@ -194,10 +186,7 @@ export default function Header() {
             color="secondary"
             sx={{ px: 1.5, py: 0.8, flexShrink: 0 }}
           >
-            <Typography
-              textAlign="center"
-              noWrap
-            >
+            <Typography textAlign="center" noWrap>
               {item.name}
             </Typography>
           </Button>
@@ -210,37 +199,28 @@ export default function Header() {
   // MENÚ MÓVIL
   // =====================================================
 
-  const menuPrincipalMobile = navItems.map(
-    (page, index) => {
-      if (page.roles) {
-        if (
-          !userData ||
-          Object.keys(userData).length === 0
-        ) {
-          return null;
-        }
-
-        if (!autorize(page.roles)) {
-          return null;
-        }
+  const menuPrincipalMobile = navItems.map((page, index) => {
+    if (page.roles) {
+      if (!userData || Object.keys(userData).length === 0) {
+        return null;
       }
 
-      return (
-        <MenuItem
-          key={index}
-          component={Link}
-          to={page.link}
-          onClick={handleClosePrincipalMenu}
-        >
-          <Typography
-            sx={{ textAlign: "center" }}
-          >
-            {page.name}
-          </Typography>
-        </MenuItem>
-      );
+      if (!autorize(page.roles)) {
+        return null;
+      }
     }
-  );
+
+    return (
+      <MenuItem
+        key={index}
+        component={Link}
+        to={page.link}
+        onClick={handleClosePrincipalMenu}
+      >
+        <Typography sx={{ textAlign: "center" }}>{page.name}</Typography>
+      </MenuItem>
+    );
+  });
 
   // =====================================================
   // MENÚ DEL USUARIO
@@ -272,17 +252,13 @@ export default function Header() {
         open={Boolean(anchorElUser)}
         onClose={handleUserMenuClose}
       >
-        {userData &&
-          Object.keys(userData).length > 0 && (
-            <MenuItem>
-              <Typography
-                variant="subtitle1"
-                gutterBottom
-              >
-                {userData?.email}
-              </Typography>
-            </MenuItem>
-          )}
+        {userData && Object.keys(userData).length > 0 && (
+          <MenuItem>
+            <Typography variant="subtitle1" gutterBottom>
+              {userData?.email}
+            </Typography>
+          </MenuItem>
+        )}
 
         {userItems.map((setting, index) => {
           if (setting.login && isLoggedIn) {
@@ -293,9 +269,7 @@ export default function Header() {
                 to={setting.link}
                 onClick={handleUserMenuClose}
               >
-                <Typography
-                  sx={{ textAlign: "center" }}
-                >
+                <Typography sx={{ textAlign: "center" }}>
                   {setting.name}
                 </Typography>
               </MenuItem>
@@ -309,9 +283,7 @@ export default function Header() {
                 to={setting.link}
                 onClick={handleUserMenuClose}
               >
-                <Typography
-                  sx={{ textAlign: "center" }}
-                >
+                <Typography sx={{ textAlign: "center" }}>
                   {setting.name}
                 </Typography>
               </MenuItem>
@@ -327,8 +299,7 @@ export default function Header() {
   // MENÚ DE OPCIONES EN MÓVIL
   // =====================================================
 
-  const menuOpcionesId =
-    "badge-menu-mobile";
+  const menuOpcionesId = "badge-menu-mobile";
 
   const menuOpcionesMobile = (
     <Menu
@@ -360,8 +331,7 @@ export default function Header() {
                 badgeContent={getCountItems(cart)}
                 sx={{
                   "& .MuiBadge-badge": {
-                    backgroundColor:
-                      "secondary.main",
+                    backgroundColor: "secondary.main",
                     color: "primary.main",
                   },
                 }}
@@ -379,14 +349,8 @@ export default function Header() {
         )}
 
       <MenuItem>
-        <IconButton
-          size="large"
-          color="inherit"
-        >
-          <Badge
-            badgeContent={17}
-            color="error"
-          >
+        <IconButton size="large" color="inherit">
+          <Badge badgeContent={17} color="error">
             <NotificationsIcon />
           </Badge>
         </IconButton>
@@ -405,8 +369,7 @@ export default function Header() {
         position="static"
         color="primaryLight"
         sx={{
-          backgroundColor:
-            "primaryLight.main",
+          backgroundColor: "primaryLight.main",
           width: "100%",
           borderRadius: 0,
           overflow: "hidden",
@@ -422,8 +385,7 @@ export default function Header() {
               xs: 0.5,
               lg: 1,
             },
-            justifyContent:
-              "space-between",
+            justifyContent: "space-between",
             px: {
               xs: 1,
               sm: 2,
@@ -448,8 +410,7 @@ export default function Header() {
                 aria-label="La Tostelería"
                 sx={{
                   p: 0.5,
-                  color:
-                    "secondary.main",
+                  color: "secondary.main",
                 }}
               >
                 <img
@@ -458,8 +419,7 @@ export default function Header() {
                   style={{
                     width: 40,
                     height: 40,
-                    objectFit:
-                      "contain",
+                    objectFit: "contain",
                     display: "block",
                   }}
                 />
@@ -469,26 +429,20 @@ export default function Header() {
             <IconButton
               size="large"
               color="inherit"
-              aria-controls={
-                menuIdPrincipal
-              }
+              aria-controls={menuIdPrincipal}
               aria-haspopup="true"
               sx={{
                 mr: 2,
                 display: { xs: "inline-flex", lg: "none" },
               }}
-              onClick={
-                handleOpenPrincipalMenu
-              }
+              onClick={handleOpenPrincipalMenu}
             >
               <MenuIcon />
             </IconButton>
 
             <Menu
               id={menuIdPrincipal}
-              anchorEl={
-                anchorElPrincipal
-              }
+              anchorEl={anchorElPrincipal}
               anchorOrigin={{
                 vertical: "bottom",
                 horizontal: "left",
@@ -498,12 +452,8 @@ export default function Header() {
                 vertical: "top",
                 horizontal: "left",
               }}
-              open={Boolean(
-                anchorElPrincipal
-              )}
-              onClose={
-                handleClosePrincipalMenu
-              }
+              open={Boolean(anchorElPrincipal)}
+              onClose={handleClosePrincipalMenu}
               sx={{
                 display: {
                   xs: "block",
@@ -521,8 +471,7 @@ export default function Header() {
             sx={{
               display: "flex",
               alignItems: "center",
-              justifyContent:
-                "flex-end",
+              justifyContent: "flex-end",
               flex: "0 0 auto",
               minWidth: 0,
             }}
@@ -536,11 +485,8 @@ export default function Header() {
               {/* Carrito únicamente para Cliente */}
 
               {userData &&
-                Object.keys(userData)
-                  .length > 0 &&
-                autorize([
-                  "Cliente",
-                ]) && (
+                Object.keys(userData).length > 0 &&
+                autorize(["Cliente"]) && (
                   <Tooltip title="Mi carrito">
                     <IconButton
                       size="large"
@@ -549,28 +495,21 @@ export default function Header() {
                       to="/pedido/crear"
                       aria-label="Mi carrito"
                       sx={{
-                        color:
-                          "secondary.main",
+                        color: "secondary.main",
                       }}
                     >
                       <Badge
-                        badgeContent={getCountItems(
-                          cart
-                        )}
+                        badgeContent={getCountItems(cart)}
                         sx={{
-                          "& .MuiBadge-badge":
-                            {
-                              backgroundColor:
-                                "secondary.main",
-                              color:
-                                "primary.main",
-                            },
+                          "& .MuiBadge-badge": {
+                            backgroundColor: "secondary.main",
+                            color: "primary.main",
+                          },
                         }}
                       >
                         <ShoppingCartIcon
                           sx={{
-                            color:
-                              "secondary.main",
+                            color: "secondary.main",
                           }}
                         />
                       </Badge>
@@ -589,11 +528,7 @@ export default function Header() {
                 <Button
                   color="inherit"
                   size="small"
-                  onClick={() =>
-                    i18n.changeLanguage(
-                      "es"
-                    )
-                  }
+                  onClick={() => i18n.changeLanguage("es")}
                   sx={{
                     minWidth: "35px",
                   }}
@@ -604,11 +539,7 @@ export default function Header() {
                 <Button
                   color="inherit"
                   size="small"
-                  onClick={() =>
-                    i18n.changeLanguage(
-                      "en"
-                    )
-                  }
+                  onClick={() => i18n.changeLanguage("en")}
                   sx={{
                     minWidth: "35px",
                   }}
@@ -617,14 +548,8 @@ export default function Header() {
                 </Button>
               </Box>
 
-              <IconButton
-                size="large"
-                color="inherit"
-              >
-                <Badge
-                  badgeContent={17}
-                  color="error"
-                >
+              <IconButton size="large" color="inherit">
+                <Badge badgeContent={17} color="error">
                   <NotificationsIcon />
                 </Badge>
               </IconButton>
@@ -636,13 +561,9 @@ export default function Header() {
               <IconButton
                 size="large"
                 aria-label="show more"
-                aria-controls={
-                  menuOpcionesId
-                }
+                aria-controls={menuOpcionesId}
                 aria-haspopup="true"
-                onClick={
-                  handleOpcionesMenuOpen
-                }
+                onClick={handleOpcionesMenuOpen}
                 color="inherit"
               >
                 <MoreIcon />

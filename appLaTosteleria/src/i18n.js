@@ -13,6 +13,7 @@ const resources = {
         menus: "Menús",
         pedidos: "Pedidos",
         mantenimientoMenus: "Mantenimiento Menús",
+        mantenimientoCombos: "Mantenimiento de Combos",
       },
 
       user: {
@@ -197,6 +198,11 @@ const resources = {
           disable: "Inhabilitar",
           enable: "Habilitar",
           noCombos: "No se encontraron combos",
+
+          image: "Imagen",
+          statusEnabledSuccess: "Combo habilitado correctamente.",
+          statusDisabledSuccess: "Combo inhabilitado correctamente.",
+          statusChangeError: "No fue posible cambiar el estado del combo.",
         },
 
         form: {
@@ -226,6 +232,16 @@ const resources = {
           product: "Producto",
           productWithId: "Producto {{id}}",
 
+          comboImage: "Imagen del combo",
+
+          imageDescription: "Seleccione una imagen relacionada con el combo.",
+
+          selectImage: "Seleccionar imagen",
+
+          selectedFile: "Archivo seleccionado: {{name}}",
+
+          imagePreview: "Vista previa de la imagen del combo",
+
           validation: {
             nameRequired: "El nombre del combo es obligatorio",
             nameMin: "El nombre debe tener al menos 3 caracteres",
@@ -241,6 +257,16 @@ const resources = {
             categoryRequired: "La categoría es obligatoria",
 
             productsRequired: "Debe seleccionar al menos un producto",
+
+            nameLetters:
+              "El nombre del combo debe contener al menos una letra.",
+
+            imageRequired: "Debe seleccionar una imagen para el combo.",
+
+            invalidImage:
+              "Debe seleccionar una imagen en formato PNG, JPG, JPEG o WEBP.",
+
+            duplicateName: "Ya existe un combo registrado con ese nombre.",
           },
         },
       },
@@ -721,6 +747,7 @@ const resources = {
         menus: "Menus",
         pedidos: "Orders",
         mantenimientoMenus: "Menu Management",
+        mantenimientoCombos: "Combo Management",
       },
 
       user: {
@@ -906,6 +933,11 @@ const resources = {
           disable: "Disable",
           enable: "Enable",
           noCombos: "No combos found",
+
+          image: "Image",
+          statusEnabledSuccess: "Combo enabled successfully.",
+          statusDisabledSuccess: "Combo disabled successfully.",
+          statusChangeError: "The combo status could not be changed.",
         },
 
         form: {
@@ -935,6 +967,16 @@ const resources = {
           product: "Product",
           productWithId: "Product {{id}}",
 
+          comboImage: "Combo image",
+
+          imageDescription: "Select an image related to the combo.",
+
+          selectImage: "Select image",
+
+          selectedFile: "Selected file: {{name}}",
+
+          imagePreview: "Combo image preview",
+
           validation: {
             nameRequired: "Combo name is required",
             nameMin: "The name must contain at least 3 characters",
@@ -951,6 +993,15 @@ const resources = {
             categoryRequired: "Category is required",
 
             productsRequired: "You must select at least one product",
+
+            nameLetters: "The combo name must contain at least one letter.",
+
+            imageRequired: "You must select an image for the combo.",
+
+            invalidImage:
+              "You must select an image in PNG, JPG, JPEG, or WEBP format.",
+
+            duplicateName: "A combo with that name already exists.",
           },
         },
       },

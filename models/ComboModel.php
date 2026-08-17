@@ -1,4 +1,5 @@
 <?php
+
 class ComboModel
 {
     public $enlace;
@@ -8,10 +9,13 @@ class ComboModel
         $this->enlace = new MySqlConnect();
     }
 
+    /**
+     * Listar combos.
+     */
     public function all()
     {
         try {
-            $vSQL = "SELECT 
+            $vSQL = "SELECT
                         co.*,
                         ca.nombre_categoria
                     FROM combos co
@@ -25,10 +29,15 @@ class ComboModel
         }
     }
 
+    /**
+     * Obtener combo por id.
+     */
     public function get($id)
     {
         try {
-            $vSQL = "SELECT 
+            $id = (int) $id;
+
+            $vSQL = "SELECT
                         co.*,
                         ca.nombre_categoria
                     FROM combos co
@@ -36,12 +45,13 @@ class ComboModel
                         ON co.categoria_id = ca.id_categoria
                     WHERE co.id_combo = $id";
 
-            $vResultado = $this->enlace->ExecuteSQL($vSQL);
+            $vResultado =
+                $this->enlace->ExecuteSQL($vSQL);
 
             if (!empty($vResultado)) {
                 $vResultado = $vResultado[0];
 
-                $vSQLProductos = "SELECT 
+                $vSQLProductos = "SELECT
                                     p.*,
                                     cp.cantidad
                                   FROM combo_producto cp
@@ -49,7 +59,10 @@ class ComboModel
                                     ON cp.producto_id = p.id_producto
                                   WHERE cp.combo_id = $id";
 
-                $vResultado->productos = $this->enlace->ExecuteSQL($vSQLProductos);
+                $vResultado->productos =
+                    $this->enlace->ExecuteSQL(
+                        $vSQLProductos
+                    );
             }
 
             return $vResultado;
@@ -58,59 +71,197 @@ class ComboModel
         }
     }
 
-    public function create($objeto)
+    /**
+     * Escapar texto.
+     */
+    private function escapar($valor)
+    {
+        return addslashes(
+            trim((string) $valor)
+        );
+    }
+
+    /**
+     * Verificar si existe otro combo
+     * con el mismo nombre.
+     */
+    private function nombreExiste(
+        $nombre,
+        $idCombo = null
+    ) {
+        $nombre = $this->escapar($nombre);
+
+        $sql = "SELECT id_combo
+                FROM combos
+                WHERE LOWER(nombre_combo) =
+                      LOWER('$nombre')";
+
+        if ($idCombo !== null) {
+            $idCombo = (int) $idCombo;
+
+            $sql .=
+                " AND id_combo <> $idCombo";
+        }
+
+        $resultado =
+            $this->enlace->ExecuteSQL($sql);
+
+        return !empty($resultado);
+    }
+
+    /**
+     * Crear combo.
+     */
+    public function create($combo)
     {
         try {
-            // Datos principales del combo
-            $nombre_combo = $objeto->nombre_combo;
-            $descripcion = $objeto->descripcion;
-            $precio_especial = $objeto->precio_especial;
-            $categoria_id = $objeto->categoria_id;
-
-            // Insertar combo
-            $vSQL = "INSERT INTO combos (
-                    categoria_id,
-                    nombre_combo,
-                    descripcion,
-                    precio_especial
-                 )
-                 VALUES (
-                    '$categoria_id',
-                    '$nombre_combo',
-                    '$descripcion',
-                    '$precio_especial'
-                 )";
-
-            // Ejecutar INSERT y obtener ID
-            $idCombo = $this->enlace->executeSQL_DML_last(
-                $vSQL
-            );
-
-            // Insertar productos del combo
+            // Validar datos obligatorios
             if (
-                isset($objeto->productos) &&
-                is_array($objeto->productos)
+                !isset($combo->nombre_combo) ||
+                !isset($combo->descripcion) ||
+                !isset($combo->precio_especial) ||
+                !isset($combo->categoria_id) ||
+                !isset($combo->productos)
             ) {
-                foreach ($objeto->productos as $producto) {
+                throw new Exception(
+                    "Faltan datos obligatorios para registrar el combo."
+                );
+            }
 
-                    $producto_id = $producto->producto_id;
-                    $cantidad = $producto->cantidad;
+            $nombre =
+                $this->escapar(
+                    $combo->nombre_combo
+                );
 
-                    $vSQLProducto = "INSERT INTO combo_producto (
-                                    combo_id,
-                                    producto_id,
-                                    cantidad
-                                 )
-                                 VALUES (
-                                    '$idCombo',
-                                    '$producto_id',
-                                    '$cantidad'
-                                 )";
+            $descripcion =
+                $this->escapar(
+                    $combo->descripcion
+                );
 
-                    $this->enlace->executeSQL_DML(
-                        $vSQLProducto
-                    );
+            $precioEspecial =
+                (float) $combo->precio_especial;
+
+            $categoriaId =
+                (int) $combo->categoria_id;
+
+            // Nombre
+            if ($nombre === "") {
+                throw new Exception(
+                    "El nombre del combo es obligatorio."
+                );
+            }
+
+            // Descripción
+            if ($descripcion === "") {
+                throw new Exception(
+                    "La descripción del combo es obligatoria."
+                );
+            }
+
+            // Precio
+            if ($precioEspecial <= 0) {
+                throw new Exception(
+                    "El precio especial debe ser mayor que cero."
+                );
+            }
+
+            // Categoría
+            if ($categoriaId <= 0) {
+                throw new Exception(
+                    "Debe seleccionar una categoría válida."
+                );
+            }
+
+            // Productos
+            if (
+                !is_array($combo->productos) ||
+                count($combo->productos) === 0
+            ) {
+                throw new Exception(
+                    "Debe seleccionar al menos un producto."
+                );
+            }
+
+            // Nombre duplicado
+            if ($this->nombreExiste($nombre)) {
+                throw new Exception(
+                    "Ya existe un combo registrado con ese nombre."
+                );
+            }
+
+            /*
+             * La imagen es obligatoria al crear.
+             * Aunque SQL permita NULL para los registros
+             * antiguos, los combos nuevos deben tener imagen.
+             */
+            if (
+                !isset($combo->imagen) ||
+                trim((string) $combo->imagen) === ""
+            ) {
+                throw new Exception(
+                    "Debe seleccionar una imagen para el combo."
+                );
+            }
+
+            $imagen =
+                $this->escapar($combo->imagen);
+
+            $sql = "INSERT INTO combos
+                    (
+                        categoria_id,
+                        nombre_combo,
+                        descripcion,
+                        imagen,
+                        precio_especial
+                    )
+                    VALUES
+                    (
+                        $categoriaId,
+                        '$nombre',
+                        '$descripcion',
+                        '$imagen',
+                        $precioEspecial
+                    )";
+
+            $idCombo =
+                $this->enlace
+                ->executeSQL_DML_last($sql);
+
+            // Insertar productos
+            foreach (
+                $combo->productos as $producto
+            ) {
+                $productoId =
+                    (int) $producto->producto_id;
+
+                $cantidad =
+                    (int) $producto->cantidad;
+
+                if (
+                    $productoId <= 0 ||
+                    $cantidad <= 0
+                ) {
+                    continue;
                 }
+
+                $sqlProducto =
+                    "INSERT INTO combo_producto
+                    (
+                        combo_id,
+                        producto_id,
+                        cantidad
+                    )
+                    VALUES
+                    (
+                        $idCombo,
+                        $productoId,
+                        $cantidad
+                    )";
+
+                $this->enlace
+                    ->executeSQL_DML(
+                        $sqlProducto
+                    );
             }
 
             return $this->get($idCombo);
@@ -119,60 +270,181 @@ class ComboModel
         }
     }
 
-    public function update($objeto)
+    /**
+     * Actualizar combo.
+     */
+    public function update($combo)
     {
         try {
-            $idCombo = (int) $objeto->id_combo;
-            $categoriaId = (int) $objeto->categoria_id;
-            $nombreCombo = $objeto->nombre_combo;
-            $descripcion = $objeto->descripcion;
-            $precioEspecial = (float) $objeto->precio_especial;
+            if (
+                !isset($combo->id_combo) ||
+                !isset($combo->nombre_combo) ||
+                !isset($combo->descripcion) ||
+                !isset($combo->precio_especial) ||
+                !isset($combo->categoria_id) ||
+                !isset($combo->productos)
+            ) {
+                throw new Exception(
+                    "Faltan datos obligatorios para actualizar el combo."
+                );
+            }
 
-            // Actualizar datos principales del combo
-            $vSQL = "UPDATE combos
-                 SET
-                    categoria_id = '$categoriaId',
-                    nombre_combo = '$nombreCombo',
-                    descripcion = '$descripcion',
-                    precio_especial = '$precioEspecial'
-                 WHERE id_combo = $idCombo";
+            $idCombo =
+                (int) $combo->id_combo;
 
-            $this->enlace->executeSQL_DML($vSQL);
+            $nombre =
+                $this->escapar(
+                    $combo->nombre_combo
+                );
+
+            $descripcion =
+                $this->escapar(
+                    $combo->descripcion
+                );
+
+            $precioEspecial =
+                (float) $combo->precio_especial;
+
+            $categoriaId =
+                (int) $combo->categoria_id;
+
+            // ID
+            if ($idCombo <= 0) {
+                throw new Exception(
+                    "El identificador del combo no es válido."
+                );
+            }
+
+            // Nombre
+            if ($nombre === "") {
+                throw new Exception(
+                    "El nombre del combo es obligatorio."
+                );
+            }
+
+            // Descripción
+            if ($descripcion === "") {
+                throw new Exception(
+                    "La descripción del combo es obligatoria."
+                );
+            }
+
+            // Precio
+            if ($precioEspecial <= 0) {
+                throw new Exception(
+                    "El precio especial debe ser mayor que cero."
+                );
+            }
+
+            // Categoría
+            if ($categoriaId <= 0) {
+                throw new Exception(
+                    "Debe seleccionar una categoría válida."
+                );
+            }
+
+            // Productos
+            if (
+                !is_array($combo->productos) ||
+                count($combo->productos) === 0
+            ) {
+                throw new Exception(
+                    "Debe seleccionar al menos un producto."
+                );
+            }
+
+            // Nombre duplicado
+            if (
+                $this->nombreExiste(
+                    $nombre,
+                    $idCombo
+                )
+            ) {
+                throw new Exception(
+                    "Ya existe otro combo registrado con ese nombre."
+                );
+            }
+
+            // Imagen nueva opcional
+            $imagen = null;
+
+            if (
+                isset($combo->imagen) &&
+                trim((string) $combo->imagen) !== ""
+            ) {
+                $imagen =
+                    $this->escapar(
+                        $combo->imagen
+                    );
+            }
+
+            $sql = "UPDATE combos
+                    SET
+                        categoria_id = $categoriaId,
+                        nombre_combo = '$nombre',
+                        descripcion = '$descripcion',
+                        precio_especial = $precioEspecial";
+
+            /*
+             * Solo reemplazar imagen cuando
+             * se recibió una nueva.
+             */
+            if ($imagen !== null) {
+                $sql .=
+                    ", imagen = '$imagen'";
+            }
+
+            $sql .=
+                " WHERE id_combo = $idCombo";
+
+            $this->enlace
+                ->executeSQL_DML($sql);
 
             // Eliminar relaciones anteriores
-            $vSQLEliminar = "DELETE FROM combo_producto
-                         WHERE combo_id = $idCombo";
+            $sqlEliminar =
+                "DELETE FROM combo_producto
+                 WHERE combo_id = $idCombo";
 
-            $this->enlace->executeSQL_DML($vSQLEliminar);
+            $this->enlace
+                ->executeSQL_DML(
+                    $sqlEliminar
+                );
 
-            // Insertar nuevamente los productos seleccionados
-            if (
-                isset($objeto->productos) &&
-                is_array($objeto->productos)
+            // Registrar productos seleccionados
+            foreach (
+                $combo->productos as $producto
             ) {
-                foreach ($objeto->productos as $producto) {
-                    $productoId = (int) $producto->producto_id;
-                    $cantidad = (int) $producto->cantidad;
+                $productoId =
+                    (int) $producto->producto_id;
 
-                    if ($productoId <= 0 || $cantidad <= 0) {
-                        continue;
-                    }
+                $cantidad =
+                    (int) $producto->cantidad;
 
-                    $vSQLProducto = "INSERT INTO combo_producto
-                                (
-                                    combo_id,
-                                    producto_id,
-                                    cantidad
-                                )
-                                VALUES
-                                (
-                                    $idCombo,
-                                    $productoId,
-                                    $cantidad
-                                )";
-
-                    $this->enlace->executeSQL_DML($vSQLProducto);
+                if (
+                    $productoId <= 0 ||
+                    $cantidad <= 0
+                ) {
+                    continue;
                 }
+
+                $sqlProducto =
+                    "INSERT INTO combo_producto
+                    (
+                        combo_id,
+                        producto_id,
+                        cantidad
+                    )
+                    VALUES
+                    (
+                        $idCombo,
+                        $productoId,
+                        $cantidad
+                    )";
+
+                $this->enlace
+                    ->executeSQL_DML(
+                        $sqlProducto
+                    );
             }
 
             return $this->get($idCombo);
@@ -187,8 +459,11 @@ class ComboModel
     public function changeStatus($combo)
     {
         try {
-            $idCombo = (int) $combo->id_combo;
-            $activo = (int) $combo->activo;
+            $idCombo =
+                (int) $combo->id_combo;
+
+            $activo =
+                (int) $combo->activo;
 
             if ($idCombo <= 0) {
                 throw new Exception(
@@ -196,17 +471,21 @@ class ComboModel
                 );
             }
 
-            if ($activo !== 0 && $activo !== 1) {
+            if (
+                $activo !== 0 &&
+                $activo !== 1
+            ) {
                 throw new Exception(
                     "El estado del combo no es válido."
                 );
             }
 
             $sql = "UPDATE combos
-                SET activo = $activo
-                WHERE id_combo = $idCombo";
+                    SET activo = $activo
+                    WHERE id_combo = $idCombo";
 
-            $this->enlace->executeSQL_DML($sql);
+            $this->enlace
+                ->executeSQL_DML($sql);
 
             return $this->get($idCombo);
         } catch (Exception $e) {

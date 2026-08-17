@@ -1,9 +1,14 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
+
 import ComboService from "../../services/ComboService";
+import { UserContext } from "../../context/UserContext";
 
 import {
+  Avatar,
   Box,
   Button,
   Chip,
@@ -31,6 +36,19 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 export function TableCombo() {
   const { t } = useTranslation();
+
+  /*
+   * Obtener el rol del usuario.
+   * Solo el Administrador puede crear,
+   * editar o cambiar el estado de combos.
+   */
+  const { decodeToken } = useContext(UserContext);
+
+  const userData = decodeToken();
+
+  const roleName = userData?.rol?.name ?? "";
+
+  const isAdministrador = roleName === "Administrador";
 
   const [data, setData] = useState([]);
   const [busqueda, setBusqueda] = useState("");
@@ -64,12 +82,23 @@ export function TableCombo() {
       setData((combosActuales) =>
         combosActuales.map((combo) =>
           combo.id_combo === item.id_combo
-            ? { ...combo, activo: nuevoEstado }
+            ? {
+                ...combo,
+                activo: nuevoEstado,
+              }
             : combo,
         ),
       );
+
+      toast.success(
+        nuevoEstado === 1
+          ? t("combos.maintenance.statusEnabledSuccess")
+          : t("combos.maintenance.statusDisabledSuccess"),
+      );
     } catch (error) {
       console.error("Error al cambiar el estado del combo:", error);
+
+      toast.error(t("combos.maintenance.statusChangeError"));
     }
   };
 
@@ -90,6 +119,7 @@ export function TableCombo() {
 
   return (
     <Container maxWidth="xl" sx={{ py: 5 }}>
+      {/* Encabezado */}
       <Box
         sx={{
           display: "flex",
@@ -122,27 +152,30 @@ export function TableCombo() {
           </Typography>
         </Box>
 
-        <Button
-          component={Link}
-          to="/combo/create"
-          variant="contained"
-          startIcon={<AddCircleIcon />}
-          sx={{
-            backgroundColor: "#9b1209",
-            px: 3,
-            py: 1.5,
-            borderRadius: 2,
-            textTransform: "none",
-            fontSize: "1rem",
-            fontWeight: 600,
+        {/* Solo Administrador */}
+        {isAdministrador && (
+          <Button
+            component={Link}
+            to="/combo/create"
+            variant="contained"
+            startIcon={<AddCircleIcon />}
+            sx={{
+              backgroundColor: "#9b1209",
+              px: 3,
+              py: 1.5,
+              borderRadius: 2,
+              textTransform: "none",
+              fontSize: "1rem",
+              fontWeight: 600,
 
-            "&:hover": {
-              backgroundColor: "#7d0e07",
-            },
-          }}
-        >
-          {t("combos.maintenance.newCombo")}
-        </Button>
+              "&:hover": {
+                backgroundColor: "#7d0e07",
+              },
+            }}
+          >
+            {t("combos.maintenance.newCombo")}
+          </Button>
+        )}
       </Box>
 
       <Paper
@@ -152,6 +185,7 @@ export function TableCombo() {
           borderRadius: 4,
         }}
       >
+        {/* Filtros */}
         <Box
           sx={{
             display: "flex",
@@ -173,7 +207,9 @@ export function TableCombo() {
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
               size="small"
-              sx={{ width: 300 }}
+              sx={{
+                width: 300,
+              }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -188,7 +224,9 @@ export function TableCombo() {
               onChange={(e) => setCategoria(e.target.value)}
               displayEmpty
               size="small"
-              sx={{ width: 250 }}
+              sx={{
+                width: 250,
+              }}
             >
               <MenuItem value="">
                 {t("combos.maintenance.allCategories")}
@@ -226,6 +264,10 @@ export function TableCombo() {
                 </TableCell>
 
                 <TableCell>
+                  <strong>{t("combos.maintenance.image")}</strong>
+                </TableCell>
+
+                <TableCell>
                   <strong>{t("combos.maintenance.combo")}</strong>
                 </TableCell>
 
@@ -258,14 +300,33 @@ export function TableCombo() {
                     },
                   }}
                 >
+                  {/* ID */}
                   <TableCell>{item.id_combo}</TableCell>
 
+                  {/* Imagen */}
+                  <TableCell>
+                    <Avatar
+                      variant="rounded"
+                      src={item.imagen ? `/images/${item.imagen}` : undefined}
+                      alt={item.nombre_combo}
+                      sx={{
+                        width: 70,
+                        height: 55,
+                        borderRadius: 2,
+                      }}
+                    >
+                      {item.nombre_combo?.charAt(0)?.toUpperCase()}
+                    </Avatar>
+                  </TableCell>
+
+                  {/* Nombre */}
                   <TableCell>
                     <Typography fontWeight={600}>
                       {item.nombre_combo}
                     </Typography>
                   </TableCell>
 
+                  {/* Categoría */}
                   <TableCell>
                     <Chip
                       label={
@@ -280,6 +341,7 @@ export function TableCombo() {
                     />
                   </TableCell>
 
+                  {/* Precio */}
                   <TableCell>
                     <Typography fontWeight={600}>
                       ₡{" "}
@@ -289,6 +351,7 @@ export function TableCombo() {
                     </Typography>
                   </TableCell>
 
+                  {/* Estado */}
                   <TableCell align="center">
                     <Chip
                       label={
@@ -304,14 +367,17 @@ export function TableCombo() {
                     />
                   </TableCell>
 
+                  {/* Acciones */}
                   <TableCell align="center">
                     <Box
                       sx={{
                         display: "flex",
                         justifyContent: "center",
                         gap: 1,
+                        flexWrap: "wrap",
                       }}
                     >
+                      {/* Disponible para consulta */}
                       <Button
                         component={Link}
                         to={`/combo/${item.id_combo}`}
@@ -326,48 +392,55 @@ export function TableCombo() {
                         {t("combos.maintenance.detail")}
                       </Button>
 
-                      <Button
-                        component={Link}
-                        to={`/combo/update/${item.id_combo}`}
-                        variant="outlined"
-                        startIcon={<EditIcon />}
-                        size="small"
-                        sx={{
-                          textTransform: "none",
-                          borderRadius: 2,
-                          borderColor: "#b71c1c",
-                          color: "#b71c1c",
+                      {/* Acciones exclusivas del Administrador */}
+                      {isAdministrador && (
+                        <>
+                          <Button
+                            component={Link}
+                            to={`/combo/update/${item.id_combo}`}
+                            variant="outlined"
+                            startIcon={<EditIcon />}
+                            size="small"
+                            sx={{
+                              textTransform: "none",
+                              borderRadius: 2,
+                              borderColor: "#b71c1c",
+                              color: "#b71c1c",
 
-                          "&:hover": {
-                            borderColor: "#8e0000",
-                            backgroundColor: "#fff4f4",
-                          },
-                        }}
-                      >
-                        {t("combos.maintenance.edit")}
-                      </Button>
+                              "&:hover": {
+                                borderColor: "#8e0000",
+                                backgroundColor: "#fff4f4",
+                              },
+                            }}
+                          >
+                            {t("combos.maintenance.edit")}
+                          </Button>
 
-                      <Button
-                        onClick={() => cambiarEstado(item)}
-                        variant="outlined"
-                        startIcon={
-                          Number(item.activo) === 1 ? (
-                            <BlockIcon />
-                          ) : (
-                            <CheckCircleIcon />
-                          )
-                        }
-                        size="small"
-                        color={Number(item.activo) === 1 ? "error" : "success"}
-                        sx={{
-                          textTransform: "none",
-                          borderRadius: 2,
-                        }}
-                      >
-                        {Number(item.activo) === 1
-                          ? t("combos.maintenance.disable")
-                          : t("combos.maintenance.enable")}
-                      </Button>
+                          <Button
+                            onClick={() => cambiarEstado(item)}
+                            variant="outlined"
+                            startIcon={
+                              Number(item.activo) === 1 ? (
+                                <BlockIcon />
+                              ) : (
+                                <CheckCircleIcon />
+                              )
+                            }
+                            size="small"
+                            color={
+                              Number(item.activo) === 1 ? "error" : "success"
+                            }
+                            sx={{
+                              textTransform: "none",
+                              borderRadius: 2,
+                            }}
+                          >
+                            {Number(item.activo) === 1
+                              ? t("combos.maintenance.disable")
+                              : t("combos.maintenance.enable")}
+                          </Button>
+                        </>
+                      )}
                     </Box>
                   </TableCell>
                 </TableRow>
@@ -375,7 +448,7 @@ export function TableCombo() {
 
               {combosFiltrados.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 5 }}>
+                  <TableCell colSpan={7} align="center" sx={{ py: 5 }}>
                     <Typography color="text.secondary">
                       {t("combos.maintenance.noCombos")}
                     </Typography>

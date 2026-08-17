@@ -160,23 +160,27 @@ const rutas = createBrowserRouter([
         ],
       },
 
-      // =================================================
-      // Administrador y Encargado
-     // =================================================
+      // =====================================================
+      // MANTENIMIENTO DE COMBOS - ADMINISTRADOR Y EMPLEADO
+      // =====================================================
 
       {
-        element: <Auth requiredRoles={["Administrador", "Encargado"]} />,
-
+        element: <Auth requiredRoles={["Administrador", "Empleado"]} />,
         children: [
-          // =================================================
-          // MANTENIMIENTO DE COMBOS
-          // =================================================
-
           {
             path: "/combo-table",
             element: <TableCombo />,
           },
+        ],
+      },
 
+      // =====================================================
+      // CREAR Y ACTUALIZAR COMBOS - SOLO ADMINISTRADOR
+      // =====================================================
+
+      {
+        element: <Auth requiredRoles={["Administrador"]} />,
+        children: [
           {
             path: "/combo/create",
             element: <CreateCombo />,
@@ -186,7 +190,17 @@ const rutas = createBrowserRouter([
             path: "/combo/update/:id",
             element: <UpdateCombo />,
           },
+        ],
+      },
 
+      // =================================================
+      // Administrador y Encargado
+      // =================================================
+
+      {
+        element: <Auth requiredRoles={["Administrador", "Encargado"]} />,
+
+        children: [
           // =================================================
           // MANTENIMIENTO DE PROCESOS
           // =================================================

@@ -7,16 +7,20 @@ class ComboService {
     return axios.get(BASE_URL);
   }
 
-  getComboById(ComboId) {
-    return axios.get(BASE_URL + "/" + ComboId);
+  getComboById(comboId) {
+    return axios.get(`${BASE_URL}/${comboId}`);
   }
 
-  createCombo(combo) {
-    return axios.post(`${BASE_URL}/create`, combo);
+  createCombo(formData) {
+    return axios.post(`${BASE_URL}/create`, formData);
   }
 
-  updateCombo(combo) {
-    return axios.put(`${BASE_URL}/update`, combo);
+  updateCombo(formData) {
+    /*
+     * Se utiliza POST porque PHP recibe
+     * FormData mediante $_POST y $_FILES.
+     */
+    return axios.post(`${BASE_URL}/update`, formData);
   }
 
   changeStatus(combo) {

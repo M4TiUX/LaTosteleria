@@ -35,7 +35,10 @@ export function DetailCombo() {
   useEffect(() => {
     ComboService.getComboById(id)
       .then((response) => {
-        console.log("Detalle del combo:", response.data);
+        console.log(
+          "Detalle del combo:",
+          response.data
+        );
 
         if (response.data?.data) {
           setCombo(response.data.data);
@@ -44,7 +47,11 @@ export function DetailCombo() {
         }
       })
       .catch((error) => {
-        console.error("Error al cargar el combo:", error);
+        console.error(
+          "Error al cargar el combo:",
+          error
+        );
+
         setError(true);
       })
       .finally(() => {
@@ -74,7 +81,10 @@ export function DetailCombo() {
       >
         <CircularProgress size={36} />
 
-        <Typography variant="body2" color="text.secondary">
+        <Typography
+          variant="body2"
+          color="text.secondary"
+        >
           {t("combos.detail.loading")}
         </Typography>
       </Box>
@@ -83,8 +93,17 @@ export function DetailCombo() {
 
   if (error) {
     return (
-      <Box sx={{ maxWidth: 850, mx: "auto", py: 4 }}>
-        <Alert severity="error" sx={{ mb: 3 }}>
+      <Box
+        sx={{
+          maxWidth: 850,
+          mx: "auto",
+          py: 4,
+        }}
+      >
+        <Alert
+          severity="error"
+          sx={{ mb: 3 }}
+        >
           {t("combos.detail.loadError")}
         </Alert>
 
@@ -98,7 +117,9 @@ export function DetailCombo() {
             fontWeight: "bold",
           }}
         >
-          {t("combos.detail.backToCombos")}
+          {t(
+            "combos.detail.backToCombos"
+          )}
         </Button>
       </Box>
     );
@@ -106,8 +127,17 @@ export function DetailCombo() {
 
   if (!combo) {
     return (
-      <Box sx={{ maxWidth: 850, mx: "auto", py: 4 }}>
-        <Alert severity="warning" sx={{ mb: 3 }}>
+      <Box
+        sx={{
+          maxWidth: 850,
+          mx: "auto",
+          py: 4,
+        }}
+      >
+        <Alert
+          severity="warning"
+          sx={{ mb: 3 }}
+        >
           {t("combos.detail.notFound")}
         </Alert>
 
@@ -121,7 +151,9 @@ export function DetailCombo() {
             fontWeight: "bold",
           }}
         >
-          {t("combos.detail.backToCombos")}
+          {t(
+            "combos.detail.backToCombos"
+          )}
         </Button>
       </Box>
     );
@@ -132,16 +164,19 @@ export function DetailCombo() {
       sx={{
         maxWidth: 900,
         mx: "auto",
+
         px: {
           xs: 2,
           sm: 3,
         },
+
         py: {
           xs: 2,
           md: 3,
         },
       }}
     >
+      {/* Regresar */}
       <Button
         component={Link}
         to="/combo"
@@ -152,7 +187,9 @@ export function DetailCombo() {
           fontWeight: "bold",
         }}
       >
-        {t("combos.detail.backToCombos")}
+        {t(
+          "combos.detail.backToCombos"
+        )}
       </Button>
 
       <Card
@@ -164,36 +201,48 @@ export function DetailCombo() {
           margin: "auto",
         }}
       >
+        {/* Encabezado */}
         <Box
           sx={{
             px: {
               xs: 2.5,
               sm: 3,
             },
+
             py: 2.5,
             bgcolor: "action.hover",
             display: "flex",
-            justifyContent: "space-between",
+            justifyContent:
+              "space-between",
+
             alignItems: {
               xs: "flex-start",
               sm: "center",
             },
+
             flexDirection: {
               xs: "column",
               sm: "row",
             },
+
             gap: 2,
           }}
         >
-          <Stack direction="row" spacing={1.5} alignItems="center">
+          <Stack
+            direction="row"
+            spacing={1.5}
+            alignItems="center"
+          >
             <Box
               sx={{
                 width: 48,
                 height: 48,
                 borderRadius: "50%",
-                bgcolor: "background.paper",
+                bgcolor:
+                  "background.paper",
                 display: "flex",
-                justifyContent: "center",
+                justifyContent:
+                  "center",
                 alignItems: "center",
                 boxShadow: 1,
               }}
@@ -216,24 +265,79 @@ export function DetailCombo() {
                 {combo.nombre_combo}
               </Typography>
 
-              <Typography variant="body2" color="text.secondary">
-                {t("combos.detail.specialCombo")}
+              <Typography
+                variant="body2"
+                color="text.secondary"
+              >
+                {t(
+                  "combos.detail.specialCombo"
+                )}
               </Typography>
             </Box>
           </Stack>
 
           <Chip
-            icon={<CategoryOutlinedIcon />}
+            icon={
+              <CategoryOutlinedIcon />
+            }
             label={
               combo.nombre_categoria ||
               t("combos.noCategory")
             }
             sx={{
               fontWeight: "bold",
-              bgcolor: "background.paper",
+              bgcolor:
+                "background.paper",
             }}
           />
         </Box>
+
+        {/* Imagen principal del combo */}
+        {combo.imagen ? (
+          <Box
+            component="img"
+            src={`/images/${combo.imagen}`}
+            alt={combo.nombre_combo}
+            sx={{
+              width: "100%",
+              height: {
+                xs: 250,
+                sm: 340,
+              },
+              display: "block",
+              objectFit: "cover",
+            }}
+          />
+        ) : (
+          /*
+           * Fallback para combos antiguos
+           * que todavía tengan imagen NULL.
+           */
+          <Box
+            sx={{
+              width: "100%",
+
+              height: {
+                xs: 250,
+                sm: 340,
+              },
+
+              display: "flex",
+              justifyContent:
+                "center",
+              alignItems: "center",
+              bgcolor: "#f5f5f5",
+            }}
+          >
+            <RestaurantMenuOutlinedIcon
+              sx={{
+                fontSize: 90,
+                color:
+                  "text.disabled",
+              }}
+            />
+          </Box>
+        )}
 
         <CardContent
           sx={{
@@ -241,6 +345,7 @@ export function DetailCombo() {
               xs: 2.5,
               sm: 3,
             },
+
             "&:last-child": {
               pb: {
                 xs: 2.5,
@@ -249,6 +354,7 @@ export function DetailCombo() {
             },
           }}
         >
+          {/* Precio */}
           <Stack
             direction={{
               xs: "column",
@@ -262,8 +368,13 @@ export function DetailCombo() {
             spacing={2}
           >
             <Box>
-              <Typography variant="caption" color="text.secondary">
-                {t("combos.detail.specialPrice")}
+              <Typography
+                variant="caption"
+                color="text.secondary"
+              >
+                {t(
+                  "combos.detail.specialPrice"
+                )}
               </Typography>
 
               <Typography
@@ -277,19 +388,26 @@ export function DetailCombo() {
                   },
                 }}
               >
-                {formatearPrecio(combo.precio_especial)}
+                {formatearPrecio(
+                  combo.precio_especial
+                )}
               </Typography>
             </Box>
 
             <Chip
-              icon={<LocalOfferOutlinedIcon />}
-              label={t("combos.detail.promotionalPrice")}
+              icon={
+                <LocalOfferOutlinedIcon />
+              }
+              label={t(
+                "combos.detail.promotionalPrice"
+              )}
               variant="outlined"
             />
           </Stack>
 
           <Divider sx={{ my: 3 }} />
 
+          {/* Descripción */}
           <Stack
             direction="row"
             spacing={1}
@@ -298,8 +416,14 @@ export function DetailCombo() {
           >
             <DescriptionOutlinedIcon />
 
-            <Typography variant="h6" component="h2" fontWeight="bold">
-              {t("combos.detail.description")}
+            <Typography
+              variant="h6"
+              component="h2"
+              fontWeight="bold"
+            >
+              {t(
+                "combos.detail.description"
+              )}
             </Typography>
           </Stack>
 
@@ -310,11 +434,15 @@ export function DetailCombo() {
               lineHeight: 1.7,
             }}
           >
-            {combo.descripcion || t("combos.detail.noDescription")}
+            {combo.descripcion ||
+              t(
+                "combos.detail.noDescription"
+              )}
           </Typography>
 
           <Divider sx={{ my: 3 }} />
 
+          {/* Productos incluidos */}
           <Stack
             direction="row"
             spacing={1}
@@ -323,106 +451,179 @@ export function DetailCombo() {
           >
             <RestaurantMenuOutlinedIcon />
 
-            <Typography variant="h6" component="h2" fontWeight="bold">
-              {t("combos.detail.includedProducts")}
+            <Typography
+              variant="h6"
+              component="h2"
+              fontWeight="bold"
+            >
+              {t(
+                "combos.detail.includedProducts"
+              )}
             </Typography>
           </Stack>
 
-          {combo.productos?.length > 0 ? (
+          {combo.productos?.length >
+          0 ? (
             <List
               disablePadding
               sx={{
                 display: "flex",
-                flexDirection: "column",
+                flexDirection:
+                  "column",
                 gap: 1,
               }}
             >
-              {combo.productos.map((producto) => (
-                <ListItem
-                  key={producto.id_producto}
-                  sx={{
-                    px: 1.5,
-                    py: 1.25,
-                    border: 1,
-                    borderColor: "divider",
-                    borderRadius: 2,
-                    bgcolor: "background.paper",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1.5,
-                    flexWrap: {
-                      xs: "wrap",
-                      sm: "nowrap",
-                    },
-                    transition: "0.2s",
-                    "&:hover": {
-                      boxShadow: 3,
-                      transform: "translateY(-2px)",
-                    },
-                  }}
-                >
-                  <Box
-                    component="img"
-                    src={`/images/${producto.imagen}`}
-                    alt={producto.nombre_producto}
+              {combo.productos.map(
+                (producto) => (
+                  <ListItem
+                    key={
+                      producto.id_producto
+                    }
                     sx={{
-                      width: 58,
-                      height: 58,
+                      px: 1.5,
+                      py: 1.25,
+                      border: 1,
+                      borderColor:
+                        "divider",
                       borderRadius: 2,
-                      objectFit: "cover",
-                      flexShrink: 0,
-                    }}
-                  />
+                      bgcolor:
+                        "background.paper",
+                      display: "flex",
+                      alignItems:
+                        "center",
+                      gap: 1.5,
 
-                  <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                    <Typography
-                      fontWeight="bold"
-                      sx={{
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {producto.nombre_producto}
-                    </Typography>
-
-                    <Typography variant="body2" color="text.secondary">
-                      {t("combos.detail.quantity", {
-                        count: producto.cantidad,
-                      })}
-                    </Typography>
-                  </Box>
-
-                  <Chip
-                    label={`x${producto.cantidad}`}
-                    size="small"
-                    sx={{
-                      fontWeight: "bold",
-                    }}
-                  />
-
-                  <Button
-                    component={Link}
-                    to={`/producto/${producto.id_producto}`}
-                    variant="outlined"
-                    size="small"
-                    sx={{
-                      ml: {
-                        xs: "auto",
-                        sm: 0,
+                      flexWrap: {
+                        xs: "wrap",
+                        sm: "nowrap",
                       },
-                      textTransform: "none",
-                      fontWeight: "bold",
+
+                      transition:
+                        "0.2s",
+
+                      "&:hover": {
+                        boxShadow: 3,
+                        transform:
+                          "translateY(-2px)",
+                      },
                     }}
                   >
-                    {t("combos.detail.viewProduct")}
-                  </Button>
-                </ListItem>
-              ))}
+                    {/* Imagen del producto */}
+                    {producto.imagen ? (
+                      <Box
+                        component="img"
+                        src={`/images/${producto.imagen}`}
+                        alt={
+                          producto.nombre_producto
+                        }
+                        sx={{
+                          width: 58,
+                          height: 58,
+                          borderRadius:
+                            2,
+                          objectFit:
+                            "cover",
+                          flexShrink:
+                            0,
+                        }}
+                      />
+                    ) : (
+                      <Box
+                        sx={{
+                          width: 58,
+                          height: 58,
+                          borderRadius:
+                            2,
+                          bgcolor:
+                            "action.hover",
+                          display:
+                            "flex",
+                          justifyContent:
+                            "center",
+                          alignItems:
+                            "center",
+                          flexShrink:
+                            0,
+                        }}
+                      >
+                        <RestaurantMenuOutlinedIcon color="disabled" />
+                      </Box>
+                    )}
+
+                    <Box
+                      sx={{
+                        flexGrow: 1,
+                        minWidth: 0,
+                      }}
+                    >
+                      <Typography
+                        fontWeight="bold"
+                        sx={{
+                          whiteSpace:
+                            "nowrap",
+                          overflow:
+                            "hidden",
+                          textOverflow:
+                            "ellipsis",
+                        }}
+                      >
+                        {
+                          producto.nombre_producto
+                        }
+                      </Typography>
+
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                      >
+                        {t(
+                          "combos.detail.quantity",
+                          {
+                            count:
+                              producto.cantidad,
+                          }
+                        )}
+                      </Typography>
+                    </Box>
+
+                    <Chip
+                      label={`x${producto.cantidad}`}
+                      size="small"
+                      sx={{
+                        fontWeight:
+                          "bold",
+                      }}
+                    />
+
+                    <Button
+                      component={Link}
+                      to={`/producto/${producto.id_producto}`}
+                      variant="outlined"
+                      size="small"
+                      sx={{
+                        ml: {
+                          xs: "auto",
+                          sm: 0,
+                        },
+                        textTransform:
+                          "none",
+                        fontWeight:
+                          "bold",
+                      }}
+                    >
+                      {t(
+                        "combos.detail.viewProduct"
+                      )}
+                    </Button>
+                  </ListItem>
+                )
+              )}
             </List>
           ) : (
             <Typography color="text.secondary">
-              {t("combos.detail.noProducts")}
+              {t(
+                "combos.detail.noProducts"
+              )}
             </Typography>
           )}
 
@@ -431,7 +632,9 @@ export function DetailCombo() {
             to="/combo"
             variant="contained"
             fullWidth
-            startIcon={<ArrowBackIcon />}
+            startIcon={
+              <ArrowBackIcon />
+            }
             sx={{
               mt: 3,
               py: 1,
@@ -440,7 +643,9 @@ export function DetailCombo() {
               fontWeight: "bold",
             }}
           >
-            {t("combos.detail.backToCatalog")}
+            {t(
+              "combos.detail.backToCatalog"
+            )}
           </Button>
         </CardContent>
       </Card>
