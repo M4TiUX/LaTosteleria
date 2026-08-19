@@ -14,6 +14,8 @@ const resources = {
         pedidos: "Pedidos",
         mantenimientoMenus: "Mantenimiento Menús",
         mantenimientoCombos: "Mantenimiento de Combos",
+        mantenimientos: "Mantenimientos",
+        usuarios: "Gestión de Usuarios",
       },
 
       user: {
@@ -336,6 +338,7 @@ const resources = {
             "Registre la disponibilidad, los productos y los combos que formarán parte del menú.",
           save: "Guardar menú",
           error: "No fue posible registrar el menú.",
+          success: "Menú creado correctamente.",
         },
 
         edit: {
@@ -346,6 +349,7 @@ const resources = {
           loadError: "No fue posible cargar el menú solicitado.",
           updateError: "No fue posible actualizar el menú.",
           notFound: "No se encontró el menú solicitado.",
+          success: "Menú actualizado correctamente.",
         },
 
         form: {
@@ -373,31 +377,34 @@ const resources = {
           save: "Guardar menú",
           saving: "Guardando...",
 
+          menuImage: "Imagen del menú",
+          imageDescription: "Seleccione una imagen relacionada con el menú.",
+          selectImage: "Seleccionar imagen",
+          selectedFile: "Archivo seleccionado: {{name}}",
+          imagePreview: "Vista previa de la imagen",
+
           validation: {
             nameRequired: "El nombre del menú es obligatorio.",
             nameMin: "El nombre del menú debe tener al menos 3 caracteres.",
             nameMax: "El nombre del menú no puede superar los 100 caracteres.",
-
             startDateRequired: "La fecha de inicio es obligatoria.",
             startDateFormat:
               "La fecha de inicio debe tener formato YYYY-MM-DD.",
-
             endDateRequired: "La fecha de fin es obligatoria.",
             endDateFormat: "La fecha de fin debe tener formato YYYY-MM-DD.",
-
             dateRange:
               "La fecha de inicio no puede ser mayor que la fecha final.",
-
             startTimeRequired: "La hora de inicio es obligatoria.",
             startTimeFormat: "La hora de inicio debe tener formato HH:MM.",
-
             endTimeRequired: "La hora de fin es obligatoria.",
             endTimeFormat: "La hora de fin debe tener formato HH:MM.",
-
             timeRange:
               "La hora de inicio no puede ser mayor que la hora final cuando las fechas son iguales.",
-
             itemsRequired: "Debe seleccionar al menos un producto o un combo.",
+            imageRequired: "Debe seleccionar una imagen para el menú.",
+            imageType: "La imagen debe ser PNG, JPG, JPEG o WEBP.",
+            nameNumeric:
+              "El nombre del menú no puede contener únicamente números.",
           },
         },
 
@@ -433,6 +440,8 @@ const resources = {
           enableSuccess: "El menú fue activado correctamente.",
           disableSuccess: "El menú fue desactivado correctamente.",
           statusError: "No fue posible actualizar el estado del menú.",
+
+          image: "Imagen",
         },
       },
 
@@ -684,7 +693,7 @@ const resources = {
           notFound: "No se encontró la factura.",
           title: "Factura #{{id}}",
           generalInfo: "Información general",
-          manager: "Encargado",
+          manager: "Empleado",
           notApplicable: "No aplica",
           notRegistered: "No registrado",
           detailTitle: "Detalle de la factura",
@@ -748,6 +757,8 @@ const resources = {
         pedidos: "Orders",
         mantenimientoMenus: "Menu Management",
         mantenimientoCombos: "Combo Management",
+        mantenimientos: "Management",
+        usuarios: "User Management",
       },
 
       user: {
@@ -1070,6 +1081,7 @@ const resources = {
             "Enter the availability, products, and combos that will be included in the menu.",
           save: "Save menu",
           error: "Unable to create the menu.",
+          success: "Menu created successfully.",
         },
 
         edit: {
@@ -1080,6 +1092,7 @@ const resources = {
           loadError: "Unable to load the requested menu.",
           updateError: "Unable to update the menu.",
           notFound: "The requested menu was not found.",
+          success: "Menu updated successfully.",
         },
 
         form: {
@@ -1106,29 +1119,32 @@ const resources = {
           save: "Save menu",
           saving: "Saving...",
 
+          menuImage: "Menu image",
+
+          imageDescription: "Select an image related to the menu.",
+          selectImage: "Select image",
+          selectedFile: "Selected file: {{name}}",
+          imagePreview: "Image preview",
+
           validation: {
             nameRequired: "The menu name is required.",
             nameMin: "The menu name must contain at least 3 characters.",
             nameMax: "The menu name cannot exceed 100 characters.",
-
             startDateRequired: "The start date is required.",
             startDateFormat: "The start date must use the YYYY-MM-DD format.",
-
             endDateRequired: "The end date is required.",
             endDateFormat: "The end date must use the YYYY-MM-DD format.",
-
             dateRange: "The start date cannot be later than the end date.",
-
             startTimeRequired: "The start time is required.",
             startTimeFormat: "The start time must use the HH:MM format.",
-
             endTimeRequired: "The end time is required.",
             endTimeFormat: "The end time must use the HH:MM format.",
-
             timeRange:
               "The start time cannot be later than the end time when both dates are the same.",
-
             itemsRequired: "You must select at least one product or one combo.",
+            imageRequired: "You must select an image for the menu.",
+            imageType: "The image must be PNG, JPG, JPEG or WEBP.",
+            nameNumeric: "The menu name cannot contain only numbers.",
           },
         },
 
@@ -1164,6 +1180,8 @@ const resources = {
           enableSuccess: "The menu was enabled successfully.",
           disableSuccess: "The menu was disabled successfully.",
           statusError: "Unable to update the menu status.",
+
+          image: "Image",
         },
       },
 

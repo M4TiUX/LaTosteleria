@@ -60,7 +60,7 @@ class seguimientoPedido
             }
 
             $role = $authUser->rol->name ?? '';
-            if ($role !== 'Administrador' && $role !== 'Encargado' && $role !== 'Cocina') {
+            if ($role !== 'Administrador' && $role !== 'Empleado' && $role !== 'Cocina') {
                 $response->status(403)->toJSON(['message' => 'No tiene permisos para actualizar seguimiento.']);
                 return;
             }
@@ -87,7 +87,7 @@ class seguimientoPedido
             }
 
             $role = $authUser->rol->name ?? '';
-            if ($role !== 'Administrador' && $role !== 'Encargado') {
+            if ($role !== 'Administrador' && $role !== 'Empleado') {
                 $response->status(403)->toJSON(['message' => 'No tiene permisos para crear pedidos demo.']);
                 return;
             }

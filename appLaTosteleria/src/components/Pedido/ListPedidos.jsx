@@ -87,11 +87,11 @@ export function ListPedidos() {
 
   const isCliente = roleName === "Cliente";
 
-  const isEncargado = roleName === "Encargado";
+  const isEmpleado = roleName === "Empleado";
 
   const isAdministrador = roleName === "Administrador";
 
-  const canCreateOrder = isCliente || isEncargado;
+  const canCreateOrder = isCliente || isEmpleado;
 
   // ==========================================
   // ESTADOS
@@ -165,24 +165,24 @@ export function ListPedidos() {
       return t("orders.list.titles.client");
     }
 
-    if (isEncargado || isAdministrador) {
+    if (isEmpleado || isAdministrador) {
       return t("orders.list.titles.staff");
     }
 
     return t("orders.list.titles.default");
-  }, [isCliente, isEncargado, isAdministrador, t]);
+  }, [isCliente, isEmpleado, isAdministrador, t]);
 
   const description = useMemo(() => {
     if (isCliente) {
       return t("orders.list.descriptions.client");
     }
 
-    if (isEncargado || isAdministrador) {
+    if (isEmpleado || isAdministrador) {
       return t("orders.list.descriptions.staff");
     }
 
     return t("orders.list.descriptions.default");
-  }, [isCliente, isEncargado, isAdministrador, t]);
+  }, [isCliente, isEmpleado, isAdministrador, t]);
 
   // ==========================================
   // ESTADOS DISPONIBLES PARA FILTRAR

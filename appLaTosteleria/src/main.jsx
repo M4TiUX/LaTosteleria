@@ -175,6 +175,21 @@ const rutas = createBrowserRouter([
       },
 
       // =====================================================
+      // MANTENIMIENTO DE MENÚS - ADMINISTRADOR Y EMPLEADO
+      // =====================================================
+
+      {
+        element: <Auth requiredRoles={["Administrador", "Empleado"]} />,
+
+        children: [
+          {
+            path: "/menu/mantenimiento",
+            element: <MenuMaintenance />,
+          },
+        ],
+      },
+
+      // =====================================================
       // CREAR Y ACTUALIZAR COMBOS - SOLO ADMINISTRADOR
       // =====================================================
 
@@ -193,18 +208,32 @@ const rutas = createBrowserRouter([
         ],
       },
 
+      // =====================================================
+      // CREAR Y EDITAR MENÚS - SOLO ADMINISTRADOR
+      // =====================================================
+
+      {
+        element: <Auth requiredRoles={["Administrador"]} />,
+        children: [
+          {
+            path: "/menu/mantenimiento/crear",
+            element: <CreateMenu />,
+          },
+          {
+            path: "/menu/mantenimiento/editar/:id",
+            element: <EditMenu />,
+          },
+        ],
+      },
+
       // =================================================
-      // Administrador y Encargado
+      // Administrador y Empleado
       // =================================================
 
       {
-        element: <Auth requiredRoles={["Administrador", "Encargado"]} />,
+        element: <Auth requiredRoles={["Administrador", "Empleado"]} />,
 
         children: [
-          // =================================================
-          // MANTENIMIENTO DE PROCESOS
-          // =================================================
-
           {
             path: "/procesos/mantenimiento",
             element: <TableProcesos />,
@@ -219,30 +248,12 @@ const rutas = createBrowserRouter([
             path: "/procesos/mantenimiento/editar/:id",
             element: <UpdateProceso />,
           },
-
-          // =================================================
-          // MANTENIMIENTO DE MENÚS
-          // =================================================
-
-          {
-            path: "/menu/mantenimiento",
-            element: <MenuMaintenance />,
-          },
-
-          {
-            path: "/menu/mantenimiento/crear",
-            element: <CreateMenu />,
-          },
-
-          {
-            path: "/menu/mantenimiento/editar/:id",
-            element: <EditMenu />,
-          },
         ],
       },
 
       {
-        element: <Auth requiredRoles={["Administrador", "Encargado"]} />,
+        element: <Auth requiredRoles={["Administrador", "Empleado"]} />,
+
         children: [
           {
             path: "/dashboard",
@@ -252,7 +263,8 @@ const rutas = createBrowserRouter([
       },
 
       {
-        element: <Auth requiredRoles={["Administrador", "Encargado"]} />,
+        element: <Auth requiredRoles={["Administrador", "Empleado"]} />,
+
         children: [
           {
             path: "/user/gestion",
@@ -262,12 +274,12 @@ const rutas = createBrowserRouter([
       },
 
       // =====================================================
-      // ADMINISTRADOR, ENCARGADO Y COCINA
+      // ADMINISTRADOR, EMPLEADO Y COCINA
       // =====================================================
 
       {
         element: (
-          <Auth requiredRoles={["Administrador", "Encargado", "Cocina"]} />
+          <Auth requiredRoles={["Administrador", "Empleado", "Cocina"]} />
         ),
 
         children: [
@@ -284,11 +296,11 @@ const rutas = createBrowserRouter([
       },
 
       // =====================================================
-      // CLIENTE Y ENCARGADO
+      // CLIENTE Y EMPLEADO
       // =====================================================
 
       {
-        element: <Auth requiredRoles={["Cliente", "Encargado"]} />,
+        element: <Auth requiredRoles={["Cliente", "Empleado"]} />,
 
         children: [
           {
@@ -304,12 +316,12 @@ const rutas = createBrowserRouter([
       },
 
       // =====================================================
-      // CLIENTE, ENCARGADO Y ADMINISTRADOR
+      // CLIENTE, EMPLEADO Y ADMINISTRADOR
       // =====================================================
 
       {
         element: (
-          <Auth requiredRoles={["Cliente", "Encargado", "Administrador"]} />
+          <Auth requiredRoles={["Cliente", "Empleado", "Administrador"]} />
         ),
 
         children: [

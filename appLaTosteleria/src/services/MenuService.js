@@ -1,6 +1,7 @@
-import axios from 'axios';
+import axios from "axios";
 
-const BASE_URL = import.meta.env.VITE_BASE_URL + 'menu';
+const BASE_URL =
+  import.meta.env.VITE_BASE_URL + "menu";
 
 class MenuService {
   getMenus() {
@@ -8,19 +9,33 @@ class MenuService {
   }
 
   getMenuById(menuId) {
-    return axios.get(`${BASE_URL}/${menuId}`);
+    return axios.get(
+      `${BASE_URL}/${menuId}`
+    );
   }
 
   getAvailableMenu() {
-    return axios.get(`${BASE_URL}/available`);
+    return axios.get(
+      `${BASE_URL}/available`
+    );
   }
 
-  createMenu(menu) {
-    return axios.post(`${BASE_URL}/create`, menu);
+  createMenu(formData) {
+    return axios.post(
+      `${BASE_URL}/create`,
+      formData
+    );
   }
 
-  updateMenu(menu) {
-    return axios.put(`${BASE_URL}/update`, menu);
+  updateMenu(formData) {
+    /*
+     * Se utiliza POST para que PHP pueda
+     * recibir correctamente $_POST y $_FILES.
+     */
+    return axios.post(
+      `${BASE_URL}/update`,
+      formData
+    );
   }
 }
 

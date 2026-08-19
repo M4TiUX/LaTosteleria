@@ -75,12 +75,12 @@ class pedido
             }
 
             // =================================================
-            // ENCARGADO / ADMINISTRADOR
+            // EMPLEADO / ADMINISTRADOR
             // Pueden consultar todos
             // =================================================
 
             if (
-                $role === 'Encargado' ||
+                $role === 'Empleado' ||
                 $role === 'Administrador'
             ) {
 
@@ -230,7 +230,7 @@ class pedido
 
             if (
                 $role !== 'Cliente' &&
-                $role !== 'Encargado' &&
+                $role !== 'Empleado' &&
                 $role !== 'Administrador'
             ) {
 
@@ -351,12 +351,12 @@ class pedido
             }
 
             // =================================================
-            // ENCARGADO
+            // EMPLEADO
             // Puede crear pedido para cliente
             // y queda registrado como encargado
             // =================================================
 
-            elseif ($role === 'Encargado') {
+            elseif ($role === 'Empleado') {
 
                 if (
                     !isset(

@@ -19,7 +19,7 @@ class user
         }
 
         $role = $authUser->rol->name ?? '';
-        if ($role !== 'Administrador' && $role !== 'Encargado') {
+        if ($role !== 'Administrador' && $role !== 'Empleado') {
             $response->status(403)->toJSON(['message' => 'No tiene permisos para consultar usuarios.']);
             return;
         }
@@ -44,7 +44,7 @@ class user
         $requestedId = (int) $param;
         $authId = isset($authUser->id) ? (int) $authUser->id : 0;
 
-        $canViewAny = ($role === 'Administrador' || $role === 'Encargado');
+        $canViewAny = ($role === 'Administrador' || $role === 'Empleado');
         $canViewOwn = ($requestedId > 0 && $requestedId === $authId);
 
         if (!$canViewAny && !$canViewOwn) {
@@ -68,7 +68,7 @@ class user
         }
 
         $role = $authUser->rol->name ?? '';
-        if ($role !== 'Administrador' && $role !== 'Encargado') {
+        if ($role !== 'Administrador' && $role !== 'Empleado') {
             $response->status(403)->toJSON(['message' => 'No tiene permisos para consultar clientes.']);
             return;
         }
@@ -90,7 +90,7 @@ class user
         }
 
         $role = $authUser->rol->name ?? '';
-        if ($role !== 'Administrador' && $role !== 'Encargado') {
+        if ($role !== 'Administrador' && $role !== 'Empleado') {
             $response->status(403)->toJSON(['message' => 'No tiene permisos para consultar clientes.']);
             return;
         }

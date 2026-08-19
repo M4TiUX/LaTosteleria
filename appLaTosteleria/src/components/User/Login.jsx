@@ -69,7 +69,7 @@ export function Login() {
 
         if (roleName === "Cocina") {
           navigate(canRespectRequestedPath ? requestedPath : "/procesos", { replace: true });
-        } else if (roleName === "Administrador" || roleName === "Encargado") {
+        } else if (roleName === "Administrador" || roleName === "Empleado") {
           navigate(canRespectRequestedPath ? requestedPath : "/dashboard", { replace: true });
         } else {
           navigate(canRespectRequestedPath ? requestedPath : "/", { replace: true });

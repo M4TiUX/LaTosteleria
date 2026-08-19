@@ -152,7 +152,7 @@ export function CreatePedido() {
   const userData = decodeToken();
   const roleName = userData?.rol?.name ?? "";
   const isCliente = roleName === "Cliente";
-  const isStaff = roleName === "Encargado";
+  const isStaff = roleName === "Empleado";
 
   const {
     cart,
@@ -723,7 +723,7 @@ export function CreatePedido() {
                         label="Funcionario encargado"
                         value={userData?.name ?? "-"}
                         InputProps={{ readOnly: true }}
-                        helperText={roleName || "Encargado"}
+                        helperText={roleName || "Empleado"}
                       />
                     </Grid>
                   )}

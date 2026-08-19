@@ -50,7 +50,7 @@ const schema = yup.object({
 });
 
 const ROLE_OPTIONS = [
-  { id: 3, label: "Encargado" },
+  { id: 3, label: "Empleado" },
   { id: 4, label: "Cocina" },
 ];
 

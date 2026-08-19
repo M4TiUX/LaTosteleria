@@ -50,7 +50,7 @@ class RoutesController
                         ->authMiddleware
                         ->handle([
                             'Administrador',
-                            'Encargado'
+                            'Empleado'
                         ]);
                 }
 
@@ -58,7 +58,7 @@ class RoutesController
                     ->authMiddleware
                     ->handle([
                         'Administrador',
-                        'Encargado',
+                        'Empleado',
                         'Cliente'
                     ]);
             }
@@ -72,14 +72,14 @@ class RoutesController
                 return $this
                     ->authMiddleware
                     ->handle([
-                        'Encargado',
+                        'Empleado',
                         'Cliente'
                     ]);
             }
 
             // -----------------------------------------------
             // ACTUALIZAR ESTADO
-            // SOLO ADMIN / ENCARGADO
+            // SOLO ADMIN / EMPLEADO
             // -----------------------------------------------
 
             if (
@@ -91,7 +91,7 @@ class RoutesController
                     ->authMiddleware
                     ->handle([
                         'Administrador',
-                        'Encargado'
+                        'Empleado'
                     ]);
             }
 
@@ -156,13 +156,35 @@ class RoutesController
         }
 
         // =====================================================
+        // GESTIÓN DE MENÚS
+        // =====================================================
+
+        if ($controller === 'menu') {
+
+            // Solo el Administrador puede crear,
+            // actualizar o eliminar menús.
+            if (
+                $method === 'POST' ||
+                $method === 'PUT' ||
+                $method === 'PATCH' ||
+                $method === 'DELETE'
+            ) {
+
+                return $this
+                    ->authMiddleware
+                    ->handle([
+                        'Administrador'
+                    ]);
+            }
+        }
+
+        // =====================================================
         // MANTENIMIENTOS ADMINISTRATIVOS
         // =====================================================
 
         $adminControllers = [
             'categoria',
             'ingrediente',
-            'menu',
             'estacion',
             'procesopreparacion'
         ];
@@ -194,7 +216,7 @@ class RoutesController
                     ->authMiddleware
                     ->handle([
                         'Administrador',
-                        'Encargado'
+                        'Empleado'
                     ]);
             }
         }
@@ -217,7 +239,7 @@ class RoutesController
                     ->authMiddleware
                     ->handle([
                         'Administrador',
-                        'Encargado',
+                        'Empleado',
                         'Cliente',
                         'Cocina'
                     ]);
@@ -236,7 +258,7 @@ class RoutesController
                     ->authMiddleware
                     ->handle([
                         'Administrador',
-                        'Encargado',
+                        'Empleado',
                         'Cliente',
                         'Cocina'
                     ]);
@@ -251,7 +273,7 @@ class RoutesController
                     ->authMiddleware
                     ->handle([
                         'Administrador',
-                        'Encargado',
+                        'Empleado',
                         'Cocina'
                     ]);
             }
@@ -265,7 +287,7 @@ class RoutesController
                     ->authMiddleware
                     ->handle([
                         'Administrador',
-                        'Encargado'
+                        'Empleado'
                     ]);
             }
         }
@@ -294,14 +316,14 @@ class RoutesController
 
             if ($method === 'GET') {
 
-                // Listado completo de usuarios: Administrador y Encargado
+                // Listado completo de usuarios: Administrador y Empleado
                 if (!$action) {
 
                     return $this
                         ->authMiddleware
                         ->handle([
                             'Administrador',
-                            'Encargado'
+                            'Empleado'
                         ]);
                 }
 
@@ -315,7 +337,7 @@ class RoutesController
                         ->authMiddleware
                         ->handle([
                             'Administrador',
-                            'Encargado'
+                            'Empleado'
                         ]);
                 }
 
@@ -324,7 +346,7 @@ class RoutesController
                     ->authMiddleware
                     ->handle([
                         'Administrador',
-                        'Encargado',
+                        'Empleado',
                         'Cliente',
                         'Cocina'
                     ]);

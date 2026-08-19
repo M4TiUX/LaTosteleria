@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
+
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -28,18 +29,21 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import BlockIcon from "@mui/icons-material/Block";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import SearchIcon from "@mui/icons-material/Search";
+import RestaurantMenuOutlinedIcon from "@mui/icons-material/RestaurantMenuOutlined";
 
 import toast from "react-hot-toast";
 
 import MenuService from "../../services/MenuService";
+import { UserContext } from "../../context/UserContext";
 
-import {
-  formatMenuDate,
-  formatMenuTime,
-  isMenuAvailable,
-} from "./menuUtils";
+import { formatMenuDate, formatMenuTime, isMenuAvailable } from "./menuUtils";
 
-function buildMenuUpdatePayload(menu, activo) {
+/*
+ * Construye el FormData necesario para
+ * cambiar únicamente el estado del menú,
+ * conservando el resto de la información.
+ */
+function buildMenuUpdateFormData(menu, activo) {
   const productos = [];
   const combos = [];
 
@@ -53,24 +57,54 @@ function buildMenuUpdatePayload(menu, activo) {
     });
   });
 
-  return {
-    id_menu: Number(menu.id_menu),
-    nombre_menu: menu.nombre_menu,
-    fecha_inicio: menu.fecha_inicio,
-    fecha_fin: menu.fecha_fin,
-    hora_inicio: String(menu.hora_inicio).slice(0, 8),
-    hora_fin: String(menu.hora_fin).slice(0, 8),
-    productos: Array.from(new Set(productos)),
-    combos: Array.from(new Set(combos)),
-    activo,
-  };
+  const formData = new FormData();
+
+  formData.append("id_menu", Number(menu.id_menu));
+
+  formData.append("nombre_menu", menu.nombre_menu);
+
+  formData.append("fecha_inicio", menu.fecha_inicio);
+
+  formData.append("fecha_fin", menu.fecha_fin);
+
+  formData.append("hora_inicio", String(menu.hora_inicio).slice(0, 8));
+
+  formData.append("hora_fin", String(menu.hora_fin).slice(0, 8));
+
+  formData.append("productos", JSON.stringify(Array.from(new Set(productos))));
+
+  formData.append("combos", JSON.stringify(Array.from(new Set(combos))));
+
+  formData.append("activo", activo);
+
+  /*
+   * No enviamos imagen.
+   *
+   * MenuModel conservará la imagen
+   * que el menú ya tiene.
+   */
+
+  return formData;
 }
 
 export function MenuMaintenance() {
   const { t } = useTranslation();
 
+  const { autorize } = useContext(UserContext);
+
+  /*
+   * Solamente el Administrador puede
+   * modificar la información de Menús.
+   *
+   * El Encargado puede entrar al
+   * mantenimiento, pero solo consultar.
+   */
+  const puedeModificar = autorize(["Administrador"]);
+
   const [menus, setMenus] = useState([]);
+
   const [loaded, setLoaded] = useState(false);
+
   const [error, setError] = useState(null);
 
   const [now] = useState(() => new Date());
@@ -78,10 +112,12 @@ export function MenuMaintenance() {
   const [processingId, setProcessingId] = useState(null);
 
   const [busqueda, setBusqueda] = useState("");
+
   const [statusFilter, setStatusFilter] = useState("");
 
   const getStatus = (menu) => {
     const activo = Number(menu.activo) === 1;
+
     const disponible = isMenuAvailable(menu, now);
 
     if (!activo) {
@@ -111,6 +147,7 @@ export function MenuMaintenance() {
     MenuService.getMenus()
       .then((response) => {
         setMenus(response.data ?? []);
+
         setLoaded(true);
       })
       .catch((err) => {
@@ -130,13 +167,21 @@ export function MenuMaintenance() {
       .toLowerCase()
       .includes(busqueda.toLowerCase());
 
-    const coincideEstado =
-      statusFilter === "" || status.key === statusFilter;
+    const coincideEstado = statusFilter === "" || status.key === statusFilter;
 
     return coincideBusqueda && coincideEstado;
   });
 
   const handleToggleActive = async (menu) => {
+    /*
+     * Protección visual adicional.
+     * El Encargado nunca debería
+     * ejecutar esta función.
+     */
+    if (!puedeModificar) {
+      return;
+    }
+
     const estaActivo = Number(menu.activo) === 1;
 
     const mensajeConfirmacion = estaActivo
@@ -155,49 +200,42 @@ export function MenuMaintenance() {
 
     try {
       setError(null);
+
       setProcessingId(Number(menu.id_menu));
 
-      // Recuperar el menú completo antes de actualizarlo
+      /*
+       * Recuperamos el menú completo
+       * porque necesitamos conservar
+       * productos y combos.
+       */
       const response = await MenuService.getMenuById(menu.id_menu);
 
-      // Reconstruir todos los datos que necesita el backend
-      const payload = buildMenuUpdatePayload(
-        response.data,
-        estaActivo ? 0 : 1
-      );
+      const nuevoEstado = estaActivo ? 0 : 1;
 
-      // Actualizar usando el método original
-      await MenuService.updateMenu(payload);
+      const formData = buildMenuUpdateFormData(response.data, nuevoEstado);
+
+      await MenuService.updateMenu(formData);
 
       toast.success(
-        Number(payload.activo) === 1
+        nuevoEstado === 1
           ? t("menus.maintenance.enableSuccess")
-          : t("menus.maintenance.disableSuccess")
+          : t("menus.maintenance.disableSuccess"),
       );
 
       cargarMenus();
     } catch (err) {
-      console.error(
-        "Error al actualizar el estado del menú:",
-        err
-      );
+      console.error("Error al actualizar el estado del menú:", err);
 
       setError(err);
 
-      toast.error(
-        t("menus.maintenance.statusError")
-      );
+      toast.error(t("menus.maintenance.statusError"));
     } finally {
       setProcessingId(null);
     }
   };
 
   if (!loaded) {
-    return (
-      <p>
-        {t("menus.maintenance.loading")}
-      </p>
-    );
+    return <p>{t("menus.maintenance.loading")}</p>;
   }
 
   return (
@@ -235,27 +273,30 @@ export function MenuMaintenance() {
           </Typography>
         </Box>
 
-        <Button
-          component={Link}
-          to="/menu/mantenimiento/crear"
-          variant="contained"
-          startIcon={<AddCircleIcon />}
-          sx={{
-            backgroundColor: "#9b1209",
-            px: 3,
-            py: 1.5,
-            borderRadius: 2,
-            textTransform: "none",
-            fontSize: "1rem",
-            fontWeight: 600,
+        {/* Solo Administrador */}
+        {puedeModificar && (
+          <Button
+            component={Link}
+            to="/menu/mantenimiento/crear"
+            variant="contained"
+            startIcon={<AddCircleIcon />}
+            sx={{
+              backgroundColor: "#9b1209",
+              px: 3,
+              py: 1.5,
+              borderRadius: 2,
+              textTransform: "none",
+              fontSize: "1rem",
+              fontWeight: 600,
 
-            "&:hover": {
-              backgroundColor: "#7d0e07",
-            },
-          }}
-        >
-          {t("menus.maintenance.newMenu")}
-        </Button>
+              "&:hover": {
+                backgroundColor: "#7d0e07",
+              },
+            }}
+          >
+            {t("menus.maintenance.newMenu")}
+          </Button>
+        )}
       </Box>
 
       {error && (
@@ -293,9 +334,7 @@ export function MenuMaintenance() {
             <TextField
               placeholder={t("menus.maintenance.search")}
               value={busqueda}
-              onChange={(event) =>
-                setBusqueda(event.target.value)
-              }
+              onChange={(event) => setBusqueda(event.target.value)}
               size="small"
               sx={{ width: 300 }}
               InputProps={{
@@ -309,28 +348,20 @@ export function MenuMaintenance() {
 
             <Select
               value={statusFilter}
-              onChange={(event) =>
-                setStatusFilter(event.target.value)
-              }
+              onChange={(event) => setStatusFilter(event.target.value)}
               displayEmpty
               size="small"
               sx={{ width: 250 }}
             >
-              <MenuItem value="">
-                {t("menus.maintenance.allStatuses")}
-              </MenuItem>
+              <MenuItem value="">{t("menus.maintenance.allStatuses")}</MenuItem>
 
               <MenuItem value="available">
                 {t("menus.status.available")}
               </MenuItem>
 
-              <MenuItem value="active">
-                {t("menus.status.active")}
-              </MenuItem>
+              <MenuItem value="active">{t("menus.status.active")}</MenuItem>
 
-              <MenuItem value="inactive">
-                {t("menus.status.inactive")}
-              </MenuItem>
+              <MenuItem value="inactive">{t("menus.status.inactive")}</MenuItem>
             </Select>
           </Box>
 
@@ -355,39 +386,32 @@ export function MenuMaintenance() {
                 }}
               >
                 <TableCell>
-                  <strong>
-                    {t("menus.maintenance.id")}
-                  </strong>
+                  <strong>{t("menus.maintenance.id")}</strong>
+                </TableCell>
+
+                {/* Imagen */}
+                <TableCell>
+                  <strong>{t("menus.maintenance.image")}</strong>
                 </TableCell>
 
                 <TableCell>
-                  <strong>
-                    {t("menus.maintenance.menu")}
-                  </strong>
+                  <strong>{t("menus.maintenance.menu")}</strong>
                 </TableCell>
 
                 <TableCell>
-                  <strong>
-                    {t("menus.maintenance.start")}
-                  </strong>
+                  <strong>{t("menus.maintenance.start")}</strong>
                 </TableCell>
 
                 <TableCell>
-                  <strong>
-                    {t("menus.maintenance.end")}
-                  </strong>
+                  <strong>{t("menus.maintenance.end")}</strong>
                 </TableCell>
 
                 <TableCell align="center">
-                  <strong>
-                    {t("menus.maintenance.status")}
-                  </strong>
+                  <strong>{t("menus.maintenance.status")}</strong>
                 </TableCell>
 
                 <TableCell align="center">
-                  <strong>
-                    {t("menus.maintenance.actions")}
-                  </strong>
+                  <strong>{t("menus.maintenance.actions")}</strong>
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -406,8 +430,38 @@ export function MenuMaintenance() {
                       },
                     }}
                   >
+                    <TableCell>{menu.id_menu}</TableCell>
+
+                    {/* Imagen */}
                     <TableCell>
-                      {menu.id_menu}
+                      {menu.imagen ? (
+                        <Box
+                          component="img"
+                          src={`/images/${menu.imagen}`}
+                          alt={menu.nombre_menu}
+                          sx={{
+                            width: 85,
+                            height: 60,
+                            objectFit: "cover",
+                            borderRadius: 2,
+                            display: "block",
+                          }}
+                        />
+                      ) : (
+                        <Box
+                          sx={{
+                            width: 85,
+                            height: 60,
+                            borderRadius: 2,
+                            bgcolor: "action.hover",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                          }}
+                        >
+                          <RestaurantMenuOutlinedIcon color="disabled" />
+                        </Box>
+                      )}
                     </TableCell>
 
                     <TableCell>
@@ -421,10 +475,7 @@ export function MenuMaintenance() {
                         {formatMenuDate(menu.fecha_inicio)}
                       </Typography>
 
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                      >
+                      <Typography variant="body2" color="text.secondary">
                         {formatMenuTime(menu.hora_inicio)}
                       </Typography>
                     </TableCell>
@@ -434,10 +485,7 @@ export function MenuMaintenance() {
                         {formatMenuDate(menu.fecha_fin)}
                       </Typography>
 
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                      >
+                      <Typography variant="body2" color="text.secondary">
                         {formatMenuTime(menu.hora_fin)}
                       </Typography>
                     </TableCell>
@@ -462,6 +510,7 @@ export function MenuMaintenance() {
                           flexWrap: "wrap",
                         }}
                       >
+                        {/* Administrador y Encargado */}
                         <Button
                           component={Link}
                           to={`/menu/${menu.id_menu}`}
@@ -476,67 +525,58 @@ export function MenuMaintenance() {
                           {t("menus.maintenance.detail")}
                         </Button>
 
-                        <Button
-                          component={Link}
-                          to={`/menu/mantenimiento/editar/${menu.id_menu}`}
-                          variant="outlined"
-                          startIcon={<EditIcon />}
-                          size="small"
-                          sx={{
-                            textTransform: "none",
-                            borderRadius: 2,
-                            borderColor: "#b71c1c",
-                            color: "#b71c1c",
+                        {/* Solo Administrador */}
+                        {puedeModificar && (
+                          <>
+                            <Button
+                              component={Link}
+                              to={`/menu/mantenimiento/editar/${menu.id_menu}`}
+                              variant="outlined"
+                              startIcon={<EditIcon />}
+                              size="small"
+                              sx={{
+                                textTransform: "none",
+                                borderRadius: 2,
+                                borderColor: "#b71c1c",
+                                color: "#b71c1c",
 
-                            "&:hover": {
-                              borderColor: "#8e0000",
-                              backgroundColor: "#fff4f4",
-                            },
-                          }}
-                        >
-                          {t("menus.maintenance.edit")}
-                        </Button>
+                                "&:hover": {
+                                  borderColor: "#8e0000",
+                                  backgroundColor: "#fff4f4",
+                                },
+                              }}
+                            >
+                              {t("menus.maintenance.edit")}
+                            </Button>
 
-                        <Button
-                          variant="outlined"
-                          onClick={() =>
-                            handleToggleActive(menu)
-                          }
-                          disabled={
-                            processingId ===
-                            Number(menu.id_menu)
-                          }
-                          startIcon={
-                            Number(menu.activo) === 1 ? (
-                              <BlockIcon />
-                            ) : (
-                              <CheckCircleIcon />
-                            )
-                          }
-                          size="small"
-                          color={
-                            Number(menu.activo) === 1
-                              ? "error"
-                              : "success"
-                          }
-                          sx={{
-                            textTransform: "none",
-                            borderRadius: 2,
-                          }}
-                        >
-                          {processingId ===
-                          Number(menu.id_menu)
-                            ? t(
-                                "menus.maintenance.saving"
-                              )
-                            : Number(menu.activo) === 1
-                              ? t(
-                                  "menus.maintenance.disable"
+                            <Button
+                              variant="outlined"
+                              onClick={() => handleToggleActive(menu)}
+                              disabled={processingId === Number(menu.id_menu)}
+                              startIcon={
+                                Number(menu.activo) === 1 ? (
+                                  <BlockIcon />
+                                ) : (
+                                  <CheckCircleIcon />
                                 )
-                              : t(
-                                  "menus.maintenance.enable"
-                                )}
-                        </Button>
+                              }
+                              size="small"
+                              color={
+                                Number(menu.activo) === 1 ? "error" : "success"
+                              }
+                              sx={{
+                                textTransform: "none",
+                                borderRadius: 2,
+                              }}
+                            >
+                              {processingId === Number(menu.id_menu)
+                                ? t("menus.maintenance.saving")
+                                : Number(menu.activo) === 1
+                                  ? t("menus.maintenance.disable")
+                                  : t("menus.maintenance.enable")}
+                            </Button>
+                          </>
+                        )}
                       </Box>
                     </TableCell>
                   </TableRow>
@@ -545,15 +585,9 @@ export function MenuMaintenance() {
 
               {menusFiltrados.length === 0 && (
                 <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    align="center"
-                    sx={{ py: 5 }}
-                  >
+                  <TableCell colSpan={7} align="center" sx={{ py: 5 }}>
                     <Typography color="text.secondary">
-                      {t(
-                        "menus.maintenance.noResults"
-                      )}
+                      {t("menus.maintenance.noResults")}
                     </Typography>
                   </TableCell>
                 </TableRow>

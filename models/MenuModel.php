@@ -13,24 +13,32 @@ class MenuModel
     {
         try {
             $vSql = "SELECT
-                        id_menu,
-                        nombre_menu,
-                        fecha_inicio,
-                        fecha_fin,
-                        hora_inicio,
-                        hora_fin,
-                        activo,
-                        CASE
-                            WHEN activo = 1
-                                 AND CURDATE() BETWEEN fecha_inicio AND fecha_fin
-                                 AND CURTIME() BETWEEN hora_inicio AND hora_fin
-                            THEN 1
-                            ELSE 0
-                        END AS disponible
-                    FROM menus
-                    ORDER BY fecha_inicio DESC, hora_inicio DESC, id_menu DESC";
+                    id_menu,
+                    nombre_menu,
+                    imagen,
+                    fecha_inicio,
+                    fecha_fin,
+                    hora_inicio,
+                    hora_fin,
+                    activo,
+                    CASE
+                        WHEN activo = 1
+                             AND NOW() BETWEEN
+                                 TIMESTAMP(fecha_inicio, hora_inicio)
+                                 AND
+                                 TIMESTAMP(fecha_fin, hora_fin)
+                        THEN 1
+                        ELSE 0
+                    END AS disponible
+                FROM menus
+                ORDER BY
+                    fecha_inicio DESC,
+                    hora_inicio DESC,
+                    id_menu DESC";
 
-            return $this->enlace->ExecuteSQL($vSql);
+            return $this->enlace->ExecuteSQL(
+                $vSql
+            );
         } catch (Exception $e) {
             handleException($e);
         }
@@ -42,6 +50,7 @@ class MenuModel
             $this->validarMenu($menu);
 
             $nombre = $this->escapar($menu->nombre_menu);
+            $imagen = $this->escapar($menu->imagen);
             $fechaInicio = $this->escapar($menu->fecha_inicio);
             $fechaFin = $this->escapar($menu->fecha_fin);
             $horaInicio = $this->normalizarHora($menu->hora_inicio);
@@ -49,23 +58,25 @@ class MenuModel
             $activo = isset($menu->activo) ? (int) $menu->activo : 1;
 
             $sql = "INSERT INTO menus
-                    (
-                        nombre_menu,
-                        fecha_inicio,
-                        fecha_fin,
-                        hora_inicio,
-                        hora_fin,
-                        activo
-                    )
-                VALUES
-                    (
-                        '$nombre',
-                        '$fechaInicio',
-                        '$fechaFin',
-                        '$horaInicio',
-                        '$horaFin',
-                        $activo
-                    )";
+        (
+            nombre_menu,
+            imagen,
+            fecha_inicio,
+            fecha_fin,
+            hora_inicio,
+            hora_fin,
+            activo
+        )
+        VALUES
+        (
+            '$nombre',
+            '$imagen',
+            '$fechaInicio',
+            '$fechaFin',
+            '$horaInicio',
+            '$horaFin',
+            $activo
+        )";
 
             $idMenu = $this->enlace->executeSQL_DML_last($sql);
 
@@ -89,6 +100,15 @@ class MenuModel
             $this->validarMenu($menu, $idMenu);
 
             $nombre = $this->escapar($menu->nombre_menu);
+
+            $imagen = null;
+            if (
+                isset($menu->imagen) &&
+                trim((string) $menu->imagen) !== ''
+            ) {
+                $imagen = $this->escapar($menu->imagen);
+            }
+
             $fechaInicio = $this->escapar($menu->fecha_inicio);
             $fechaFin = $this->escapar($menu->fecha_fin);
             $horaInicio = $this->normalizarHora($menu->hora_inicio);
@@ -96,14 +116,19 @@ class MenuModel
             $activo = isset($menu->activo) ? (int) $menu->activo : 1;
 
             $sql = "UPDATE menus
-                    SET
-                        nombre_menu = '$nombre',
-                        fecha_inicio = '$fechaInicio',
-                        fecha_fin = '$fechaFin',
-                        hora_inicio = '$horaInicio',
-                        hora_fin = '$horaFin',
-                        activo = $activo
-                    WHERE id_menu = $idMenu";
+        SET
+            nombre_menu = '$nombre',
+            fecha_inicio = '$fechaInicio',
+            fecha_fin = '$fechaFin',
+            hora_inicio = '$horaInicio',
+            hora_fin = '$horaFin',
+            activo = $activo";
+
+            if ($imagen !== null) {
+                $sql .= ", imagen = '$imagen'";
+            }
+
+            $sql .= " WHERE id_menu = $idMenu";
 
             $this->enlace->executeSQL_DML($sql);
 
@@ -138,55 +163,68 @@ class MenuModel
     {
         try {
             $vSql = "SELECT
-                        id_menu,
-                        nombre_menu,
-                        fecha_inicio,
-                        fecha_fin,
-                        hora_inicio,
-                        hora_fin,
-                        activo,
-                        CASE
-                            WHEN activo = 1
-                                 AND CURDATE() BETWEEN fecha_inicio AND fecha_fin
-                                 AND CURTIME() BETWEEN hora_inicio AND hora_fin
-                            THEN 1
-                            ELSE 0
-                        END AS disponible
-                    FROM menus
-                    WHERE activo = 1
-                      AND CURDATE() BETWEEN fecha_inicio AND fecha_fin
-                      AND CURTIME() BETWEEN hora_inicio AND hora_fin
-                                        ORDER BY fecha_inicio DESC, hora_inicio DESC, fecha_fin DESC, hora_fin DESC, id_menu DESC
-                    LIMIT 1";
+                    id_menu,
+                    nombre_menu,
+                    imagen,
+                    fecha_inicio,
+                    fecha_fin,
+                    hora_inicio,
+                    hora_fin,
+                    activo,
+                    1 AS disponible
+                FROM menus
+                WHERE activo = 1
+                  AND NOW() BETWEEN
+                      TIMESTAMP(fecha_inicio, hora_inicio)
+                      AND
+                      TIMESTAMP(fecha_fin, hora_fin)
+                ORDER BY
+                    fecha_inicio DESC,
+                    hora_inicio DESC,
+                    id_menu DESC
+                LIMIT 1";
 
-            $vResultado = $this->enlace->ExecuteSQL($vSql);
-            if (!is_array($vResultado) || empty($vResultado)) {
+            $vResultado =
+                $this->enlace->ExecuteSQL(
+                    $vSql
+                );
+
+            if (
+                !is_array($vResultado) ||
+                empty($vResultado)
+            ) {
                 return null;
             }
 
-            $menu = $vResultado[0];
-            $menu->categorias = $this->getGroupedItems($menu->id_menu);
+            $menu =
+                $vResultado[0];
+
+            $menu->categorias =
+                $this->getGroupedItems(
+                    $menu->id_menu
+                );
 
             return $menu;
         } catch (Exception $e) {
             handleException($e);
         }
     }
-
+    
     private function getMenuRow($id)
     {
         $id = (int) $id;
 
         $vSql = "SELECT
-                    id_menu,
-                    nombre_menu,
-                    fecha_inicio,
-                    fecha_fin,
-                    hora_inicio,
-                    hora_fin,
-                    activo
-                FROM menus
-                WHERE id_menu = $id";
+            id_menu,
+            nombre_menu,
+            imagen,
+            fecha_inicio,
+            fecha_fin,
+            hora_inicio,
+            hora_fin,
+            activo
+        FROM menus
+        WHERE id_menu = $id";
 
         $vResultado = $this->enlace->ExecuteSQL($vSql);
 
@@ -230,7 +268,7 @@ class MenuModel
                         co.nombre_combo AS item_nombre,
                         co.descripcion AS item_descripcion,
                         co.precio_especial AS item_precio,
-                        NULL AS item_imagen,
+                        co.imagen AS item_imagen,
                         co.categoria_id AS categoria_id
                     FROM menu_items mi
                     INNER JOIN combos co ON mi.combo_id = co.id_combo
@@ -338,6 +376,22 @@ class MenuModel
 
         if (mb_strlen($nombre) > 100) {
             throw new Exception("El nombre del menú no puede superar los 100 caracteres.");
+        }
+
+        // El nombre no puede estar formado únicamente por números.
+        if (preg_match('/^\d+$/', $nombre)) {
+            throw new Exception("El nombre del menú no puede contener únicamente números.");
+        }
+
+        if ($idMenu === null) {
+            if (
+                !isset($menu->imagen) ||
+                trim((string) $menu->imagen) === ''
+            ) {
+                throw new Exception(
+                    "Debe seleccionar una imagen para el menú."
+                );
+            }
         }
 
         if (!isset($menu->fecha_inicio) || !isset($menu->fecha_fin)) {
