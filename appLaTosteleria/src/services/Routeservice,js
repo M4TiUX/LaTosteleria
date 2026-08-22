@@ -1,0 +1,55 @@
+import axios from "axios";
+
+// ============================================================
+// RouteService
+//
+// Obtiene la geometría de una ruta REAL por calles entre dos
+// coordenadas usando OSRM (Open Source Routing Machine).
+//
+// Se usa el servidor demo público de OSRM: es gratuito, no
+// requiere API key y encaja bien porque ya usamos tiles de
+// OpenStreetMap en el mapa (Leaflet).
+//
+// IMPORTANTE: el servidor demo público (router.project-osrm.org)
+// es solo para pruebas/uso liviano, tiene límites de uso y no
+// tiene SLA. Para producción con tráfico real se recomienda:
+//   - Self-host OSRM (Docker con datos de Costa Rica), o
+//   - Usar un proveedor pago (Mapbox Directions, ORS, Google
+//     Directions, etc).
+// El código de abajo no cambia si en el futuro se cambia la URL
+// base por un servidor propio.
+// ============================================================
+
+const OSRM_BASE_URL =
+  import.meta.env.VITE_OSRM_URL ?? "https://router.project-osrm.org/route/v1/driving";
+
+class RouteService {
+  /**
+   * @param {{lat:number, lng:number}} origen
+   * @param {{lat:number, lng:number}} destino
+   * @returns {Promise<{coordenadas:[number,number][], distanciaMetros:number, duracionSegundos:number}>}
+   */
+  async getRoute(origen, destino) {
+    // OSRM espera "lng,lat" (orden GeoJSON), no "lat,lng"
+    const coordsParam = `${origen.lng},${origen.lat};${destino.lng},${destino.lat}`;
+    const url = `${OSRM_BASE_URL}/${coordsParam}?overview=full&geometries=geojson`;
+
+    const response = await axios.get(url);
+    const ruta = response.data?.routes?.[0];
+
+    if (!ruta || !Array.isArray(ruta.geometry?.coordinates)) {
+      throw new Error("No se pudo calcular la ruta del repartidor.");
+    }
+
+    // GeoJSON entrega [lng, lat] -> Leaflet necesita [lat, lng]
+    const coordenadas = ruta.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
+
+    return {
+      coordenadas,
+      distanciaMetros: ruta.distance,
+      duracionSegundos: ruta.duration,
+    };
+  }
+}
+
+export default new RouteService();

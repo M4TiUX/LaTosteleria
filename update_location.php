@@ -41,7 +41,7 @@ require_once __DIR__ . '/controllers/core/Response.php';
 // SeguimientoPedidoModel::TIENDA_LAT / TIENDA_LNG)
 const TIENDA_LAT = 9.928069;
 const TIENDA_LNG = -84.090725;
-const DELIVERY_DURATION_SECONDS = 60; // duracion simulada del trayecto
+const DELIVERY_DURATION_SECONDS = 90; // duracion simulada del trayecto
 
 function responderError($mensaje, $status = 400)
 {

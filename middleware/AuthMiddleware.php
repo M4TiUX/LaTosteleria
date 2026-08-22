@@ -70,8 +70,12 @@ class AuthMiddleware
     {
         $headers = [];
 
+        if (function_exists('getallheaders')) {
+            $headers = getallheaders();
+        }
+
         if (function_exists('apache_request_headers')) {
-            $headers = apache_request_headers();
+            $headers = array_merge($headers, apache_request_headers());
         }
 
         $authHeader = '';
@@ -96,6 +100,14 @@ class AuthMiddleware
         ) {
             $authHeader =
                 $_SERVER['HTTP_AUTHORIZATION'];
+        }
+
+        if (
+            !$authHeader &&
+            isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])
+        ) {
+            $authHeader =
+                $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
         }
 
         if (
@@ -125,10 +137,8 @@ class AuthMiddleware
                     'HS256'
                 )
             );
-
         } catch (ExpiredException $e) {
             return false;
-
         } catch (Exception $e) {
             return false;
         }

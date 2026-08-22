@@ -54,6 +54,13 @@ L.Icon.Default.mergeOptions({
   shadowUrl: iconShadow,
 });
 
+const iconoUbicacionSeleccionada = new L.Icon({
+  iconUrl: " /images/nrk--pin-solid.png",
+  iconSize: [34, 34],
+  iconAnchor: [17, 34],
+  popupAnchor: [0, -34],
+});
+
 import MenuService from "../../services/MenuService";
 import PedidoService from "../../services/PedidoService";
 import DireccionEnvioService from "../../services/DireccionEnvioService";
@@ -415,7 +422,7 @@ export function CreatePedido() {
       : 0;
 
   const totalAmount = subtotalAmount + taxAmount + shippingCost;
-  const totalAmountRounded = Math.round(totalAmount);
+  const totalAmountRounded = Number(totalAmount.toFixed(2));
 
   const selectedCustomer = useMemo(() => {
     if (isCliente) {
@@ -930,6 +937,7 @@ export function CreatePedido() {
                                   selectedLocation.lat,
                                   selectedLocation.lng,
                                 ]}
+                                icon={iconoUbicacionSeleccionada}
                               >
                                 <Popup>
                                   {t("orders.create.selectedLocation")}
@@ -1300,10 +1308,21 @@ export function CreatePedido() {
                         onChange={(event) =>
                           setAmountReceived(event.target.value)
                         }
-                        inputProps={{ min: 0, step: 100 }}
+                        inputProps={{ min: 0, step: 0.01 }}
                       />
+                      <Button
+                        type="button"
+                        variant="outlined"
+                        onClick={() =>
+                          setAmountReceived(String(totalAmountRounded))
+                        }
+                      >
+                        {t("orders.create.payExactAmount", {
+                          amount: formatCurrency(totalAmountRounded),
+                        })}
+                      </Button>
                       {amountReceived !== "" &&
-                        (Number(amountReceived) < totalAmount ? (
+                        (Number(amountReceived) < totalAmountRounded ? (
                           <Alert severity="warning">
                             {t("orders.create.insufficientAmount")}
                           </Alert>

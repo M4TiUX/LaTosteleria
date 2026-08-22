@@ -25,8 +25,6 @@ export function ListProduct() {
   useEffect(() => {
     ProductService.getProducts()
       .then((response) => {
-        console.log("Estructura de la respuesta:", response.data);
-
         if (Array.isArray(response.data)) {
           setProductos(
             response.data.filter((producto) => Number(producto.activo) === 1),

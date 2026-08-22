@@ -40,7 +40,7 @@ class pedido
                     ->status(401)
                     ->toJSON([
                         'message' =>
-                            'No fue posible identificar al usuario autenticado.'
+                        'No fue posible identificar al usuario autenticado.'
                     ]);
 
                 return;
@@ -48,8 +48,8 @@ class pedido
 
             $userId =
                 isset($user->id)
-                    ? (int) $user->id
-                    : 0;
+                ? (int) $user->id
+                : 0;
 
             $role =
                 $user->rol->name ??
@@ -102,9 +102,8 @@ class pedido
                 ->status(403)
                 ->toJSON([
                     'message' =>
-                        'No tiene permisos para consultar pedidos.'
+                    'No tiene permisos para consultar pedidos.'
                 ]);
-
         } catch (Exception $e) {
             handleException($e);
         }
@@ -138,7 +137,7 @@ class pedido
                     ->status(400)
                     ->toJSON([
                         'message' =>
-                            'El identificador del pedido no es valido.'
+                        'El identificador del pedido no es valido.'
                     ]);
 
                 return;
@@ -157,7 +156,7 @@ class pedido
                     ->status(401)
                     ->toJSON([
                         'message' =>
-                            'No fue posible identificar al usuario autenticado.'
+                        'No fue posible identificar al usuario autenticado.'
                     ]);
 
                 return;
@@ -165,8 +164,8 @@ class pedido
 
             $userId =
                 isset($user->id)
-                    ? (int) $user->id
-                    : 0;
+                ? (int) $user->id
+                : 0;
 
             $role =
                 $user->rol->name ??
@@ -187,7 +186,7 @@ class pedido
                     ->status(404)
                     ->toJSON([
                         'message' =>
-                            'No se encontro el pedido solicitado.'
+                        'No se encontro el pedido solicitado.'
                     ]);
 
                 return;
@@ -204,9 +203,9 @@ class pedido
                     isset(
                         $result->cliente_id
                     )
-                        ? (int)
-                            $result->cliente_id
-                        : 0;
+                    ? (int)
+                    $result->cliente_id
+                    : 0;
 
                 if (
                     $clientePedidoId !==
@@ -217,7 +216,7 @@ class pedido
                         ->status(403)
                         ->toJSON([
                             'message' =>
-                                'Acceso denegado: este pedido pertenece a otro cliente.'
+                            'Acceso denegado: este pedido pertenece a otro cliente.'
                         ]);
 
                     return;
@@ -238,7 +237,7 @@ class pedido
                     ->status(403)
                     ->toJSON([
                         'message' =>
-                            'No tiene permisos para consultar este pedido.'
+                        'No tiene permisos para consultar este pedido.'
                     ]);
 
                 return;
@@ -251,7 +250,6 @@ class pedido
             $response->toJSON(
                 $result
             );
-
         } catch (Exception $e) {
             handleException($e);
         }
@@ -288,7 +286,7 @@ class pedido
                     ->status(401)
                     ->toJSON([
                         'message' =>
-                            'No fue posible identificar al usuario autenticado.'
+                        'No fue posible identificar al usuario autenticado.'
                     ]);
 
                 return;
@@ -296,8 +294,8 @@ class pedido
 
             $userId =
                 isset($user->id)
-                    ? (int) $user->id
-                    : 0;
+                ? (int) $user->id
+                : 0;
 
             $role =
                 $user->rol->name ??
@@ -316,7 +314,7 @@ class pedido
                     ->status(400)
                     ->toJSON([
                         'message' =>
-                            'Debe enviar la informacion del pedido.'
+                        'Debe enviar la informacion del pedido.'
                     ]);
 
                 return;
@@ -372,7 +370,7 @@ class pedido
                         ->status(400)
                         ->toJSON([
                             'message' =>
-                                'Debe seleccionar el cliente del pedido.'
+                            'Debe seleccionar el cliente del pedido.'
                         ]);
 
                     return;
@@ -397,19 +395,17 @@ class pedido
                     ->status(403)
                     ->toJSON([
                         'message' =>
-                            'El rol Administrador no puede registrar pedidos.'
+                        'El rol Administrador no puede registrar pedidos.'
                     ]);
 
                 return;
-            }
-
-            else {
+            } else {
 
                 $response
                     ->status(403)
                     ->toJSON([
                         'message' =>
-                            'No tiene permisos para registrar pedidos.'
+                        'No tiene permisos para registrar pedidos.'
                     ]);
 
                 return;
@@ -429,9 +425,10 @@ class pedido
                 ->toJSON(
                     $result
                 );
-
         } catch (Exception $e) {
-            handleException($e);
+            (new Response())->status(400)->toJSON([
+                'message' => $e->getMessage(),
+            ]);
         }
     }
 
@@ -450,13 +447,19 @@ class pedido
 
             $headers = [];
 
+            if (function_exists('getallheaders')) {
+                $headers = getallheaders();
+            }
+
             if (
                 function_exists(
                     'apache_request_headers'
                 )
             ) {
-                $headers =
-                    apache_request_headers();
+                $headers = array_merge(
+                    $headers,
+                    apache_request_headers()
+                );
             }
 
             $authHeader = '';
@@ -490,16 +493,22 @@ class pedido
             if (
                 !$authHeader &&
                 isset(
-                    $_SERVER[
-                        'HTTP_AUTHORIZATION'
-                    ]
+                    $_SERVER['HTTP_AUTHORIZATION']
                 )
             ) {
 
                 $authHeader =
-                    $_SERVER[
-                        'HTTP_AUTHORIZATION'
-                    ];
+                    $_SERVER['HTTP_AUTHORIZATION'];
+            }
+
+            if (
+                !$authHeader &&
+                isset(
+                    $_SERVER['REDIRECT_HTTP_AUTHORIZATION']
+                )
+            ) {
+                $authHeader =
+                    $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
             }
 
             // -------------------------------------------------
@@ -534,7 +543,6 @@ class pedido
                     'HS256'
                 )
             );
-
         } catch (Exception $e) {
 
             return null;

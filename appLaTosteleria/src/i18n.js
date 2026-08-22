@@ -594,6 +594,7 @@ const resources = {
           cash: "Efectivo",
           card: "Tarjeta",
           amountReceived: "Monto recibido",
+          payExactAmount: "Pagar monto exacto: {{amount}}",
           insufficientAmount: "El monto recibido es insuficiente.",
           lastFourDigits: "Últimos 4 dígitos",
           lastFourDigitsHelp: "Digite únicamente los últimos 4 dígitos.",
@@ -722,6 +723,8 @@ const resources = {
           loadError: "No fue posible consultar el seguimiento.",
           locationError:
             "No fue posible consultar la ubicación del repartidor.",
+          routeError:
+            "No fue posible calcular la ruta por calles; se muestra una línea recta como referencia.",
           demoError: "No fue posible crear el pedido demo.",
           loading: "Cargando seguimiento del pedido...",
           title: "Seguimiento del pedido",
@@ -1334,6 +1337,7 @@ const resources = {
           cash: "Cash",
           card: "Card",
           amountReceived: "Amount received",
+          payExactAmount: "Pay exact amount: {{amount}}",
           insufficientAmount: "The amount received is insufficient.",
           lastFourDigits: "Last 4 digits",
           lastFourDigitsHelp: "Enter only the last 4 digits.",
@@ -1451,6 +1455,8 @@ const resources = {
           orderRequired: "You must specify an order to view tracking.",
           loadError: "Unable to load tracking.",
           locationError: "Unable to load the driver's location.",
+          routeError:
+            "Unable to calculate the street route; showing a straight line as a reference.",
           demoError: "Unable to create the demo order.",
           loading: "Loading order tracking...",
           title: "Order tracking",

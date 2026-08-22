@@ -30,10 +30,10 @@ class SeguimientoPedidoModel
         ],
     ];
 
-    private const UPDATE_INTERVAL_SECONDS = 5;
+    private const UPDATE_INTERVAL_SECONDS = 10;
     private const TIENDA_LAT = 9.928069;
     private const TIENDA_LNG = -84.090725;
-    private const DELIVERY_DURATION_SECONDS = 60; // duracion simulada del trayecto
+    private const DELIVERY_DURATION_SECONDS = 90; // duracion simulada del trayecto
 
     public $enlace;
 

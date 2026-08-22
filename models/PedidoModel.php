@@ -319,7 +319,7 @@ class PedidoModel
             }
 
             $this->registerPayment($pedidoId, $pagoValidado, $total, $fechaCreacion);
-            
+
             foreach ($validatedItems as $item) {
                 $productoId = $item['item_type'] === 'producto' ? (int) $item['item_id'] : 'NULL';
                 $comboId = $item['item_type'] === 'combo' ? (int) $item['item_id'] : 'NULL';
@@ -437,6 +437,9 @@ class PedidoModel
                 $pago->monto_recibido
                 : 0;
 
+            $montoRecibido = round($montoRecibido, 2);
+            $total = round((float) $total, 2);
+
             if (
                 $montoRecibido <= 0
             ) {
@@ -446,7 +449,7 @@ class PedidoModel
             }
 
             if (
-                $montoRecibido <
+                ($montoRecibido + 0.001) <
                 $total
             ) {
                 throw new Exception(

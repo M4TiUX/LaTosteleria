@@ -103,7 +103,11 @@ class seguimientoPedido
     private function getAuthenticatedUser()
     {
         try {
-            $headers = function_exists('apache_request_headers') ? apache_request_headers() : [];
+            $headers = function_exists('getallheaders') ? getallheaders() : [];
+
+            if (function_exists('apache_request_headers')) {
+                $headers = array_merge($headers, apache_request_headers());
+            }
             $authHeader = '';
 
             foreach ($headers as $key => $value) {
@@ -115,6 +119,10 @@ class seguimientoPedido
 
             if (!$authHeader && isset($_SERVER['HTTP_AUTHORIZATION'])) {
                 $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
+            }
+
+            if (!$authHeader && isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+                $authHeader = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
             }
 
             if (!$authHeader || !preg_match('/Bearer\s+(\S+)/i', $authHeader, $matches)) {

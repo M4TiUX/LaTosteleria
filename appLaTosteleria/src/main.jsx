@@ -357,13 +357,18 @@ const rutas = createBrowserRouter([
 axios.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
+    const backendUrl = import.meta.env.VITE_BASE_URL;
+    const requestUrl = config.url ?? "";
+    const isBackendRequest =
+      requestUrl.startsWith(backendUrl) ||
+      (!requestUrl.startsWith("http://") && !requestUrl.startsWith("https://"));
 
     // Solo adjuntamos el header si el token tiene forma de JWT valido
     // (3 segmentos separados por punto). Si esta corrupto, lo
     // eliminamos en vez de seguir reenviandolo roto en cada request.
-    if (token && token.split(".").length === 3) {
+    if (isBackendRequest && token && token.split(".").length === 3) {
       config.headers.Authorization = `Bearer ${token}`;
-    } else if (token) {
+    } else if (isBackendRequest && token) {
       localStorage.removeItem("token");
     }
 
@@ -371,6 +376,26 @@ axios.interceptors.request.use(
   },
 
   (error) => {
+    return Promise.reject(error);
+  },
+);
+
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const requestUrl = error.config?.url ?? "";
+    const backendUrl = import.meta.env.VITE_BASE_URL;
+    const isBackendRequest = requestUrl.startsWith(backendUrl);
+    const isLoginRequest = requestUrl.includes("/user/login");
+
+    if (error.response?.status === 401 && isBackendRequest && !isLoginRequest) {
+      localStorage.removeItem("token");
+
+      if (window.location.pathname !== "/user/login") {
+        window.location.assign("/user/login");
+      }
+    }
+
     return Promise.reject(error);
   },
 );

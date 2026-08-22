@@ -20,7 +20,10 @@ export function Login() {
   const [error, setError] = useState(null);
 
   const loginSchema = yup.object({
-    email: yup.string().required("El email es requerido").email("Formato email"),
+    email: yup
+      .string()
+      .required("El email es requerido")
+      .email("Formato email"),
     password: yup.string().required("El password es requerido"),
   });
 
@@ -41,8 +44,13 @@ export function Login() {
       const data = response.data;
 
       // ✅ 1. Si la respuesta es HTML, mostramos error y no guardamos nada
-      if (typeof data === "string" && (data.includes("<html") || data.includes("xdebug"))) {
-        toast.error("Error interno del servidor. Contacta al administrador.", { duration: 5000 });
+      if (
+        typeof data === "string" &&
+        (data.includes("<html") || data.includes("xdebug"))
+      ) {
+        toast.error("Error interno del servidor. Contacta al administrador.", {
+          duration: 5000,
+        });
         setError("El servidor devolvió un error HTML.");
         return;
       }
@@ -51,9 +59,17 @@ export function Login() {
       let token = null;
       if (typeof data === "string" && data.split(".").length === 3) {
         token = data; // es un JWT directo
-      } else if (data?.token && typeof data.token === "string" && data.token.split(".").length === 3) {
+      } else if (
+        data?.token &&
+        typeof data.token === "string" &&
+        data.token.split(".").length === 3
+      ) {
         token = data.token;
-      } else if (data?.access_token && typeof data.access_token === "string" && data.access_token.split(".").length === 3) {
+      } else if (
+        data?.access_token &&
+        typeof data.access_token === "string" &&
+        data.access_token.split(".").length === 3
+      ) {
         token = data.access_token;
       }
 
@@ -65,14 +81,22 @@ export function Login() {
         toast.success("Inicio de sesion exitoso.", { duration: 2000 });
 
         const requestedPath = location.state?.from?.pathname;
-        const canRespectRequestedPath = Boolean(requestedPath && requestedPath !== "/unauthorized");
+        const canRespectRequestedPath = Boolean(
+          requestedPath && requestedPath !== "/unauthorized",
+        );
 
         if (roleName === "Cocina") {
-          navigate(canRespectRequestedPath ? requestedPath : "/procesos", { replace: true });
+          navigate(canRespectRequestedPath ? requestedPath : "/procesos", {
+            replace: true,
+          });
         } else if (roleName === "Administrador" || roleName === "Empleado") {
-          navigate(canRespectRequestedPath ? requestedPath : "/dashboard", { replace: true });
+          navigate(canRespectRequestedPath ? requestedPath : "/dashboard", {
+            replace: true,
+          });
         } else {
-          navigate(canRespectRequestedPath ? requestedPath : "/", { replace: true });
+          navigate(canRespectRequestedPath ? requestedPath : "/", {
+            replace: true,
+          });
         }
       } else {
         // Si no hay token, mostramos el mensaje de error que venga del backend
@@ -82,7 +106,9 @@ export function Login() {
       }
     } catch (err) {
       console.error("Error en login:", err);
-      toast.error("Error al iniciar sesión. Intenta de nuevo.", { duration: 4000 });
+      toast.error("Error al iniciar sesión. Intenta de nuevo.", {
+        duration: 4000,
+      });
       setError(err.message || "Error desconocido");
     }
   };
@@ -92,14 +118,14 @@ export function Login() {
   return (
     <form onSubmit={handleSubmit(onSubmit, onError)} noValidate>
       <Grid container spacing={1}>
-        <Grid size={12} sm={12}>
+        <Grid size={12}>
           <Typography variant="h5" gutterBottom>
             Iniciar sesion
           </Typography>
         </Grid>
 
         {error && (
-          <Grid size={12} sm={12}>
+          <Grid size={12}>
             <Alert severity="error">{error}</Alert>
           </Grid>
         )}
@@ -141,8 +167,13 @@ export function Login() {
           </FormControl>
         </Grid>
 
-        <Grid size={12} sm={12}>
-          <Button type="submit" variant="contained" color="secondary" sx={{ m: 1 }}>
+        <Grid size={12}>
+          <Button
+            type="submit"
+            variant="contained"
+            color="secondary"
+            sx={{ m: 1 }}
+          >
             Ingresar
           </Button>
         </Grid>

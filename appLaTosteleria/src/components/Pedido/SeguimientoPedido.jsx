@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Alert,
@@ -14,7 +14,14 @@ import {
   Typography,
 } from "@mui/material";
 
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  Polyline,
+  useMap,
+} from "react-leaflet";
 import { useTranslation } from "react-i18next";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -23,6 +30,9 @@ import iconShadow from "leaflet/dist/images/marker-shadow.png";
 
 import SeguimientoPedidoService from "../../services/SeguimientoPedidoService";
 import UbicacionRepartidorService from "../../services/UbicacionRepartidorService";
+import RouteService from "../../services/RouteService";
+import { buildCumulativeDistances, pointAtFraction } from "../../utils/geo";
+import PropTypes from "prop-types";
 
 // ============================================================
 // FIX ICONO POR DEFECTO DE LEAFLET
@@ -39,18 +49,18 @@ L.Icon.Default.mergeOptions({
 // ============================================================
 
 const iconoTienda = new L.Icon({
-  iconUrl: "/images/Logo2.png",
-  shadowUrl: iconShadow,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
+  iconUrl: "/images/nrk--pin-solid.png",
+  iconSize: [38, 38],
+  iconAnchor: [19, 38],
+  popupAnchor: [0, -38],
   className: "marker-tienda",
 });
 
 const iconoDestino = new L.Icon({
-  iconUrl: "/images/Destino.png",
-  shadowUrl: iconShadow,
-  iconSize: [25, 41],
-  iconAnchor: [25, 41],
+  iconUrl: "/images/nrk--pin-solid.png",
+  iconSize: [34, 34],
+  iconAnchor: [17, 34],
+  popupAnchor: [0, -34],
   className: "marker-destino",
 });
 
@@ -73,8 +83,25 @@ const TIENDA_LNG = -84.090725;
 // INTERVALOS DE POLLING (en milisegundos)
 // ============================================================
 
-const INTERVALO_TRACKING_MS = 5000; // historial / progreso / estado
-const INTERVALO_UBICACION_MS = 3000; // posicion del repartidor en el mapa
+const INTERVALO_TRACKING_MS = 1000; // historial / progreso / estado
+const INTERVALO_UBICACION_MS = 1000; // posicion del repartidor en el mapa
+const DURACION_ANIMACION_MS = 900;
+
+function RouteViewport({ positions }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (positions.length > 1) {
+      map.fitBounds(positions, { padding: [24, 24] });
+    }
+  }, [map, positions]);
+
+  return null;
+}
+
+RouteViewport.propTypes = {
+  positions: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)).isRequired,
+};
 
 function formatDateTime(value) {
   if (!value) {
@@ -123,6 +150,25 @@ export function SeguimientoPedido() {
 
   const [ubicacionRepartidor, setUbicacionRepartidor] = useState(null);
   const [mapaError, setMapaError] = useState(null);
+  const progresoAnimadoRef = useRef(0);
+  const [progresoAnimado, setProgresoAnimado] = useState(0);
+
+  // ==========================================================
+  // RUTA REAL (calles) TIENDA -> DESTINO
+  // Se pide una sola vez por pedido (no en cada polling)
+  // ==========================================================
+
+  const [rutaCoordenadas, setRutaCoordenadas] = useState([]);
+  const [rutaCumDist, setRutaCumDist] = useState([]);
+  const [rutaError, setRutaError] = useState(null);
+  const [rutaCargada, setRutaCargada] = useState(false);
+
+  useEffect(() => {
+    setRutaCoordenadas([]);
+    setRutaCumDist([]);
+    setRutaError(null);
+    setRutaCargada(false);
+  }, [id]);
 
   // ==========================================================
   // POLLING: HISTORIAL / ESTADO / PROGRESO
@@ -228,6 +274,102 @@ export function SeguimientoPedido() {
     };
   }, [id, t, tracking?.metodo_entrega, tracking?.estado_actual]);
 
+  useEffect(() => {
+    const progresoObjetivo = Math.min(
+      1,
+      Math.max(0, Number(ubicacionRepartidor?.progreso_ruta ?? 0) / 100),
+    );
+    const progresoInicial = progresoAnimadoRef.current;
+
+    if (progresoInicial === progresoObjetivo) {
+      return undefined;
+    }
+
+    let animationFrameId;
+    const startedAt = performance.now();
+
+    const animate = (now) => {
+      const elapsed = now - startedAt;
+      const fraction = Math.min(1, elapsed / DURACION_ANIMACION_MS);
+      const easedFraction = 1 - (1 - fraction) ** 3;
+      const nextProgress =
+        progresoInicial + (progresoObjetivo - progresoInicial) * easedFraction;
+
+      progresoAnimadoRef.current = nextProgress;
+      setProgresoAnimado(nextProgress);
+
+      if (fraction < 1) {
+        animationFrameId = window.requestAnimationFrame(animate);
+      }
+    };
+
+    animationFrameId = window.requestAnimationFrame(animate);
+
+    return () => window.cancelAnimationFrame(animationFrameId);
+  }, [ubicacionRepartidor?.progreso_ruta, rutaCoordenadas.length]);
+
+  // ==========================================================
+  // RUTA REAL (calles) TIENDA -> DESTINO
+  // Se pide una sola vez apenas se conoce la direccion de entrega
+  // (no en cada polling: la ruta no cambia, solo el avance sobre ella)
+  // ==========================================================
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const direccionEntrega = tracking?.direccion_entrega ?? null;
+    const esDomicilio = tracking?.metodo_entrega === "Domicilio";
+    const tieneCoordenadas =
+      direccionEntrega?.latitud && direccionEntrega?.longitud;
+
+    if (!esDomicilio || !tieneCoordenadas || rutaCargada) {
+      return undefined;
+    }
+
+    const cargarRuta = async () => {
+      try {
+        const { coordenadas } = await RouteService.getRoute(
+          { lat: TIENDA_LAT, lng: TIENDA_LNG },
+          {
+            lat: Number(direccionEntrega.latitud),
+            lng: Number(direccionEntrega.longitud),
+          },
+        );
+
+        if (isMounted) {
+          setRutaCoordenadas(coordenadas);
+          setRutaCumDist(buildCumulativeDistances(coordenadas));
+          setRutaError(null);
+        }
+      } catch (requestError) {
+        if (isMounted) {
+          setRutaError(
+            requestError?.message ?? t("orders.tracking.routeError"),
+          );
+        }
+      } finally {
+        if (isMounted) {
+          setRutaCargada(true);
+        }
+      }
+    };
+
+    cargarRuta();
+
+    return () => {
+      isMounted = false;
+    };
+    // Se depende de latitud/longitud puntuales (no del objeto completo)
+    // para no re-disparar el fetch por cambios que no afectan la ruta.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    t,
+    rutaCargada,
+    tracking?.metodo_entrega,
+    tracking?.direccion_entrega?.latitud,
+    tracking?.direccion_entrega?.longitud,
+  ]);
+
   // ==========================================================
   // CREAR PEDIDO DEMO
   // ==========================================================
@@ -278,6 +420,26 @@ export function SeguimientoPedido() {
         (TIENDA_LNG + Number(direccion.longitud)) / 2,
       ]
     : [TIENDA_LAT, TIENDA_LNG];
+
+  // ==========================================================
+  // POSICION DEL REPARTIDOR SOBRE LA RUTA
+  //
+  // El backend solo manda un % de avance (progreso_ruta), calculado
+  // por tiempo transcurrido. Ese % se traduce aca a un punto real
+  // sobre la ruta por calles (rutaCoordenadas), para que el icono
+  // "camine" sobre el camino en vez de moverse en linea recta.
+  //
+  // Si la ruta real no se pudo cargar (rutaError), se usa como
+  // respaldo la posicion en linea recta que manda el backend.
+  // ==========================================================
+
+  const tieneRutaReal = rutaCoordenadas.length > 1 && !rutaError;
+
+  const posicionRepartidor = ubicacionRepartidor
+    ? tieneRutaReal
+      ? pointAtFraction(rutaCoordenadas, rutaCumDist, progresoAnimado)
+      : [ubicacionRepartidor.latitud, ubicacionRepartidor.longitud]
+    : null;
 
   return (
     <Stack spacing={3}>
@@ -377,6 +539,12 @@ export function SeguimientoPedido() {
                       </Alert>
                     )}
 
+                    {rutaError && (
+                      <Alert severity="info" sx={{ mb: 1.5 }}>
+                        {t("orders.tracking.routeError")}
+                      </Alert>
+                    )}
+
                     <Box
                       sx={{
                         height: 350,
@@ -395,6 +563,8 @@ export function SeguimientoPedido() {
                           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         />
+
+                        <RouteViewport positions={rutaCoordenadas} />
 
                         {/* TIENDA (fija) */}
                         <Marker
@@ -418,13 +588,22 @@ export function SeguimientoPedido() {
                           </Popup>
                         </Marker>
 
-                        {/* REPARTIDOR (se mueve con el polling) */}
-                        {ubicacionRepartidor && (
+                        {/* RUTA REAL POR CALLES (tienda -> destino) */}
+                        {tieneRutaReal && (
+                          <Polyline
+                            positions={rutaCoordenadas}
+                            pathOptions={{
+                              color: "#6f4e37",
+                              weight: 5,
+                              opacity: 0.7,
+                            }}
+                          />
+                        )}
+
+                        {/* REPARTIDOR (camina sobre la ruta con el polling) */}
+                        {posicionRepartidor && (
                           <Marker
-                            position={[
-                              ubicacionRepartidor.latitud,
-                              ubicacionRepartidor.longitud,
-                            ]}
+                            position={posicionRepartidor}
                             icon={iconoRepartidor}
                           >
                             <Popup>
