@@ -310,142 +310,309 @@ INSERT INTO `producto_ingrediente` VALUES (1,1),(1,2),(2,3),(2,4),(3,5),(3,6),(4
    DATOS ADICIONALES
    ===================================================== */
 
--- Nuevas categorías
-INSERT INTO categorias (id_categoria,nombre_categoria) VALUES
-(4,'Sandwiches'),
-(5,'Frappés');
+START TRANSACTION;
 
--- Nuevas estaciones
-INSERT INTO estaciones (id_estacion,nombre_estacion) VALUES
-(4,'Empaque'),
-(5,'Bebidas Frías');
+-- Categorías y estaciones que ya forman parte del catálogo ampliado.
+INSERT INTO categorias (nombre_categoria)
+SELECT 'Sandwiches' FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM categorias WHERE nombre_categoria = 'Sandwiches');
+INSERT INTO categorias (nombre_categoria)
+SELECT 'Frappés' FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM categorias WHERE nombre_categoria = 'Frappés');
+INSERT INTO estaciones (nombre_estacion)
+SELECT 'Empaque' FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM estaciones WHERE nombre_estacion = 'Empaque');
+INSERT INTO estaciones (nombre_estacion)
+SELECT 'Bebidas Frías' FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM estaciones WHERE nombre_estacion = 'Bebidas Frías');
 
--- Nuevos ingredientes
-INSERT INTO ingredientes VALUES
-(10,'Jamón'),
-(11,'Queso Mozzarella'),
-(12,'Tomate'),
-(13,'Albahaca'),
-(14,'Pollo'),
-(15,'Mantequilla'),
-(16,'Canela'),
-(17,'Helado de Vainilla'),
-(18,'Caramelo'),
-(19,'Fresas');
-
--- Nuevos menús
-INSERT INTO menus VALUES
-(5,'Menú Frappés','2026-06-01','2026-12-31','12:00:00','18:00:00',0),
-(6,'Menú Fin de Semana','2026-06-01','2026-12-31','08:00:00','16:00:00',0);
-
--- Nuevos repartidores
-INSERT INTO repartidores (`id_repartidor`,`nombre`,`telefono`,`vehiculo`,`disponible`) VALUES
-(3,'Luis Hernández','8666-1111','Motocicleta',1),
-(4,'María Gómez','8555-2222','Bicicleta',1);
-
--- Roles oficiales ya insertados en la seccion inicial (1-4).
-
--- Nuevos productos
-INSERT INTO productos VALUES
-(5,1,'Cappuccino','Café espresso con espuma de leche',2000.00,'cappuccino.jpg',1),
-(6,1,'Chocolate Caliente','Chocolate caliente artesanal',2200.00,'chocolate-caliente.jpg',1),
-(7,2,'Tostada Caprese','Pan artesanal con tomate, mozzarella y albahaca',3500.00,'caprese.jpg',1),
-(8,2,'Sándwich de Pollo','Pan artesanal con pollo y queso',4200.00,'sandwich-pollo.jpg',1),
-(9,3,'Pie de Manzana','Pie artesanal con canela',2800.00,'pie-manzana.jpg',1),
-(10,5,'Frappé de Caramelo','Frappé con caramelo y crema batida',3200.00,'frappe-caramelo.jpg',1);
-
--- Nuevos combos
-INSERT INTO combos VALUES
-(5,1,'Combo Cappuccino','Cappuccino con cheesecake',4200.00,1),
-(6,2,'Combo Caprese','Tostada Caprese y café latte',5000.00,1),
-(7,5,'Combo Frappé Dulce','Frappé de Caramelo y Brownie',4500.00,1);
-
--- Relación combos-productos
-INSERT INTO combo_producto VALUES
-(5,5,1),
-(5,3,1),
-(6,7,1),
-(6,1,1),
-(7,10,1),
-(7,4,1);
-
--- Nuevos elementos de menú
-INSERT INTO menu_items VALUES
-(10,5,10,NULL),
-(11,5,NULL,7),
-(12,6,5,NULL),
-(13,6,7,NULL),
-(14,6,8,NULL),
-(15,6,NULL,6);
-
--- Procesos de preparación
-INSERT INTO procesos_preparacion VALUES
-(7,5,1,1,3),
-(8,6,1,1,5),
-(9,7,1,1,4),
-(10,7,2,2,5),
-(11,8,1,1,5),
-(12,8,2,2,6),
-(13,9,1,1,8),
-(14,10,5,1,6);
-
--- Procesos adicionales para el producto 4
-INSERT INTO procesos_preparacion (producto_id, estacion_id, orden_paso, tiempo_estimado_minutos) VALUES
-(4, 1, 1, 5),
-(4, 2, 2, 18),
-(4, 3, 3, 5);
-
--- Relación producto-ingrediente
-INSERT INTO producto_ingrediente VALUES
-(5,1),
-(5,2),
-(6,7),
-(6,2),
-(7,3),
-(7,11),
-(7,12),
-(7,13),
-(8,3),
-(8,14),
-(8,11),
-(9,8),
-(9,9),
-(9,16),
-(10,2),
-(10,17),
-(10,18);
-
--- Crear el menu 24/7
-INSERT INTO menus (
-  nombre_menu,
-  fecha_inicio,
-  fecha_fin,
-  hora_inicio,
-  hora_fin,
-  activo
-) VALUES (
-  'Menú 24/7',
-  '2026-01-01',
-  '2035-12-31',
-  '00:00:00',
-  '23:59:59',
-  1
+-- Ingredientes adicionales; los existentes se reutilizan por nombre.
+INSERT INTO ingredientes (nombre_ingrediente)
+SELECT nuevos.nombre_ingrediente
+FROM (
+  SELECT 'Jamón' AS nombre_ingrediente UNION ALL SELECT 'Queso Mozzarella'
+  UNION ALL SELECT 'Tomate' UNION ALL SELECT 'Albahaca' UNION ALL SELECT 'Pollo'
+  UNION ALL SELECT 'Mantequilla' UNION ALL SELECT 'Canela' UNION ALL SELECT 'Helado de Vainilla'
+  UNION ALL SELECT 'Caramelo' UNION ALL SELECT 'Fresas' UNION ALL SELECT 'Masa de croissant'
+  UNION ALL SELECT 'Salmón ahumado' UNION ALL SELECT 'Arándanos' UNION ALL SELECT 'Chispas de chocolate'
+  UNION ALL SELECT 'Nueces' UNION ALL SELECT 'Vainilla' UNION ALL SELECT 'Matcha'
+  UNION ALL SELECT 'Té negro' UNION ALL SELECT 'Limón' UNION ALL SELECT 'Crema batida'
+) nuevos
+WHERE NOT EXISTS (
+  SELECT 1 FROM ingredientes existentes
+  WHERE existentes.nombre_ingrediente = nuevos.nombre_ingrediente
 );
 
-SET @menu_id = LAST_INSERT_ID();
+-- Datos adicionales que ya existían en el script, conservados e idempotentes.
+INSERT INTO menus (nombre_menu, fecha_inicio, fecha_fin, hora_inicio, hora_fin, activo)
+SELECT 'Menú Frappés', '2026-06-01', '2026-12-31', '12:00:00', '18:00:00', 0 FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM menus WHERE nombre_menu = 'Menú Frappés');
+INSERT INTO menus (nombre_menu, fecha_inicio, fecha_fin, hora_inicio, hora_fin, activo)
+SELECT 'Menú Fin de Semana', '2026-06-01', '2026-12-31', '08:00:00', '16:00:00', 0 FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM menus WHERE nombre_menu = 'Menú Fin de Semana');
+INSERT INTO repartidores (nombre, telefono, vehiculo, disponible)
+SELECT 'Luis Hernández', '8666-1111', 'Motocicleta', 1 FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM repartidores WHERE telefono = '8666-1111');
+INSERT INTO repartidores (nombre, telefono, vehiculo, disponible)
+SELECT 'María Gómez', '8555-2222', 'Bicicleta', 1 FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM repartidores WHERE telefono = '8555-2222');
 
--- Agregar todos los productos activos
+-- Conserva los productos, combos y relaciones del bloque adicional original.
+INSERT INTO productos (categoria_id, nombre_producto, descripcion, precio, imagen, activo)
+SELECT c.id_categoria, datos.nombre_producto, datos.descripcion, datos.precio, datos.imagen, 1
+FROM (
+  SELECT 'Bebidas' categoria, 'Cappuccino' nombre_producto, 'Café espresso con espuma de leche' descripcion, 2000.00 precio, 'cappuccino.jpg' imagen UNION ALL
+  SELECT 'Bebidas', 'Chocolate Caliente', 'Chocolate caliente artesanal', 2200.00, 'chocolate-caliente.jpg' UNION ALL
+  SELECT 'Tostadas', 'Tostada Caprese', 'Pan artesanal con tomate, mozzarella y albahaca', 3500.00, 'caprese.jpg' UNION ALL
+  SELECT 'Tostadas', 'Sándwich de Pollo', 'Pan artesanal con pollo y queso', 4200.00, 'sandwich-pollo.jpg' UNION ALL
+  SELECT 'Postres', 'Pie de Manzana', 'Pie artesanal con canela', 2800.00, 'pie-manzana.jpg' UNION ALL
+  SELECT 'Frappés', 'Frappé de Caramelo', 'Frappé con caramelo y crema batida', 3200.00, 'frappe-caramelo.jpg'
+) datos JOIN categorias c ON c.nombre_categoria = datos.categoria
+WHERE NOT EXISTS (SELECT 1 FROM productos WHERE nombre_producto = datos.nombre_producto);
+INSERT INTO producto_ingrediente (producto_id, ingrediente_id)
+SELECT p.id_producto, i.id_ingrediente
+FROM (
+  SELECT 'Cappuccino' producto, 'Café espresso' ingrediente UNION ALL SELECT 'Cappuccino', 'Leche' UNION ALL
+  SELECT 'Chocolate Caliente', 'Chocolate' UNION ALL SELECT 'Chocolate Caliente', 'Leche' UNION ALL
+  SELECT 'Tostada Caprese', 'Pan artesanal' UNION ALL SELECT 'Tostada Caprese', 'Queso Mozzarella' UNION ALL SELECT 'Tostada Caprese', 'Tomate' UNION ALL SELECT 'Tostada Caprese', 'Albahaca' UNION ALL
+  SELECT 'Sándwich de Pollo', 'Pan artesanal' UNION ALL SELECT 'Sándwich de Pollo', 'Pollo' UNION ALL SELECT 'Sándwich de Pollo', 'Queso Mozzarella' UNION ALL
+  SELECT 'Pie de Manzana', 'Harina' UNION ALL SELECT 'Pie de Manzana', 'Azúcar' UNION ALL SELECT 'Pie de Manzana', 'Canela' UNION ALL
+  SELECT 'Frappé de Caramelo', 'Leche' UNION ALL SELECT 'Frappé de Caramelo', 'Helado de Vainilla' UNION ALL SELECT 'Frappé de Caramelo', 'Caramelo'
+) datos JOIN productos p ON p.nombre_producto = datos.producto JOIN ingredientes i ON i.nombre_ingrediente = datos.ingrediente
+WHERE NOT EXISTS (SELECT 1 FROM producto_ingrediente pi WHERE pi.producto_id = p.id_producto AND pi.ingrediente_id = i.id_ingrediente);
+INSERT INTO procesos_preparacion (producto_id, estacion_id, orden_paso, tiempo_estimado_minutos)
+SELECT p.id_producto, e.id_estacion, datos.orden_paso, datos.minutos
+FROM (
+  SELECT 'Cappuccino' producto, 'Preparación' estacion, 1 orden_paso, 3 minutos UNION ALL SELECT 'Chocolate Caliente', 'Preparación', 1, 5 UNION ALL
+  SELECT 'Tostada Caprese', 'Preparación', 1, 4 UNION ALL SELECT 'Tostada Caprese', 'Cocción', 2, 5 UNION ALL
+  SELECT 'Sándwich de Pollo', 'Preparación', 1, 5 UNION ALL SELECT 'Sándwich de Pollo', 'Cocción', 2, 6 UNION ALL
+  SELECT 'Pie de Manzana', 'Preparación', 1, 8 UNION ALL SELECT 'Frappé de Caramelo', 'Bebidas Frías', 1, 6 UNION ALL
+  SELECT 'Brownie Chocolate', 'Preparación', 1, 5 UNION ALL SELECT 'Brownie Chocolate', 'Cocción', 2, 18 UNION ALL SELECT 'Brownie Chocolate', 'Decoración', 3, 5
+) datos JOIN productos p ON p.nombre_producto = datos.producto JOIN estaciones e ON e.nombre_estacion = datos.estacion
+WHERE NOT EXISTS (SELECT 1 FROM procesos_preparacion pp WHERE pp.producto_id = p.id_producto AND pp.estacion_id = e.id_estacion AND pp.orden_paso = datos.orden_paso);
+
+-- Diez productos de cafetería y diez bebidas nuevas.
+INSERT INTO productos (categoria_id, nombre_producto, descripcion, precio, imagen, activo)
+SELECT categorias.id_categoria, nuevos.nombre_producto, nuevos.descripcion, nuevos.precio, nuevos.imagen, 1
+FROM (
+  SELECT 'Tostadas' AS categoria, 'Croissant de Jamón y Queso' AS nombre_producto, 'Croissant horneado relleno de jamón y queso mozzarella' AS descripcion, 3200.00 AS precio, 'croissant-jamon-queso.jpg' AS imagen
+  UNION ALL SELECT 'Postres', 'Croissant de Chocolate', 'Croissant hojaldrado relleno de chocolate', 2800.00, 'croissant-chocolate.jpg'
+  UNION ALL SELECT 'Sandwiches', 'Sándwich de Jamón y Queso', 'Pan artesanal con jamón y queso mozzarella tostado', 3900.00, 'sandwich-jamon-queso.jpg'
+  UNION ALL SELECT 'Sandwiches', 'Panini Caprese', 'Panini caliente con tomate, mozzarella y albahaca', 4200.00, 'panini-caprese.jpg'
+  UNION ALL SELECT 'Tostadas', 'Tostada de Salmón y Queso Crema', 'Pan artesanal con salmón ahumado y queso crema', 5200.00, 'tostada-salmon-queso-crema.jpg'
+  UNION ALL SELECT 'Sandwiches', 'Bagel de Pollo y Queso Crema', 'Bagel con pollo sazonado y queso crema', 4600.00, 'bagel-pollo-queso-crema.jpg'
+  UNION ALL SELECT 'Postres', 'Muffin de Arándanos', 'Muffin artesanal con arándanos', 2200.00, 'muffin-arandanos.jpg'
+  UNION ALL SELECT 'Postres', 'Galleta de Chispas de Chocolate', 'Galleta horneada con chispas de chocolate', 1600.00, 'galleta-chispas-chocolate.jpg'
+  UNION ALL SELECT 'Postres', 'Cheesecake de Frutos Rojos', 'Cheesecake cremoso con salsa de frutos rojos', 3400.00, 'cheesecake-frutos-rojos.jpg'
+  UNION ALL SELECT 'Postres', 'Brownie con Nueces', 'Brownie de chocolate con nueces tostadas', 2400.00, 'brownie-nueces.jpg'
+  UNION ALL SELECT 'Bebidas', 'Espresso Doble', 'Doble carga de café espresso', 1800.00, 'espresso-doble.jpg'
+  UNION ALL SELECT 'Bebidas', 'Americano', 'Café espresso suavizado con agua caliente', 1700.00, 'americano.jpg'
+  UNION ALL SELECT 'Bebidas', 'Latte de Vainilla', 'Café espresso con leche y vainilla', 2600.00, 'latte-vainilla.jpg'
+  UNION ALL SELECT 'Bebidas', 'Latte de Caramelo', 'Café espresso con leche y caramelo', 2700.00, 'latte-caramelo.jpg'
+  UNION ALL SELECT 'Bebidas', 'Mocha', 'Café espresso con chocolate y leche', 2800.00, 'mocha.jpg'
+  UNION ALL SELECT 'Bebidas', 'Café Macchiato', 'Espresso marcado con espuma de leche', 2100.00, 'cafe-macchiato.jpg'
+  UNION ALL SELECT 'Bebidas', 'Matcha Latte', 'Bebida de matcha con leche espumada', 2900.00, 'matcha-latte.jpg'
+  UNION ALL SELECT 'Bebidas', 'Chai Latte', 'Té chai especiado con leche', 2800.00, 'chai-latte.jpg'
+  UNION ALL SELECT 'Bebidas', 'Té Frío de Limón', 'Té negro frío con limón', 2000.00, 'te-frio-limon.jpg'
+  UNION ALL SELECT 'Frappés', 'Frappé de Chocolate', 'Frappé frío de chocolate con crema batida', 3500.00, 'frappe-chocolate.jpg'
+) nuevos
+JOIN categorias ON categorias.nombre_categoria = nuevos.categoria
+WHERE NOT EXISTS (SELECT 1 FROM productos WHERE nombre_producto = nuevos.nombre_producto);
+
+-- Ingredientes de los 20 productos nuevos.
+INSERT INTO producto_ingrediente (producto_id, ingrediente_id)
+SELECT p.id_producto, i.id_ingrediente
+FROM (
+  SELECT 'Croissant de Jamón y Queso' producto, 'Masa de croissant' ingrediente UNION ALL SELECT 'Croissant de Jamón y Queso', 'Jamón' UNION ALL SELECT 'Croissant de Jamón y Queso', 'Queso Mozzarella'
+  UNION ALL SELECT 'Croissant de Chocolate', 'Masa de croissant' UNION ALL SELECT 'Croissant de Chocolate', 'Chocolate'
+  UNION ALL SELECT 'Sándwich de Jamón y Queso', 'Pan artesanal' UNION ALL SELECT 'Sándwich de Jamón y Queso', 'Jamón' UNION ALL SELECT 'Sándwich de Jamón y Queso', 'Queso Mozzarella'
+  UNION ALL SELECT 'Panini Caprese', 'Pan artesanal' UNION ALL SELECT 'Panini Caprese', 'Tomate' UNION ALL SELECT 'Panini Caprese', 'Queso Mozzarella' UNION ALL SELECT 'Panini Caprese', 'Albahaca'
+  UNION ALL SELECT 'Tostada de Salmón y Queso Crema', 'Pan artesanal' UNION ALL SELECT 'Tostada de Salmón y Queso Crema', 'Salmón ahumado' UNION ALL SELECT 'Tostada de Salmón y Queso Crema', 'Queso crema'
+  UNION ALL SELECT 'Bagel de Pollo y Queso Crema', 'Pan artesanal' UNION ALL SELECT 'Bagel de Pollo y Queso Crema', 'Pollo' UNION ALL SELECT 'Bagel de Pollo y Queso Crema', 'Queso crema'
+  UNION ALL SELECT 'Muffin de Arándanos', 'Harina' UNION ALL SELECT 'Muffin de Arándanos', 'Azúcar' UNION ALL SELECT 'Muffin de Arándanos', 'Arándanos' UNION ALL SELECT 'Muffin de Arándanos', 'Mantequilla'
+  UNION ALL SELECT 'Galleta de Chispas de Chocolate', 'Harina' UNION ALL SELECT 'Galleta de Chispas de Chocolate', 'Azúcar' UNION ALL SELECT 'Galleta de Chispas de Chocolate', 'Chispas de chocolate' UNION ALL SELECT 'Galleta de Chispas de Chocolate', 'Mantequilla'
+  UNION ALL SELECT 'Cheesecake de Frutos Rojos', 'Queso crema' UNION ALL SELECT 'Cheesecake de Frutos Rojos', 'Galleta' UNION ALL SELECT 'Cheesecake de Frutos Rojos', 'Fresas'
+  UNION ALL SELECT 'Brownie con Nueces', 'Chocolate' UNION ALL SELECT 'Brownie con Nueces', 'Harina' UNION ALL SELECT 'Brownie con Nueces', 'Nueces' UNION ALL SELECT 'Brownie con Nueces', 'Azúcar'
+  UNION ALL SELECT 'Espresso Doble', 'Café espresso' UNION ALL SELECT 'Americano', 'Café espresso' UNION ALL SELECT 'Americano', 'Leche'
+  UNION ALL SELECT 'Latte de Vainilla', 'Café espresso' UNION ALL SELECT 'Latte de Vainilla', 'Leche' UNION ALL SELECT 'Latte de Vainilla', 'Vainilla'
+  UNION ALL SELECT 'Latte de Caramelo', 'Café espresso' UNION ALL SELECT 'Latte de Caramelo', 'Leche' UNION ALL SELECT 'Latte de Caramelo', 'Caramelo'
+  UNION ALL SELECT 'Mocha', 'Café espresso' UNION ALL SELECT 'Mocha', 'Leche' UNION ALL SELECT 'Mocha', 'Chocolate'
+  UNION ALL SELECT 'Café Macchiato', 'Café espresso' UNION ALL SELECT 'Café Macchiato', 'Leche'
+  UNION ALL SELECT 'Matcha Latte', 'Matcha' UNION ALL SELECT 'Matcha Latte', 'Leche'
+  UNION ALL SELECT 'Chai Latte', 'Té negro' UNION ALL SELECT 'Chai Latte', 'Leche' UNION ALL SELECT 'Chai Latte', 'Canela'
+  UNION ALL SELECT 'Té Frío de Limón', 'Té negro' UNION ALL SELECT 'Té Frío de Limón', 'Limón' UNION ALL SELECT 'Té Frío de Limón', 'Azúcar'
+  UNION ALL SELECT 'Frappé de Chocolate', 'Chocolate' UNION ALL SELECT 'Frappé de Chocolate', 'Leche' UNION ALL SELECT 'Frappé de Chocolate', 'Helado de Vainilla' UNION ALL SELECT 'Frappé de Chocolate', 'Crema batida'
+) relaciones
+JOIN productos p ON p.nombre_producto = relaciones.producto
+JOIN ingredientes i ON i.nombre_ingrediente = relaciones.ingrediente
+WHERE NOT EXISTS (SELECT 1 FROM producto_ingrediente pi WHERE pi.producto_id = p.id_producto AND pi.ingrediente_id = i.id_ingrediente);
+
+-- Procesos completos: las estaciones se resuelven por nombre, nunca por un ID supuesto.
+INSERT INTO procesos_preparacion (producto_id, estacion_id, orden_paso, tiempo_estimado_minutos)
+SELECT p.id_producto, e.id_estacion, pasos.orden_paso, pasos.minutos
+FROM (
+  SELECT 'Croissant de Jamón y Queso' producto, 'Preparación' estacion, 1 orden_paso, 8 minutos UNION ALL SELECT 'Croissant de Jamón y Queso', 'Cocción', 2, 15 UNION ALL SELECT 'Croissant de Jamón y Queso', 'Empaque', 3, 2
+  UNION ALL SELECT 'Croissant de Chocolate', 'Preparación', 1, 7 UNION ALL SELECT 'Croissant de Chocolate', 'Cocción', 2, 15 UNION ALL SELECT 'Croissant de Chocolate', 'Empaque', 3, 2
+  UNION ALL SELECT 'Sándwich de Jamón y Queso', 'Preparación', 1, 5 UNION ALL SELECT 'Sándwich de Jamón y Queso', 'Cocción', 2, 6 UNION ALL SELECT 'Sándwich de Jamón y Queso', 'Empaque', 3, 2
+  UNION ALL SELECT 'Panini Caprese', 'Preparación', 1, 5 UNION ALL SELECT 'Panini Caprese', 'Cocción', 2, 7 UNION ALL SELECT 'Panini Caprese', 'Empaque', 3, 2
+  UNION ALL SELECT 'Tostada de Salmón y Queso Crema', 'Preparación', 1, 5 UNION ALL SELECT 'Tostada de Salmón y Queso Crema', 'Decoración', 2, 3
+  UNION ALL SELECT 'Bagel de Pollo y Queso Crema', 'Preparación', 1, 6 UNION ALL SELECT 'Bagel de Pollo y Queso Crema', 'Cocción', 2, 5 UNION ALL SELECT 'Bagel de Pollo y Queso Crema', 'Empaque', 3, 2
+  UNION ALL SELECT 'Muffin de Arándanos', 'Preparación', 1, 8 UNION ALL SELECT 'Muffin de Arándanos', 'Cocción', 2, 20 UNION ALL SELECT 'Muffin de Arándanos', 'Empaque', 3, 2
+  UNION ALL SELECT 'Galleta de Chispas de Chocolate', 'Preparación', 1, 6 UNION ALL SELECT 'Galleta de Chispas de Chocolate', 'Cocción', 2, 12 UNION ALL SELECT 'Galleta de Chispas de Chocolate', 'Empaque', 3, 1
+  UNION ALL SELECT 'Cheesecake de Frutos Rojos', 'Preparación', 1, 8 UNION ALL SELECT 'Cheesecake de Frutos Rojos', 'Decoración', 2, 4
+  UNION ALL SELECT 'Brownie con Nueces', 'Preparación', 1, 7 UNION ALL SELECT 'Brownie con Nueces', 'Cocción', 2, 20 UNION ALL SELECT 'Brownie con Nueces', 'Empaque', 3, 2
+  UNION ALL SELECT 'Espresso Doble', 'Preparación', 1, 3 UNION ALL SELECT 'Americano', 'Preparación', 1, 3
+  UNION ALL SELECT 'Latte de Vainilla', 'Preparación', 1, 4 UNION ALL SELECT 'Latte de Vainilla', 'Decoración', 2, 2
+  UNION ALL SELECT 'Latte de Caramelo', 'Preparación', 1, 4 UNION ALL SELECT 'Latte de Caramelo', 'Decoración', 2, 2
+  UNION ALL SELECT 'Mocha', 'Preparación', 1, 5 UNION ALL SELECT 'Mocha', 'Decoración', 2, 2
+  UNION ALL SELECT 'Café Macchiato', 'Preparación', 1, 4 UNION ALL SELECT 'Café Macchiato', 'Decoración', 2, 1
+  UNION ALL SELECT 'Matcha Latte', 'Preparación', 1, 5 UNION ALL SELECT 'Matcha Latte', 'Decoración', 2, 2
+  UNION ALL SELECT 'Chai Latte', 'Preparación', 1, 6 UNION ALL SELECT 'Chai Latte', 'Decoración', 2, 1
+  UNION ALL SELECT 'Té Frío de Limón', 'Preparación', 1, 5 UNION ALL SELECT 'Té Frío de Limón', 'Bebidas Frías', 2, 3
+  UNION ALL SELECT 'Frappé de Chocolate', 'Preparación', 1, 6 UNION ALL SELECT 'Frappé de Chocolate', 'Bebidas Frías', 2, 4 UNION ALL SELECT 'Frappé de Chocolate', 'Decoración', 3, 2
+) pasos
+JOIN productos p ON p.nombre_producto = pasos.producto
+JOIN estaciones e ON e.nombre_estacion = pasos.estacion
+WHERE NOT EXISTS (
+  SELECT 1 FROM procesos_preparacion pp
+  WHERE pp.producto_id = p.id_producto AND pp.estacion_id = e.id_estacion AND pp.orden_paso = pasos.orden_paso
+);
+
+-- Siete combos nuevos, cada uno con al menos dos productos.
+INSERT INTO combos (categoria_id, nombre_combo, descripcion, precio_especial, activo)
+SELECT c.id_categoria, nuevos.nombre_combo, nuevos.descripcion, nuevos.precio, 1
+FROM (
+  SELECT 'Bebidas' categoria, 'Combo Croissant Cafetero' nombre_combo, 'Croissant de jamón y queso con latte de vainilla' descripcion, 5200.00 precio UNION ALL
+  SELECT 'Sandwiches', 'Combo Panini Caprese', 'Panini caprese con americano', 5500.00 UNION ALL
+  SELECT 'Postres', 'Combo Muffin y Latte', 'Muffin de arándanos con latte de caramelo', 4600.00 UNION ALL
+  SELECT 'Postres', 'Combo Galleta y Café', 'Galleta de chocolate con café macchiato', 3300.00 UNION ALL
+  SELECT 'Postres', 'Combo Cheesecake Especial', 'Cheesecake de frutos rojos con mocha', 5800.00 UNION ALL
+  SELECT 'Postres', 'Combo Brownie Chocolate', 'Brownie con nueces y chocolate caliente', 4200.00 UNION ALL
+  SELECT 'Frappés', 'Combo Merienda Completa', 'Bagel de pollo, frappé de chocolate y cheesecake', 8900.00
+) nuevos
+JOIN categorias c ON c.nombre_categoria = nuevos.categoria
+WHERE NOT EXISTS (SELECT 1 FROM combos WHERE nombre_combo = nuevos.nombre_combo);
+
+INSERT INTO combos (categoria_id, nombre_combo, descripcion, precio_especial, activo)
+SELECT c.id_categoria, datos.nombre_combo, datos.descripcion, datos.precio, 1
+FROM (
+  SELECT 'Bebidas' categoria, 'Combo Cappuccino' nombre_combo, 'Cappuccino con cheesecake' descripcion, 4200.00 precio UNION ALL
+  SELECT 'Tostadas', 'Combo Caprese', 'Tostada Caprese y café latte', 5000.00 UNION ALL
+  SELECT 'Frappés', 'Combo Frappé Dulce', 'Frappé de Caramelo y Brownie', 4500.00
+) datos JOIN categorias c ON c.nombre_categoria = datos.categoria
+WHERE NOT EXISTS (SELECT 1 FROM combos WHERE nombre_combo = datos.nombre_combo);
+
+INSERT INTO combo_producto (combo_id, producto_id, cantidad)
+SELECT c.id_combo, p.id_producto, 1
+FROM (
+  SELECT 'Combo Croissant Cafetero' combo, 'Croissant de Jamón y Queso' producto UNION ALL SELECT 'Combo Croissant Cafetero', 'Latte de Vainilla'
+  UNION ALL SELECT 'Combo Panini Caprese', 'Panini Caprese' UNION ALL SELECT 'Combo Panini Caprese', 'Americano'
+  UNION ALL SELECT 'Combo Muffin y Latte', 'Muffin de Arándanos' UNION ALL SELECT 'Combo Muffin y Latte', 'Latte de Caramelo'
+  UNION ALL SELECT 'Combo Galleta y Café', 'Galleta de Chispas de Chocolate' UNION ALL SELECT 'Combo Galleta y Café', 'Café Macchiato'
+  UNION ALL SELECT 'Combo Cheesecake Especial', 'Cheesecake de Frutos Rojos' UNION ALL SELECT 'Combo Cheesecake Especial', 'Mocha'
+  UNION ALL SELECT 'Combo Brownie Chocolate', 'Brownie con Nueces' UNION ALL SELECT 'Combo Brownie Chocolate', 'Chocolate Caliente'
+  UNION ALL SELECT 'Combo Merienda Completa', 'Bagel de Pollo y Queso Crema' UNION ALL SELECT 'Combo Merienda Completa', 'Frappé de Chocolate' UNION ALL SELECT 'Combo Merienda Completa', 'Cheesecake'
+  UNION ALL SELECT 'Combo Cappuccino', 'Cappuccino' UNION ALL SELECT 'Combo Cappuccino', 'Cheesecake'
+  UNION ALL SELECT 'Combo Caprese', 'Tostada Caprese' UNION ALL SELECT 'Combo Caprese', 'Café Latte'
+  UNION ALL SELECT 'Combo Frappé Dulce', 'Frappé de Caramelo' UNION ALL SELECT 'Combo Frappé Dulce', 'Brownie Chocolate'
+) relaciones
+JOIN combos c ON c.nombre_combo = relaciones.combo
+JOIN productos p ON p.nombre_producto = relaciones.producto
+WHERE NOT EXISTS (SELECT 1 FROM combo_producto cp WHERE cp.combo_id = c.id_combo AND cp.producto_id = p.id_producto);
+
+-- Menús apropiados para el catálogo nuevo.
+INSERT INTO menu_items (menu_id, producto_id, combo_id)
+SELECT m.id_menu, p.id_producto, NULL
+FROM menus m
+JOIN productos p ON p.nombre_producto IN (
+  'Croissant de Jamón y Queso', 'Croissant de Chocolate', 'Sándwich de Jamón y Queso',
+  'Bagel de Pollo y Queso Crema', 'Espresso Doble', 'Americano', 'Latte de Vainilla',
+  'Latte de Caramelo', 'Mocha', 'Café Macchiato', 'Matcha Latte', 'Chai Latte'
+)
+WHERE m.nombre_menu IN ('Menú Desayuno', 'Menú Fin de Semana')
+  AND NOT EXISTS (SELECT 1 FROM menu_items mi WHERE mi.menu_id = m.id_menu AND mi.producto_id = p.id_producto AND mi.combo_id IS NULL);
+INSERT INTO menu_items (menu_id, producto_id, combo_id)
+SELECT m.id_menu, p.id_producto, NULL
+FROM menus m
+JOIN productos p ON p.nombre_producto IN (
+  'Panini Caprese', 'Tostada de Salmón y Queso Crema', 'Té Frío de Limón', 'Frappé de Chocolate'
+)
+WHERE m.nombre_menu IN ('Menú Almuerzo', 'Menú Frappés')
+  AND NOT EXISTS (SELECT 1 FROM menu_items mi WHERE mi.menu_id = m.id_menu AND mi.producto_id = p.id_producto AND mi.combo_id IS NULL);
+INSERT INTO menu_items (menu_id, producto_id, combo_id)
+SELECT m.id_menu, p.id_producto, NULL
+FROM menus m
+JOIN productos p ON p.nombre_producto IN (
+  'Muffin de Arándanos', 'Galleta de Chispas de Chocolate', 'Cheesecake de Frutos Rojos', 'Brownie con Nueces'
+)
+WHERE m.nombre_menu IN ('Menú Tarde', 'Menú Especial')
+  AND NOT EXISTS (SELECT 1 FROM menu_items mi WHERE mi.menu_id = m.id_menu AND mi.producto_id = p.id_producto AND mi.combo_id IS NULL);
+INSERT INTO menu_items (menu_id, producto_id, combo_id)
+SELECT m.id_menu, NULL, c.id_combo
+FROM menus m
+JOIN combos c ON c.nombre_combo IN ('Combo Croissant Cafetero', 'Combo Panini Caprese', 'Combo Muffin y Latte', 'Combo Galleta y Café', 'Combo Cheesecake Especial', 'Combo Brownie Chocolate', 'Combo Merienda Completa')
+WHERE m.nombre_menu IN ('Menú Desayuno', 'Menú Almuerzo', 'Menú Tarde', 'Menú Especial')
+  AND NOT EXISTS (SELECT 1 FROM menu_items mi WHERE mi.menu_id = m.id_menu AND mi.combo_id = c.id_combo AND mi.producto_id IS NULL);
+
+  -- Elementos de menú del bloque adicional original, conservados por nombre.
+  INSERT INTO menu_items (menu_id, producto_id, combo_id)
+  SELECT m.id_menu, p.id_producto, NULL
+  FROM menus m JOIN productos p ON p.nombre_producto IN ('Frappé de Caramelo', 'Cappuccino', 'Tostada Caprese', 'Sándwich de Pollo')
+  WHERE ((m.nombre_menu = 'Menú Frappés' AND p.nombre_producto = 'Frappé de Caramelo') OR
+      (m.nombre_menu = 'Menú Fin de Semana' AND p.nombre_producto IN ('Cappuccino', 'Tostada Caprese', 'Sándwich de Pollo')))
+    AND NOT EXISTS (SELECT 1 FROM menu_items mi WHERE mi.menu_id = m.id_menu AND mi.producto_id = p.id_producto AND mi.combo_id IS NULL);
+  INSERT INTO menu_items (menu_id, producto_id, combo_id)
+  SELECT m.id_menu, NULL, c.id_combo
+  FROM menus m JOIN combos c ON c.nombre_combo IN ('Combo Frappé Dulce', 'Combo Caprese')
+  WHERE ((m.nombre_menu = 'Menú Frappés' AND c.nombre_combo = 'Combo Frappé Dulce') OR
+      (m.nombre_menu = 'Menú Fin de Semana' AND c.nombre_combo = 'Combo Caprese'))
+    AND NOT EXISTS (SELECT 1 FROM menu_items mi WHERE mi.menu_id = m.id_menu AND mi.combo_id = c.id_combo AND mi.producto_id IS NULL);
+
+-- Crear o reutilizar el Menú 24/7 y poblarlo sin duplicar elementos.
+INSERT INTO menus (nombre_menu, fecha_inicio, fecha_fin, hora_inicio, hora_fin, activo)
+SELECT 'Menú 24/7', '2026-01-01', '2035-12-31', '00:00:00', '23:59:59', 1 FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM menus WHERE nombre_menu = 'Menú 24/7');
+SET @menu_id = (SELECT id_menu FROM menus WHERE nombre_menu = 'Menú 24/7' ORDER BY id_menu LIMIT 1);
 INSERT INTO menu_items (menu_id, producto_id, combo_id)
 SELECT @menu_id, p.id_producto, NULL
 FROM productos p
-WHERE p.activo = 1;
-
--- Agregar todos los combos activos
+WHERE p.activo = 1
+  AND NOT EXISTS (SELECT 1 FROM menu_items mi WHERE mi.menu_id = @menu_id AND mi.producto_id = p.id_producto AND mi.combo_id IS NULL);
 INSERT INTO menu_items (menu_id, producto_id, combo_id)
 SELECT @menu_id, NULL, c.id_combo
 FROM combos c
-WHERE c.activo = 1;
+WHERE c.activo = 1
+  AND NOT EXISTS (SELECT 1 FROM menu_items mi WHERE mi.menu_id = @menu_id AND mi.combo_id = c.id_combo AND mi.producto_id IS NULL);
 
+/* =====================================================
+   VALIDACIONES DE DATOS NUEVOS
+   ===================================================== */
+SELECT 'Productos nuevos' validacion, COUNT(*) cantidad
+FROM productos WHERE nombre_producto IN ('Croissant de Jamón y Queso', 'Croissant de Chocolate', 'Sándwich de Jamón y Queso', 'Panini Caprese', 'Tostada de Salmón y Queso Crema', 'Bagel de Pollo y Queso Crema', 'Muffin de Arándanos', 'Galleta de Chispas de Chocolate', 'Cheesecake de Frutos Rojos', 'Brownie con Nueces');
+SELECT 'Bebidas nuevas' validacion, COUNT(*) cantidad
+FROM productos WHERE nombre_producto IN ('Espresso Doble', 'Americano', 'Latte de Vainilla', 'Latte de Caramelo', 'Mocha', 'Café Macchiato', 'Matcha Latte', 'Chai Latte', 'Té Frío de Limón', 'Frappé de Chocolate');
+SELECT 'Productos nuevos sin ingrediente' validacion, COUNT(*) cantidad
+FROM productos p LEFT JOIN producto_ingrediente pi ON pi.producto_id = p.id_producto
+WHERE p.nombre_producto IN ('Croissant de Jamón y Queso', 'Croissant de Chocolate', 'Sándwich de Jamón y Queso', 'Panini Caprese', 'Tostada de Salmón y Queso Crema', 'Bagel de Pollo y Queso Crema', 'Muffin de Arándanos', 'Galleta de Chispas de Chocolate', 'Cheesecake de Frutos Rojos', 'Brownie con Nueces', 'Espresso Doble', 'Americano', 'Latte de Vainilla', 'Latte de Caramelo', 'Mocha', 'Café Macchiato', 'Matcha Latte', 'Chai Latte', 'Té Frío de Limón', 'Frappé de Chocolate') AND pi.producto_id IS NULL;
+SELECT 'Productos nuevos sin proceso' validacion, COUNT(*) cantidad
+FROM productos p LEFT JOIN procesos_preparacion pp ON pp.producto_id = p.id_producto
+WHERE p.nombre_producto IN ('Croissant de Jamón y Queso', 'Croissant de Chocolate', 'Sándwich de Jamón y Queso', 'Panini Caprese', 'Tostada de Salmón y Queso Crema', 'Bagel de Pollo y Queso Crema', 'Muffin de Arándanos', 'Galleta de Chispas de Chocolate', 'Cheesecake de Frutos Rojos', 'Brownie con Nueces', 'Espresso Doble', 'Americano', 'Latte de Vainilla', 'Latte de Caramelo', 'Mocha', 'Café Macchiato', 'Matcha Latte', 'Chai Latte', 'Té Frío de Limón', 'Frappé de Chocolate') AND pp.producto_id IS NULL;
+SELECT 'Combos nuevos' validacion, COUNT(*) cantidad FROM combos WHERE nombre_combo IN ('Combo Croissant Cafetero', 'Combo Panini Caprese', 'Combo Muffin y Latte', 'Combo Galleta y Café', 'Combo Cheesecake Especial', 'Combo Brownie Chocolate', 'Combo Merienda Completa');
+SELECT 'Combos nuevos con menos de dos productos' validacion, COUNT(*) cantidad
+FROM combos c LEFT JOIN combo_producto cp ON cp.combo_id = c.id_combo
+WHERE c.nombre_combo IN ('Combo Croissant Cafetero', 'Combo Panini Caprese', 'Combo Muffin y Latte', 'Combo Galleta y Café', 'Combo Cheesecake Especial', 'Combo Brownie Chocolate', 'Combo Merienda Completa')
+GROUP BY c.id_combo HAVING COUNT(cp.producto_id) < 2;
+SELECT 'Productos nuevos fuera de Menú 24/7' validacion, COUNT(*) cantidad
+FROM productos p LEFT JOIN menu_items mi ON mi.producto_id = p.id_producto AND mi.menu_id = @menu_id
+WHERE p.nombre_producto IN ('Croissant de Jamón y Queso', 'Croissant de Chocolate', 'Sándwich de Jamón y Queso', 'Panini Caprese', 'Tostada de Salmón y Queso Crema', 'Bagel de Pollo y Queso Crema', 'Muffin de Arándanos', 'Galleta de Chispas de Chocolate', 'Cheesecake de Frutos Rojos', 'Brownie con Nueces', 'Espresso Doble', 'Americano', 'Latte de Vainilla', 'Latte de Caramelo', 'Mocha', 'Café Macchiato', 'Matcha Latte', 'Chai Latte', 'Té Frío de Limón', 'Frappé de Chocolate') AND mi.producto_id IS NULL;
+SELECT 'Referencias inválidas' validacion, (SELECT COUNT(*) FROM productos p LEFT JOIN categorias c ON c.id_categoria = p.categoria_id WHERE c.id_categoria IS NULL) + (SELECT COUNT(*) FROM procesos_preparacion pp LEFT JOIN estaciones e ON e.id_estacion = pp.estacion_id WHERE e.id_estacion IS NULL) + (SELECT COUNT(*) FROM menu_items mi LEFT JOIN menus m ON m.id_menu = mi.menu_id WHERE m.id_menu IS NULL) + (SELECT COUNT(*) FROM menu_items mi LEFT JOIN productos p ON p.id_producto = mi.producto_id WHERE mi.producto_id IS NOT NULL AND p.id_producto IS NULL) + (SELECT COUNT(*) FROM menu_items mi LEFT JOIN combos c ON c.id_combo = mi.combo_id WHERE mi.combo_id IS NOT NULL AND c.id_combo IS NULL) cantidad;
+SELECT 'Productos sin ingrediente' validacion, COUNT(*) cantidad FROM productos p LEFT JOIN producto_ingrediente pi ON pi.producto_id = p.id_producto WHERE pi.producto_id IS NULL;
+SELECT 'Productos sin proceso' validacion, COUNT(*) cantidad FROM productos p LEFT JOIN procesos_preparacion pp ON pp.producto_id = p.id_producto WHERE pp.producto_id IS NULL;
+SELECT 'Combos sin categoría' validacion, COUNT(*) cantidad FROM combos c LEFT JOIN categorias cat ON cat.id_categoria = c.categoria_id WHERE cat.id_categoria IS NULL;
+SELECT 'Combos sin productos' validacion, COUNT(*) cantidad FROM combos c LEFT JOIN combo_producto cp ON cp.combo_id = c.id_combo WHERE cp.combo_id IS NULL;
+SELECT 'Nombres nuevos duplicados' validacion, COUNT(*) - COUNT(DISTINCT nombre_producto) cantidad FROM productos WHERE nombre_producto IN ('Croissant de Jamón y Queso', 'Croissant de Chocolate', 'Sándwich de Jamón y Queso', 'Panini Caprese', 'Tostada de Salmón y Queso Crema', 'Bagel de Pollo y Queso Crema', 'Muffin de Arándanos', 'Galleta de Chispas de Chocolate', 'Cheesecake de Frutos Rojos', 'Brownie con Nueces', 'Espresso Doble', 'Americano', 'Latte de Vainilla', 'Latte de Caramelo', 'Mocha', 'Café Macchiato', 'Matcha Latte', 'Chai Latte', 'Té Frío de Limón', 'Frappé de Chocolate');
+
+COMMIT;
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- Fin del script
