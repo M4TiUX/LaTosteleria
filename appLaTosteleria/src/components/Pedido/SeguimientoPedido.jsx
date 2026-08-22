@@ -177,7 +177,7 @@ export function SeguimientoPedido() {
       isMounted = false;
       window.clearInterval(intervalId);
     };
-  }, [id]);
+  }, [id, t]);
 
   // ==========================================================
   // POLLING: POSICION DEL REPARTIDOR (mapa)
@@ -202,9 +202,7 @@ export function SeguimientoPedido() {
         const response = await UbicacionRepartidorService.getUbicacion(id);
 
         if (isMounted) {
-          setUbicacionRepartidor(
-            response.data?.ubicacion_repartidor ?? null,
-          );
+          setUbicacionRepartidor(response.data?.ubicacion_repartidor ?? null);
           setMapaError(null);
         }
       } catch (requestError) {
@@ -228,7 +226,7 @@ export function SeguimientoPedido() {
         window.clearInterval(intervalId);
       }
     };
-  }, [id, tracking?.metodo_entrega, tracking?.estado_actual]);
+  }, [id, t, tracking?.metodo_entrega, tracking?.estado_actual]);
 
   // ==========================================================
   // CREAR PEDIDO DEMO
@@ -302,7 +300,9 @@ export function SeguimientoPedido() {
               onClick={handleCreateDemo}
               disabled={creatingDemo}
             >
-              {creatingDemo ? t("orders.tracking.creatingDemo") : t("orders.tracking.createDemo")}
+              {creatingDemo
+                ? t("orders.tracking.creatingDemo")
+                : t("orders.tracking.createDemo")}
             </Button>
           }
         >
@@ -328,10 +328,12 @@ export function SeguimientoPedido() {
                     {tracking.cliente?.correo})
                   </Typography>
                   <Typography color="text.secondary">
-                    {t("orders.common.deliveryMethod")}: {tracking.metodo_entrega}
+                    {t("orders.common.deliveryMethod")}:{" "}
+                    {tracking.metodo_entrega}
                   </Typography>
                   <Typography color="text.secondary">
-                    {t("orders.list.created")}: {formatDateTime(tracking.fecha_creacion)}
+                    {t("orders.list.created")}:{" "}
+                    {formatDateTime(tracking.fecha_creacion)}
                   </Typography>
                 </Box>
 
@@ -411,7 +413,8 @@ export function SeguimientoPedido() {
                           icon={iconoDestino}
                         >
                           <Popup>
-                            {direccion.detalles || t("orders.tracking.deliveryAddress")}
+                            {direccion.detalles ||
+                              t("orders.tracking.deliveryAddress")}
                           </Popup>
                         </Marker>
 
@@ -425,8 +428,9 @@ export function SeguimientoPedido() {
                             icon={iconoRepartidor}
                           >
                             <Popup>
-                              {t("orders.tracking.driver")} — {ubicacionRepartidor.progreso_ruta}
-                              % {t("orders.tracking.route")}
+                              {t("orders.tracking.driver")} —{" "}
+                              {ubicacionRepartidor.progreso_ruta}%{" "}
+                              {t("orders.tracking.route")}
                             </Popup>
                           </Marker>
                         )}
@@ -440,7 +444,8 @@ export function SeguimientoPedido() {
                         sx={{ mt: 1, display: "block" }}
                       >
                         {t("orders.tracking.driverPositionUpdates")}{" "}
-                        {INTERVALO_UBICACION_MS / 1000} {t("orders.tracking.seconds")}.
+                        {INTERVALO_UBICACION_MS / 1000}{" "}
+                        {t("orders.tracking.seconds")}.
                       </Typography>
                     )}
                   </Box>
@@ -484,7 +489,6 @@ export function SeguimientoPedido() {
                   ))}
                 </Stack>
               </Box>
-
             </Stack>
           </CardContent>
         </Card>

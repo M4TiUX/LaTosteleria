@@ -55,7 +55,7 @@ export function ListProduct() {
       .finally(() => {
         setCargando(false);
       });
-  }, []);
+  }, [t]);
 
   const formatearPrecio = (precio) => {
     return new Intl.NumberFormat("es-CR", {
@@ -169,7 +169,9 @@ export function ListProduct() {
                   />
 
                   <Chip
-                    label={producto.nombre_categoria || t("products.noCategory")}
+                    label={
+                      producto.nombre_categoria || t("products.noCategory")
+                    }
                     size="small"
                     sx={{
                       position: "absolute",

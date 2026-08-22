@@ -1,5 +1,6 @@
 import { Alert, Box, Divider, Stack, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
+import PropTypes from "prop-types";
 
 function formatCurrency(value) {
   return new Intl.NumberFormat("es-CR", {
@@ -49,11 +50,13 @@ export function FacturaDetalleItems({ items }) {
               }}
             >
               <Typography variant="body2" color="text.secondary">
-                {t("orders.invoice.linePrice")}: {formatCurrency(item.precio_unitario)}
+                {t("orders.invoice.linePrice")}:{" "}
+                {formatCurrency(item.precio_unitario)}
               </Typography>
 
               <Typography variant="body2" color="text.secondary">
-                {t("orders.invoice.lineSubtotal")}: {formatCurrency(item.subtotal)}
+                {t("orders.invoice.lineSubtotal")}:{" "}
+                {formatCurrency(item.subtotal)}
               </Typography>
 
               <Typography fontWeight={700} color="primary.main">
@@ -68,7 +71,9 @@ export function FacturaDetalleItems({ items }) {
             </Typography>
 
             <Typography variant="body2">
-              {item.observaciones ? item.observaciones : t("orders.common.noNotes")}
+              {item.observaciones
+                ? item.observaciones
+                : t("orders.common.noNotes")}
             </Typography>
           </Box>
         </Stack>
@@ -76,3 +81,7 @@ export function FacturaDetalleItems({ items }) {
     </Stack>
   );
 }
+
+FacturaDetalleItems.propTypes = {
+  items: PropTypes.arrayOf(PropTypes.object),
+};

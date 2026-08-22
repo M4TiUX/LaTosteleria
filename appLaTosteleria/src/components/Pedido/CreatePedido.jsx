@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState, useCallback } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -62,6 +62,7 @@ import UserService from "../../services/UserService";
 import { UserContext } from "../../context/UserContext";
 import { useCart } from "../../hooks/useCart";
 import { formatMenuTime, isMenuAvailable } from "../Menu/menuUtils";
+import PropTypes from "prop-types";
 
 const TAX_RATE = 0.13;
 
@@ -141,6 +142,11 @@ function MapClickHandler({ setSelectedLocation, setMapCenter }) {
   return null;
 }
 
+MapClickHandler.propTypes = {
+  setSelectedLocation: PropTypes.func.isRequired,
+  setMapCenter: PropTypes.func.isRequired,
+};
+
 // ============================================================
 // COMPONENTE PRINCIPAL
 // ============================================================
@@ -216,7 +222,7 @@ export function CreatePedido() {
 
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [mapCenter, setMapCenter] = useState([9.9281, -84.0907]);
-  const [mapZoom, setMapZoom] = useState(13);
+  const mapZoom = 13;
 
   // ==========================================================
   // GUARDAR UBICACIÓN COMO DIRECCIÓN
@@ -244,7 +250,9 @@ export function CreatePedido() {
       .then((response) => {
         const catalog = Array.isArray(response.data) ? response.data : [];
         const now = new Date();
-        const visibleMenus = catalog.filter((menu) => isMenuAvailable(menu, now));
+        const visibleMenus = catalog.filter((menu) =>
+          isMenuAvailable(menu, now),
+        );
         setMenus(visibleMenus);
         setSelectedMenuId((previousMenuId) => {
           if (
@@ -267,7 +275,7 @@ export function CreatePedido() {
       .finally(() => {
         setLoadingMenus(false);
       });
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (!isStaff) {
@@ -292,7 +300,7 @@ export function CreatePedido() {
       .finally(() => {
         setLoadingCustomers(false);
       });
-  }, [isStaff]);
+  }, [isStaff, t]);
 
   // ==========================================================
   // CARGAR DETALLE DEL MENÚ (CORREGIDO: sin cleanCart en dependencias)
@@ -333,8 +341,9 @@ export function CreatePedido() {
   // ==========================================================
 
   useEffect(() => {
-    const activeCustomerId =
-      isCliente ? Number(userData?.id ?? 0) : Number(selectedCustomerId ?? 0);
+    const activeCustomerId = isCliente
+      ? Number(userData?.id ?? 0)
+      : Number(selectedCustomerId ?? 0);
 
     if (deliveryMethod !== "Domicilio" || activeCustomerId <= 0) {
       setDirecciones([]);
@@ -363,7 +372,7 @@ export function CreatePedido() {
       .finally(() => {
         setLoadingDirecciones(false);
       });
-  }, [deliveryMethod, isCliente, selectedCustomerId, userData?.id]);
+  }, [deliveryMethod, isCliente, selectedCustomerId, t, userData?.id]);
 
   // ==========================================================
   // ITEMS DISPONIBLES
@@ -419,9 +428,19 @@ export function CreatePedido() {
     }
 
     return (
-      customers.find((customer) => String(customer.id) === selectedCustomerId) ?? null
+      customers.find(
+        (customer) => String(customer.id) === selectedCustomerId,
+      ) ?? null
     );
-  }, [customers, isCliente, roleName, selectedCustomerId, userData?.email, userData?.id, userData?.name]);
+  }, [
+    customers,
+    isCliente,
+    roleName,
+    selectedCustomerId,
+    userData?.email,
+    userData?.id,
+    userData?.name,
+  ]);
 
   // ==========================================================
   // VUELTO
@@ -486,7 +505,9 @@ export function CreatePedido() {
 
   const handleSaveLocationAsDireccion = async () => {
     if (!isCliente) {
-      setError("Solo los clientes pueden guardar direcciones desde este formulario.");
+      setError(
+        "Solo los clientes pueden guardar direcciones desde este formulario.",
+      );
       return;
     }
 
@@ -550,9 +571,7 @@ export function CreatePedido() {
       return;
     }
     if (deliveryMethod === "Domicilio" && !selectedDireccionId) {
-      setError(
-        t("orders.create.errors.addressRequired"),
-      );
+      setError(t("orders.create.errors.addressRequired"));
       return;
     }
 
@@ -574,9 +593,7 @@ export function CreatePedido() {
         return;
       }
       if (!/^[0-9]{4}$/.test(cardLastFour)) {
-        setError(
-          t("orders.create.errors.cardDigits"),
-        );
+        setError(t("orders.create.errors.cardDigits"));
         return;
       }
     }
@@ -600,7 +617,9 @@ export function CreatePedido() {
       setError(null);
 
       const payload = {
-        cliente_id: isCliente ? Number(userData?.id) : Number(selectedCustomerId),
+        cliente_id: isCliente
+          ? Number(userData?.id)
+          : Number(selectedCustomerId),
         menu_id: Number(selectedMenuId),
         metodo_entrega: deliveryMethod,
         direccion_id:
@@ -739,15 +758,22 @@ export function CreatePedido() {
                       />
                     ) : (
                       <FormControl fullWidth disabled={loadingCustomers}>
-                        <InputLabel id="customer-select-label">Cliente</InputLabel>
+                        <InputLabel id="customer-select-label">
+                          Cliente
+                        </InputLabel>
                         <Select
                           labelId="customer-select-label"
                           value={selectedCustomerId}
                           label="Cliente"
-                          onChange={(event) => setSelectedCustomerId(String(event.target.value))}
+                          onChange={(event) =>
+                            setSelectedCustomerId(String(event.target.value))
+                          }
                         >
                           {customers.map((customer) => (
-                            <MenuItem key={customer.id} value={String(customer.id)}>
+                            <MenuItem
+                              key={customer.id}
+                              value={String(customer.id)}
+                            >
                               {customer.name}
                             </MenuItem>
                           ))}
@@ -778,7 +804,9 @@ export function CreatePedido() {
                 {/* MENÚ Y ENTREGA */}
                 <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
                   <FormControl fullWidth disabled={menus.length === 0}>
-                    <InputLabel id="menu-select-label">{t("orders.create.menu")}</InputLabel>
+                    <InputLabel id="menu-select-label">
+                      {t("orders.create.menu")}
+                    </InputLabel>
                     <Select
                       labelId="menu-select-label"
                       value={selectedMenuId}
@@ -820,7 +848,9 @@ export function CreatePedido() {
                       <ToggleButton value="Tienda">
                         {t("orders.create.storePickup")}
                       </ToggleButton>
-                      <ToggleButton value="Domicilio">{t("orders.create.homeDelivery")}</ToggleButton>
+                      <ToggleButton value="Domicilio">
+                        {t("orders.create.homeDelivery")}
+                      </ToggleButton>
                     </ToggleButtonGroup>
 
                     {/* DOMICILIO */}
@@ -901,7 +931,9 @@ export function CreatePedido() {
                                   selectedLocation.lng,
                                 ]}
                               >
-                                <Popup>{t("orders.create.selectedLocation")}</Popup>
+                                <Popup>
+                                  {t("orders.create.selectedLocation")}
+                                </Popup>
                               </Marker>
                             )}
                           </MapContainer>
@@ -914,7 +946,8 @@ export function CreatePedido() {
                               sx={{ mt: 1 }}
                             >
                               <Typography variant="body2">
-                                {t("orders.create.coordinates")}: {selectedLocation.lat.toFixed(6)},{" "}
+                                {t("orders.create.coordinates")}:{" "}
+                                {selectedLocation.lat.toFixed(6)},{" "}
                                 {selectedLocation.lng.toFixed(6)}
                               </Typography>
                               <Button
@@ -950,7 +983,9 @@ export function CreatePedido() {
                   multiline
                   minRows={3}
                   inputProps={{ maxLength: 500 }}
-                  helperText={t("orders.create.characters500", { count: orderNotes.length })}
+                  helperText={t("orders.create.characters500", {
+                    count: orderNotes.length,
+                  })}
                 />
 
                 {/* INFORMACIÓN DEL MENÚ */}
@@ -1017,7 +1052,10 @@ export function CreatePedido() {
                                       color="text.secondary"
                                       variant="body2"
                                     >
-                                      {item.category} · {item.itemType === "combo" ? t("orders.common.combo") : t("orders.common.product")}
+                                      {item.category} ·{" "}
+                                      {item.itemType === "combo"
+                                        ? t("orders.common.combo")
+                                        : t("orders.common.product")}
                                     </Typography>
                                   </Box>
                                   <Chip
@@ -1054,7 +1092,9 @@ export function CreatePedido() {
                                     {t("orders.create.add")}
                                   </Button>
                                   <Typography color="text.secondary">
-                                    {t("orders.create.inOrder", { count: cartItem?.quantity ?? 0 })}
+                                    {t("orders.create.inOrder", {
+                                      count: cartItem?.quantity ?? 0,
+                                    })}
                                   </Typography>
                                 </Stack>
                               </Stack>
@@ -1090,13 +1130,16 @@ export function CreatePedido() {
                   <Typography variant="h6" fontWeight={700}>
                     {t("orders.create.summary")}
                   </Typography>
-                  <Chip label={t("orders.create.items", { count: getCountItems(cart) })} size="small" />
+                  <Chip
+                    label={t("orders.create.items", {
+                      count: getCountItems(cart),
+                    })}
+                    size="small"
+                  />
                 </Stack>
 
                 {cart.length === 0 ? (
-                  <Alert severity="info">
-                    {t("orders.create.emptyCart")}
-                  </Alert>
+                  <Alert severity="info">{t("orders.create.emptyCart")}</Alert>
                 ) : (
                   <Stack spacing={1.5}>
                     {cart.map((item) => (
@@ -1164,7 +1207,12 @@ export function CreatePedido() {
                           multiline
                           minRows={2}
                           sx={{ mt: 1.5 }}
-                          label={t("orders.create.itemNote", { type: item.itemType === "combo" ? t("orders.common.combo").toLowerCase() : t("orders.common.product").toLowerCase() })}
+                          label={t("orders.create.itemNote", {
+                            type:
+                              item.itemType === "combo"
+                                ? t("orders.common.combo").toLowerCase()
+                                : t("orders.common.product").toLowerCase(),
+                          })}
                           placeholder={t("orders.create.itemNotePlaceholder")}
                           value={itemNotes[item.id] ?? ""}
                           onChange={(event) => {
@@ -1175,7 +1223,9 @@ export function CreatePedido() {
                             }));
                           }}
                           inputProps={{ maxLength: 300 }}
-                          helperText={t("orders.create.characters300", { count: (itemNotes[item.id] ?? "").length })}
+                          helperText={t("orders.create.characters300", {
+                            count: (itemNotes[item.id] ?? "").length,
+                          })}
                         />
                       </Box>
                     ))}
@@ -1186,16 +1236,22 @@ export function CreatePedido() {
 
                 <Stack spacing={1}>
                   <Stack direction="row" justifyContent="space-between">
-                    <Typography color="text.secondary">{t("orders.common.subtotal")}</Typography>
+                    <Typography color="text.secondary">
+                      {t("orders.common.subtotal")}
+                    </Typography>
                     <Typography>{formatCurrency(subtotalAmount)}</Typography>
                   </Stack>
                   <Stack direction="row" justifyContent="space-between">
-                    <Typography color="text.secondary">{t("orders.common.taxes")}</Typography>
+                    <Typography color="text.secondary">
+                      {t("orders.common.taxes")}
+                    </Typography>
                     <Typography>{formatCurrency(taxAmount)}</Typography>
                   </Stack>
                   {deliveryMethod === "Domicilio" && (
                     <Stack direction="row" justifyContent="space-between">
-                      <Typography color="text.secondary">{t("orders.create.shipping")}</Typography>
+                      <Typography color="text.secondary">
+                        {t("orders.create.shipping")}
+                      </Typography>
                       <Typography>{formatCurrency(shippingCost)}</Typography>
                     </Stack>
                   )}
@@ -1216,15 +1272,21 @@ export function CreatePedido() {
                     {t("orders.common.paymentMethod")}
                   </Typography>
                   <FormControl fullWidth>
-                    <InputLabel id="payment-method-label">{t("orders.create.method")}</InputLabel>
+                    <InputLabel id="payment-method-label">
+                      {t("orders.create.method")}
+                    </InputLabel>
                     <Select
                       labelId="payment-method-label"
                       value={paymentMethod}
                       label={t("orders.create.method")}
                       onChange={handlePaymentMethodChange}
                     >
-                      <MenuItem value="Efectivo">{t("orders.create.cash")}</MenuItem>
-                      <MenuItem value="Tarjeta">{t("orders.create.card")}</MenuItem>
+                      <MenuItem value="Efectivo">
+                        {t("orders.create.cash")}
+                      </MenuItem>
+                      <MenuItem value="Tarjeta">
+                        {t("orders.create.card")}
+                      </MenuItem>
                     </Select>
                   </FormControl>
 
@@ -1247,7 +1309,8 @@ export function CreatePedido() {
                           </Alert>
                         ) : (
                           <Alert severity="success">
-                            {t("orders.summary.change")}: {formatCurrency(changeAmount)}
+                            {t("orders.summary.change")}:{" "}
+                            {formatCurrency(changeAmount)}
                           </Alert>
                         ))}
                     </Stack>
@@ -1256,7 +1319,9 @@ export function CreatePedido() {
                   {paymentMethod === "Tarjeta" && (
                     <Stack spacing={1.5}>
                       <FormControl fullWidth>
-                        <InputLabel id="card-brand-label">{t("orders.summary.brand")}</InputLabel>
+                        <InputLabel id="card-brand-label">
+                          {t("orders.summary.brand")}
+                        </InputLabel>
                         <Select
                           labelId="card-brand-label"
                           value={cardBrand}
@@ -1300,7 +1365,9 @@ export function CreatePedido() {
                     (deliveryMethod === "Domicilio" && !selectedDireccionId)
                   }
                 >
-                  {submitting ? t("orders.create.submitting") : t("orders.create.confirm")}
+                  {submitting
+                    ? t("orders.create.submitting")
+                    : t("orders.create.confirm")}
                 </Button>
 
                 <Button
@@ -1341,18 +1408,23 @@ export function CreatePedido() {
           />
           {selectedLocation && (
             <Typography variant="caption" display="block" sx={{ mt: 1 }}>
-              {t("orders.create.coordinates")}: {selectedLocation.lat.toFixed(6)},{" "}
+              {t("orders.create.coordinates")}:{" "}
+              {selectedLocation.lat.toFixed(6)},{" "}
               {selectedLocation.lng.toFixed(6)}
             </Typography>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenSaveDialog(false)}>{t("orders.common.cancel")}</Button>
+          <Button onClick={() => setOpenSaveDialog(false)}>
+            {t("orders.common.cancel")}
+          </Button>
           <Button
             onClick={handleSaveLocationAsDireccion}
             disabled={savingDireccion || !newDireccionDetalle.trim()}
           >
-            {savingDireccion ? t("orders.common.saving") : t("orders.common.save")}
+            {savingDireccion
+              ? t("orders.common.saving")
+              : t("orders.common.save")}
           </Button>
         </DialogActions>
       </Dialog>

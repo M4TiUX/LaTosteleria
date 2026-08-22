@@ -1,12 +1,6 @@
 import { useTranslation } from "react-i18next";
-import {
-  Box,
-  Card,
-  CardContent,
-  Divider,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Card, CardContent, Divider, Stack, Typography } from "@mui/material";
+import PropTypes from "prop-types";
 
 function formatCurrency(value) {
   return new Intl.NumberFormat("es-CR", {
@@ -45,80 +39,46 @@ export function ResumenFactura({ pedido }) {
         }}
       >
         <Stack spacing={2}>
-          <Typography
-            variant="h6"
-            fontWeight={700}
-          >
+          <Typography variant="h6" fontWeight={700}>
             {t("orders.summary.title")}
           </Typography>
 
           <Stack spacing={1}>
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-            >
+            <Stack direction="row" justifyContent="space-between">
               <Typography color="text.secondary">
                 {t("orders.summary.totalBeforeTax")}
               </Typography>
 
-              <Typography>
-                {formatCurrency(
-                  pedido.subtotal
-                )}
-              </Typography>
+              <Typography>{formatCurrency(pedido.subtotal)}</Typography>
             </Stack>
 
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-            >
+            <Stack direction="row" justifyContent="space-between">
               <Typography color="text.secondary">
                 {t("orders.common.taxes")}
               </Typography>
 
-              <Typography>
-                {formatCurrency(
-                  pedido.impuestos
-                )}
-              </Typography>
+              <Typography>{formatCurrency(pedido.impuestos)}</Typography>
             </Stack>
 
             {showShipping && (
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-              >
+              <Stack direction="row" justifyContent="space-between">
                 <Typography color="text.secondary">
                   {t("orders.summary.shippingCost")}
                 </Typography>
 
-                <Typography>
-                  {formatCurrency(shippingCost)}
-                </Typography>
+                <Typography>{formatCurrency(shippingCost)}</Typography>
               </Stack>
             )}
 
             <Divider />
 
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-            >
-              <Typography
-                variant="h6"
-                fontWeight={700}
-              >
+            <Stack direction="row" justifyContent="space-between">
+              <Typography variant="h6" fontWeight={700}>
                 {t("orders.summary.totalWithTax")}
               </Typography>
 
-              <Typography
-                variant="h6"
-                fontWeight={700}
-                color="primary"
-              >
-                {formatCurrency(
-                  pedido.total
-                )}
+              <Typography variant="h6" fontWeight={700} color="primary">
+                {formatCurrency(pedido.total)}
               </Typography>
             </Stack>
           </Stack>
@@ -126,10 +86,7 @@ export function ResumenFactura({ pedido }) {
           <Divider />
 
           <Stack spacing={1}>
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-            >
+            <Stack direction="row" justifyContent="space-between">
               <Typography color="text.secondary">
                 {t("orders.common.paymentMethod")}
               </Typography>
@@ -139,69 +96,41 @@ export function ResumenFactura({ pedido }) {
               </Typography>
             </Stack>
 
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-            >
-              <Typography color="text.secondary">
-                {receivedLabel}
-              </Typography>
+            <Stack direction="row" justifyContent="space-between">
+              <Typography color="text.secondary">{receivedLabel}</Typography>
 
               <Typography>
-                {formatCurrency(
-                  pedido.monto_recibido ??
-                    pedido.monto_pago
-                )}
+                {formatCurrency(pedido.monto_recibido ?? pedido.monto_pago)}
               </Typography>
             </Stack>
 
-            {pedido.metodo_pago ===
-              "Efectivo" && (
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-              >
+            {pedido.metodo_pago === "Efectivo" && (
+              <Stack direction="row" justifyContent="space-between">
                 <Typography color="text.secondary">
                   {t("orders.summary.change")}
                 </Typography>
 
-                <Typography>
-                  {formatCurrency(
-                    pedido.vuelto
-                  )}
-                </Typography>
+                <Typography>{formatCurrency(pedido.vuelto)}</Typography>
               </Stack>
             )}
 
-            {pedido.metodo_pago ===
-              "Tarjeta" && (
+            {pedido.metodo_pago === "Tarjeta" && (
               <>
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                >
+                <Stack direction="row" justifyContent="space-between">
                   <Typography color="text.secondary">
                     {t("orders.summary.brand")}
                   </Typography>
 
-                  <Typography>
-                    {pedido.marca_tarjeta ??
-                      "-"}
-                  </Typography>
+                  <Typography>{pedido.marca_tarjeta ?? "-"}</Typography>
                 </Stack>
 
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                >
+                <Stack direction="row" justifyContent="space-between">
                   <Typography color="text.secondary">
                     {t("orders.summary.card")}
                   </Typography>
 
                   <Typography>
-                    **** **** ****{" "}
-                    {pedido.ultimos_cuatro_digitos ??
-                      "----"}
+                    **** **** **** {pedido.ultimos_cuatro_digitos ?? "----"}
                   </Typography>
                 </Stack>
               </>
@@ -212,3 +141,7 @@ export function ResumenFactura({ pedido }) {
     </Card>
   );
 }
+
+ResumenFactura.propTypes = {
+  pedido: PropTypes.object,
+};

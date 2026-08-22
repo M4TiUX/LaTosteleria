@@ -293,9 +293,9 @@ function MenuItemSelector({
 }
 
 export function MenuForm({ defaultValues, onSubmit, submitText }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
-  const menuSchema = useMemo(() => crearMenuSchema(t), [t, i18n.language]);
+  const menuSchema = useMemo(() => crearMenuSchema(t), [t]);
 
   /*
    * Si defaultValues.imagen existe,

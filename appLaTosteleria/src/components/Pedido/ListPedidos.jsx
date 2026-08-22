@@ -154,7 +154,7 @@ export function ListPedidos() {
       .finally(() => {
         setLoading(false);
       });
-  }, [isCliente, roleName, userData?.id]);
+  }, [isCliente, roleName, t, userData?.id]);
 
   // ==========================================
   // TÍTULO SEGÚN ROL
@@ -364,7 +364,9 @@ export function ListPedidos() {
                   >
                     {statusOptions.map((status) => (
                       <MenuItem key={status} value={status}>
-                        {status === "TODOS" ? t("orders.list.filters.all") : status}
+                        {status === "TODOS"
+                          ? t("orders.list.filters.all")
+                          : status}
                       </MenuItem>
                     ))}
                   </Select>
@@ -419,7 +421,10 @@ export function ListPedidos() {
             </Grid>
 
             <Typography color="text.secondary">
-              {t("orders.list.filters.showing", { filtered: filteredOrders.length, total: orders.length })}
+              {t("orders.list.filters.showing", {
+                filtered: filteredOrders.length,
+                total: orders.length,
+              })}
             </Typography>
           </Stack>
         </CardContent>
@@ -477,7 +482,9 @@ export function ListPedidos() {
                     >
                       <Box>
                         <Typography variant="h6" fontWeight={700}>
-                          {t("orders.common.orderNumber", { id: order.id_pedido })}
+                          {t("orders.common.orderNumber", {
+                            id: order.id_pedido,
+                          })}
                         </Typography>
 
                         <Typography color="text.secondary">
@@ -486,7 +493,9 @@ export function ListPedidos() {
                       </Box>
 
                       <Chip
-                        label={order.estado_actual ?? t("orders.common.noTracking")}
+                        label={
+                          order.estado_actual ?? t("orders.common.noTracking")
+                        }
                         color={
                           String(order.estado_actual).toLowerCase() ===
                           "entregado"
@@ -532,7 +541,8 @@ export function ListPedidos() {
                     {/* Fechas */}
 
                     <Typography color="text.secondary">
-                      {t("orders.list.created")}: {formatDateTime(order.fecha_creacion)}
+                      {t("orders.list.created")}:{" "}
+                      {formatDateTime(order.fecha_creacion)}
                     </Typography>
 
                     <Typography color="text.secondary">
@@ -562,7 +572,9 @@ export function ListPedidos() {
 
                       {(order.items?.length ?? 0) > 3 && (
                         <Typography color="text.secondary">
-                          {t("orders.list.moreItems", { count: (order.items?.length ?? 0) - 3 })}
+                          {t("orders.list.moreItems", {
+                            count: (order.items?.length ?? 0) - 3,
+                          })}
                         </Typography>
                       )}
                     </Stack>

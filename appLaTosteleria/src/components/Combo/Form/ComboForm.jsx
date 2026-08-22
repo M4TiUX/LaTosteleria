@@ -32,6 +32,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 
 import * as yup from "yup";
+import PropTypes from "prop-types";
 
 const crearComboSchema = (t, esActualizacion) =>
   yup.object({
@@ -107,7 +108,7 @@ export function ComboForm({
   guardando = false,
   textoBoton,
 }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   /*
    * Si existe id_combo estamos
@@ -117,7 +118,7 @@ export function ComboForm({
 
   const comboSchema = useMemo(
     () => crearComboSchema(t, esActualizacion),
-    [t, i18n.language, esActualizacion],
+    [t, esActualizacion],
   );
 
   const [categorias, setCategorias] = useState([]);
@@ -685,3 +686,10 @@ export function ComboForm({
     </Paper>
   );
 }
+
+ComboForm.propTypes = {
+  defaultValues: PropTypes.object,
+  onSubmit: PropTypes.func.isRequired,
+  guardando: PropTypes.bool,
+  textoBoton: PropTypes.string.isRequired,
+};

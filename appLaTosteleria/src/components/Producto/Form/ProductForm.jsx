@@ -20,6 +20,7 @@ import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 
 import * as yup from "yup";
+import PropTypes from "prop-types";
 
 import CategoryService from "../../../services/CategoryService";
 import IngredientService from "../../../services/IngredientService";
@@ -98,13 +99,13 @@ export default function ProductForm({
   buttonText,
   loading = false,
 }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   const esActualizacion = Boolean(defaultValues);
 
   const productSchema = useMemo(
     () => crearProductSchema(t, esActualizacion),
-    [t, i18n.language, esActualizacion],
+    [t, esActualizacion],
   );
 
   const [categorias, setCategorias] = useState([]);
@@ -552,3 +553,10 @@ export default function ProductForm({
     </Card>
   );
 }
+
+ProductForm.propTypes = {
+  defaultValues: PropTypes.object,
+  onSubmit: PropTypes.func.isRequired,
+  buttonText: PropTypes.string.isRequired,
+  loading: PropTypes.bool,
+};

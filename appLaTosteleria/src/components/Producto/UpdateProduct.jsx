@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -17,11 +17,7 @@ export function UpdateProduct() {
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
 
-  useEffect(() => {
-    cargarProducto();
-  }, []);
-
-  const cargarProducto = async () => {
+  const cargarProducto = useCallback(async () => {
     try {
       const response = await ProductService.getProductById(id);
 
@@ -40,7 +36,11 @@ export function UpdateProduct() {
     } finally {
       setCargando(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    cargarProducto();
+  }, [cargarProducto]);
 
   const actualizarProducto = async (datos) => {
     try {
@@ -67,7 +67,6 @@ export function UpdateProduct() {
       toast.success(response.data.message || t("products.form.updateSuccess"));
 
       navigate("/producto");
-      
     } catch (error) {
       console.error("Error al actualizar el producto:", error);
 

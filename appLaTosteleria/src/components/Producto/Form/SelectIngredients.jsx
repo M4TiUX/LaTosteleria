@@ -2,13 +2,10 @@ import { useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
-import {
-  Autocomplete,
-  CircularProgress,
-  TextField,
-} from "@mui/material";
+import { Autocomplete, CircularProgress, TextField } from "@mui/material";
 
 import IngredientService from "../../../services/IngredientService";
+import PropTypes from "prop-types";
 
 export function SelectIngredients({ control, errors }) {
   const { t } = useTranslation();
@@ -44,20 +41,17 @@ export function SelectIngredients({ control, errors }) {
           options={ingredientes}
           loading={cargando}
           value={ingredientes.filter((ingrediente) =>
-            field.value?.includes(Number(ingrediente.id_ingrediente))
+            field.value?.includes(Number(ingrediente.id_ingrediente)),
           )}
-          getOptionLabel={(ingrediente) =>
-            ingrediente.nombre_ingrediente ?? ""
-          }
+          getOptionLabel={(ingrediente) => ingrediente.nombre_ingrediente ?? ""}
           isOptionEqualToValue={(option, value) =>
-            Number(option.id_ingrediente) ===
-            Number(value.id_ingrediente)
+            Number(option.id_ingrediente) === Number(value.id_ingrediente)
           }
           onChange={(_, valoresSeleccionados) => {
             field.onChange(
               valoresSeleccionados.map((ingrediente) =>
-                Number(ingrediente.id_ingrediente)
-              )
+                Number(ingrediente.id_ingrediente),
+              ),
             );
           }}
           noOptionsText={t("products.form.noIngredientsAvailable")}
@@ -66,18 +60,14 @@ export function SelectIngredients({ control, errors }) {
             <TextField
               {...params}
               label={t("products.form.ingredients")}
-              placeholder={t(
-                "products.form.selectSeveralIngredients",
-              )}
+              placeholder={t("products.form.selectSeveralIngredients")}
               error={Boolean(errors.ingredientes)}
               helperText={errors.ingredientes?.message}
               InputProps={{
                 ...params.InputProps,
                 endAdornment: (
                   <>
-                    {cargando ? (
-                      <CircularProgress size={20} />
-                    ) : null}
+                    {cargando ? <CircularProgress size={20} /> : null}
 
                     {params.InputProps.endAdornment}
                   </>
@@ -90,3 +80,8 @@ export function SelectIngredients({ control, errors }) {
     />
   );
 }
+
+SelectIngredients.propTypes = {
+  control: PropTypes.object.isRequired,
+  errors: PropTypes.object.isRequired,
+};

@@ -28,14 +28,6 @@ import { FacturaDetalleItems } from "./FacturaDetalleItems";
 import { ResumenFactura } from "./ResumenFactura";
 import { UserContext } from "../../context/UserContext";
 
-function formatCurrency(value) {
-  return new Intl.NumberFormat("es-CR", {
-    style: "currency",
-    currency: "CRC",
-    maximumFractionDigits: 0,
-  }).format(Number(value ?? 0));
-}
-
 function formatDateTime(value) {
   if (!value) {
     return "-";
@@ -107,7 +99,7 @@ export function DetailPedido() {
       .finally(() => {
         setLoading(false);
       });
-  }, [id, isCliente, userData?.id]);
+  }, [id, isCliente, t, userData?.id]);
 
   if (loading) {
     return (
@@ -130,9 +122,7 @@ export function DetailPedido() {
         }}
       >
         <Stack spacing={2}>
-          <Alert severity="error">
-            {t("orders.detail.unauthorized")}
-          </Alert>
+          <Alert severity="error">{t("orders.detail.unauthorized")}</Alert>
 
           <Box>
             <Button
@@ -359,7 +349,8 @@ export function DetailPedido() {
                     </Typography>
 
                     <Typography fontWeight={600} variant="body2">
-                      {pedido.encargado_nombre ?? t("orders.invoice.notApplicable")}
+                      {pedido.encargado_nombre ??
+                        t("orders.invoice.notApplicable")}
                     </Typography>
                   </Box>
                 </Grid>
@@ -373,7 +364,9 @@ export function DetailPedido() {
                     <Box sx={{ mt: 0.5 }}>
                       <Chip
                         size="small"
-                        label={pedido.estado_actual ?? t("orders.common.noTracking")}
+                        label={
+                          pedido.estado_actual ?? t("orders.common.noTracking")
+                        }
                       />
                     </Box>
                   </Box>

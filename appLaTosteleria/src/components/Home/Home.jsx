@@ -1,4 +1,3 @@
-import React from "react";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
@@ -19,7 +18,7 @@ export function Home() {
         gutterBottom
       >
         La Tostelería
-      </Typography >
+      </Typography>
       <img
         src="/images/Logo2.png"
         alt="Tostada de aguacate"
@@ -31,11 +30,12 @@ export function Home() {
           borderRadius: "8px",
         }}
       />
-      <Typography 
-      variant="h5" 
-      align="center" 
-      color="text.primary"
-      sx={{fontWeight:700, letterSpacing: "0.02em"}}>
+      <Typography
+        variant="h5"
+        align="center"
+        color="text.primary"
+        sx={{ fontWeight: 700, letterSpacing: "0.02em" }}
+      >
         {t("home.slogan")}
       </Typography>
 
@@ -45,8 +45,10 @@ export function Home() {
         color="text.secondary"
         sx={{ mt: 2, maxWidth: 820, mx: "auto" }}
       >
-        La Tosteleria es una cafeteria y deli donde combinamos pan artesanal, bebidas calientes y postres caseros.
-        Explore el menu disponible por horario y descubra opciones frescas preparadas con ingredientes de calidad.
+        La Tosteleria es una cafeteria y deli donde combinamos pan artesanal,
+        bebidas calientes y postres caseros. Explore el menu disponible por
+        horario y descubra opciones frescas preparadas con ingredientes de
+        calidad.
       </Typography>
 
       <Box sx={{ mt: 5 }}>

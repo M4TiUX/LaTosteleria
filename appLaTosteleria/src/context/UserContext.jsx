@@ -10,7 +10,7 @@ function getStoredUser() {
     const token = localStorage.getItem("token");
     if (!token) return null;
     return jwtDecode(token);
-  } catch (error) {
+  } catch {
     console.warn("Token inválido, limpiando...");
     localStorage.removeItem("token");
     return null;
@@ -19,7 +19,9 @@ function getStoredUser() {
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(() => getStoredUser());
-  const [isAuthenticated, setIsAuthenticated] = useState(() => Boolean(getStoredUser()));
+  const [isAuthenticated, setIsAuthenticated] = useState(() =>
+    Boolean(getStoredUser()),
+  );
 
   const decodeToken = useCallback(() => {
     return getStoredUser();
@@ -51,7 +53,8 @@ export const UserProvider = ({ children }) => {
 
   const autorize = (requiredRoles = []) => {
     const activeUser = user ?? decodeToken();
-    if (!activeUser || !requiredRoles || requiredRoles.length === 0) return false;
+    if (!activeUser || !requiredRoles || requiredRoles.length === 0)
+      return false;
     return requiredRoles.includes(activeUser?.rol?.name);
   };
 

@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 
 import CategoryService from "../../../services/CategoryService";
+import PropTypes from "prop-types";
 
 export function SelectCategory({ control, errors }) {
   const { t } = useTranslation();
@@ -74,11 +75,14 @@ export function SelectCategory({ control, errors }) {
             )}
           </Select>
 
-          <FormHelperText>
-            {errors.categoria_id?.message}
-          </FormHelperText>
+          <FormHelperText>{errors.categoria_id?.message}</FormHelperText>
         </FormControl>
       )}
     />
   );
 }
+
+SelectCategory.propTypes = {
+  control: PropTypes.object.isRequired,
+  errors: PropTypes.object.isRequired,
+};

@@ -16,6 +16,7 @@ import {
 import RestaurantMenuOutlinedIcon from "@mui/icons-material/RestaurantMenuOutlined";
 import MenuService from "../../services/MenuService";
 import { formatMenuDate, formatMenuTime } from "./menuUtils";
+import PropTypes from "prop-types";
 
 function MenuItemCard({ item, tipo }) {
   return (
@@ -112,6 +113,11 @@ function MenuItemCard({ item, tipo }) {
     </Card>
   );
 }
+
+MenuItemCard.propTypes = {
+  item: PropTypes.object.isRequired,
+  tipo: PropTypes.string.isRequired,
+};
 
 export function DetailMenu() {
   const { id } = useParams();
