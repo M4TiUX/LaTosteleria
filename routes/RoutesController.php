@@ -59,6 +59,7 @@ class RoutesController
                     ->handle([
                         'Administrador',
                         'Empleado',
+                        'Encargado',
                         'Cliente'
                     ]);
             }
@@ -73,6 +74,7 @@ class RoutesController
                     ->authMiddleware
                     ->handle([
                         'Empleado',
+                        'Administrador',
                         'Cliente'
                     ]);
             }
@@ -91,7 +93,8 @@ class RoutesController
                     ->authMiddleware
                     ->handle([
                         'Administrador',
-                        'Empleado'
+                        'Empleado',
+                        'Encargado'
                     ]);
             }
 
@@ -739,6 +742,26 @@ class RoutesController
 
                                         $response
                                             ->$action();
+                                    } elseif (
+                                        count(
+                                            $routesArray
+                                        ) == 3
+                                    ) {
+
+                                        /*
+                                         * Ejemplo:
+                                         *
+                                         * /seguimientoPedido/5
+                                         *
+                                         * "5" cae en $action porque no
+                                         * hay un nombre de acción real,
+                                         * asi que se trata como id.
+                                         */
+
+                                        $response
+                                            ->update(
+                                                $action
+                                            );
                                     } else {
 
                                         $json = [
@@ -790,6 +813,16 @@ class RoutesController
 
                                         $response
                                             ->$action();
+                                    } elseif (
+                                        count(
+                                            $routesArray
+                                        ) == 3
+                                    ) {
+
+                                        $response
+                                            ->delete(
+                                                $action
+                                            );
                                     } else {
 
                                         $json = [

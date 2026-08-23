@@ -336,6 +336,8 @@ class PedidoModel
                 $this->enlace->executeSQL_DML($detailSql);
             }
 
+            $this->initializePreparationStations($pedidoId);
+
             $trackingSql = "INSERT INTO seguimiento_pedido
             (pedido_id, estado_nombre, fecha_hora, comentario)
             VALUES
@@ -349,6 +351,86 @@ class PedidoModel
         } catch (Exception $e) {
             handleException($e);
         }
+    }
+
+    public function getPreparation($pedidoId)
+    {
+        $pedidoId = (int) $pedidoId;
+        $sql = "SELECT
+                    pe.id_pedido_estacion,
+                    pe.detalle_id,
+                    pe.producto_id,
+                    p.nombre_producto,
+                    pe.proceso_id,
+                    pe.estacion_id,
+                    e.nombre_estacion,
+                    pe.orden_paso,
+                    pe.validada,
+                    pe.fecha_validacion
+                FROM pedido_estaciones pe
+                INNER JOIN productos p ON p.id_producto = pe.producto_id
+                INNER JOIN estaciones e ON e.id_estacion = pe.estacion_id
+                WHERE pe.pedido_id = $pedidoId
+                ORDER BY pe.detalle_id, pe.orden_paso";
+
+        $result = $this->enlace->executeSQL($sql);
+
+        if (is_array($result) && !empty($result)) {
+            return $result;
+        }
+
+        // Inicializa también pedidos creados antes de agregar este control.
+        $this->initializePreparationStations($pedidoId);
+        $result = $this->enlace->executeSQL($sql);
+
+        return is_array($result) ? $result : [];
+    }
+
+    public function advancePreparation($pedidoId, $stationId)
+    {
+        $pedidoId = (int) $pedidoId;
+        $stationId = (int) $stationId;
+        $sql = "SELECT id_pedido_estacion
+                FROM pedido_estaciones
+                WHERE pedido_id = $pedidoId
+                  AND id_pedido_estacion = $stationId
+                  AND validada = 0
+                  AND NOT EXISTS (
+                    SELECT 1 FROM pedido_estaciones previous_station
+                    WHERE previous_station.detalle_id = pedido_estaciones.detalle_id
+                      AND previous_station.orden_paso < pedido_estaciones.orden_paso
+                      AND previous_station.validada = 0
+                  )
+                LIMIT 1";
+        $result = $this->enlace->executeSQL($sql);
+
+        if (!is_array($result) || empty($result)) {
+            throw new Exception('La estación no es la siguiente pendiente para este producto.');
+        }
+
+        $now = $this->escape(date('Y-m-d H:i:s'));
+        $this->enlace->executeSQL_DML("UPDATE pedido_estaciones SET validada = 1, fecha_validacion = '$now' WHERE id_pedido_estacion = $stationId AND pedido_id = $pedidoId");
+        return $this->getPreparation($pedidoId);
+    }
+
+    private function initializePreparationStations($pedidoId)
+    {
+        $pedidoId = (int) $pedidoId;
+        $sql = "INSERT INTO pedido_estaciones (pedido_id, detalle_id, producto_id, proceso_id, estacion_id, orden_paso)
+                SELECT dp.pedido_id, dp.id_detalle, p.id_producto, pp.id_proceso, pp.estacion_id, pp.orden_paso
+                FROM detalle_pedido dp
+                INNER JOIN productos p ON p.id_producto = dp.producto_id
+                INNER JOIN procesos_preparacion pp ON pp.producto_id = p.id_producto
+                WHERE dp.pedido_id = $pedidoId
+                UNION ALL
+                SELECT dp.pedido_id, dp.id_detalle, p.id_producto, pp.id_proceso, pp.estacion_id, pp.orden_paso
+                FROM detalle_pedido dp
+                INNER JOIN combo_producto cp ON cp.combo_id = dp.combo_id
+                INNER JOIN productos p ON p.id_producto = cp.producto_id
+                INNER JOIN procesos_preparacion pp ON pp.producto_id = p.id_producto
+                WHERE dp.pedido_id = $pedidoId";
+
+        $this->enlace->executeSQL_DML($sql);
     }
 
     private function getDireccionEnvio($direccionId, $clienteId)

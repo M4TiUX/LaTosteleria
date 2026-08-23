@@ -7,6 +7,10 @@ class SeguimientoPedidoService {
     return axios.get(`${BASE_URL}/${pedidoId}`);
   }
 
+  updateTracking(pedidoId, comentario = null) {
+    return axios.put(`${BASE_URL}/${pedidoId}`, { comentario });
+  }
+
   createDemoOrder() {
     return axios.post(`${BASE_URL}/createDemo`);
   }

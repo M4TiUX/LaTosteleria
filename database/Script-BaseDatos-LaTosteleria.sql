@@ -222,6 +222,26 @@ CREATE TABLE `detalle_pedido` (
   CHECK ((`producto_id` IS NOT NULL AND `combo_id` IS NULL) OR (`producto_id` IS NULL AND `combo_id` IS NOT NULL))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE `pedido_estaciones` (
+  `id_pedido_estacion` int(11) NOT NULL AUTO_INCREMENT,
+  `pedido_id` int(11) NOT NULL,
+  `detalle_id` int(11) NOT NULL,
+  `producto_id` int(11) NOT NULL,
+  `proceso_id` int(11) NOT NULL,
+  `estacion_id` int(11) NOT NULL,
+  `orden_paso` int(11) NOT NULL,
+  `validada` tinyint(1) NOT NULL DEFAULT 0,
+  `fecha_validacion` datetime DEFAULT NULL,
+  PRIMARY KEY (`id_pedido_estacion`),
+  UNIQUE KEY `uk_pedido_estacion` (`detalle_id`,`producto_id`,`proceso_id`),
+  KEY `fk_pedido_estaciones_pedido` (`pedido_id`),
+  CONSTRAINT `fk_pedido_estaciones_pedido` FOREIGN KEY (`pedido_id`) REFERENCES `pedidos` (`id_pedido`) ON DELETE CASCADE,
+  CONSTRAINT `fk_pedido_estaciones_detalle` FOREIGN KEY (`detalle_id`) REFERENCES `detalle_pedido` (`id_detalle`) ON DELETE CASCADE,
+  CONSTRAINT `fk_pedido_estaciones_producto` FOREIGN KEY (`producto_id`) REFERENCES `productos` (`id_producto`) ON UPDATE CASCADE,
+  CONSTRAINT `fk_pedido_estaciones_proceso` FOREIGN KEY (`proceso_id`) REFERENCES `procesos_preparacion` (`id_proceso`) ON DELETE CASCADE,
+  CONSTRAINT `fk_pedido_estaciones_estacion` FOREIGN KEY (`estacion_id`) REFERENCES `estaciones` (`id_estacion`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE `pagos_simulados` (
   `id_pago` int(11) NOT NULL AUTO_INCREMENT,
   `pedido_id` int(11) NOT NULL,
@@ -544,6 +564,13 @@ SELECT 7, NULL, 8 UNION ALL
 SELECT 7, NULL, 9 UNION ALL
 SELECT 7, NULL, 10 UNION ALL
 SELECT 7, NULL, 11;
+INSERT INTO `repartidores` (`id_repartidor`, `nombre`, `telefono`, `vehiculo`, `disponible`) VALUES
+(5, 'José Fernández', '8444-3333', 'Motocicleta', 1),
+(6, 'Karla Solano', '8333-4444', 'Automovil', 1),
+(7, 'Diego Araya', '8222-5555', 'Bicicleta', 1),
+(8, 'Fabiola Rojas', '8111-6666', 'Motocicleta', 1),
+(9, 'Esteban Vargas', '8999-2222', 'Automovil', 1),
+(10, 'Paola Jiménez', '8000-9999', 'Motocicleta', 1);
 
 SET FOREIGN_KEY_CHECKS = 1;
 

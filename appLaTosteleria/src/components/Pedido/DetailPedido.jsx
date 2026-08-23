@@ -56,6 +56,12 @@ export function DetailPedido() {
   const roleName = userData?.rol?.name ?? "";
 
   const isCliente = roleName === "Cliente";
+  const isAdministrador = roleName === "Administrador";
+  const canValidateStations = [
+    "Administrador",
+    "Empleado",
+    "Encargado",
+  ].includes(roleName);
 
   const [pedido, setPedido] = useState(null);
 
@@ -64,6 +70,9 @@ export function DetailPedido() {
   const [error, setError] = useState(null);
 
   const [unauthorized, setUnauthorized] = useState(false);
+  const [preparation, setPreparation] = useState([]);
+  const [loadingPreparation, setLoadingPreparation] = useState(false);
+  const [advancingStation, setAdvancingStation] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -100,6 +109,43 @@ export function DetailPedido() {
         setLoading(false);
       });
   }, [id, isCliente, t, userData?.id]);
+
+  useEffect(() => {
+    if (!canValidateStations || pedido?.metodo_entrega !== "Tienda") {
+      setPreparation([]);
+      return;
+    }
+
+    setLoadingPreparation(true);
+    PedidoService.getPreparation(id)
+      .then((response) =>
+        setPreparation(Array.isArray(response.data) ? response.data : []),
+      )
+      .catch((requestError) => {
+        setError(
+          requestError?.response?.data?.message ??
+            requestError?.message ??
+            t("orders.detail.preparationLoadError"),
+        );
+      })
+      .finally(() => setLoadingPreparation(false));
+  }, [canValidateStations, id, pedido?.metodo_entrega, t]);
+
+  const advanceStation = async (stationId) => {
+    try {
+      setAdvancingStation(stationId);
+      const response = await PedidoService.advancePreparation(id, stationId);
+      setPreparation(Array.isArray(response.data) ? response.data : []);
+    } catch (requestError) {
+      setError(
+        requestError?.response?.data?.message ??
+          requestError?.message ??
+          t("orders.detail.preparationUpdateError"),
+      );
+    } finally {
+      setAdvancingStation(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -227,6 +273,17 @@ export function DetailPedido() {
             >
               {t("orders.detail.viewInvoice")}
             </Button>
+
+            {isAdministrador && (
+              <Button
+                component={Link}
+                to={`/pedido/seguimiento/${pedido.id_pedido}`}
+                variant="contained"
+                size="small"
+              >
+                {t("orders.list.actions.tracking")}
+              </Button>
+            )}
 
             <Button
               component={Link}
@@ -393,6 +450,86 @@ export function DetailPedido() {
             </Stack>
           </CardContent>
         </Card>
+
+        {canValidateStations && pedido.metodo_entrega === "Tienda" && (
+          <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
+            <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
+              <Stack spacing={2}>
+                <Typography variant="h6" fontWeight={700}>
+                  {t("orders.detail.preparationTitle")}
+                </Typography>
+
+                {loadingPreparation ? (
+                  <CircularProgress size={24} />
+                ) : preparation.length === 0 ? (
+                  <Typography color="text.secondary">
+                    {t("orders.detail.noPreparationStations")}
+                  </Typography>
+                ) : (
+                  Array.from(
+                    preparation
+                      .reduce((groups, station) => {
+                        const key = `${station.detalle_id}-${station.producto_id}`;
+                        const group = groups.get(key) ?? [];
+                        group.push(station);
+                        groups.set(key, group);
+                        return groups;
+                      }, new Map())
+                      .values(),
+                  ).map((stations) => {
+                    const nextStation = stations.find(
+                      (station) => !Number(station.validada),
+                    );
+                    return (
+                      <Box
+                        key={`${stations[0].detalle_id}-${stations[0].producto_id}`}
+                      >
+                        <Typography fontWeight={600}>
+                          {stations[0].nombre_producto}
+                        </Typography>
+                        <Stack
+                          direction="row"
+                          spacing={1}
+                          flexWrap="wrap"
+                          sx={{ mt: 1 }}
+                        >
+                          {stations.map((station) => (
+                            <Button
+                              key={station.id_pedido_estacion}
+                              size="small"
+                              variant={
+                                Number(station.validada)
+                                  ? "contained"
+                                  : "outlined"
+                              }
+                              color={
+                                Number(station.validada) ? "success" : "primary"
+                              }
+                              disabled={
+                                Boolean(
+                                  nextStation &&
+                                    station.id_pedido_estacion !==
+                                      nextStation.id_pedido_estacion,
+                                ) ||
+                                !nextStation ||
+                                advancingStation !== null
+                              }
+                              onClick={() =>
+                                advanceStation(station.id_pedido_estacion)
+                              }
+                            >
+                              {station.orden_paso}. {station.nombre_estacion}
+                            </Button>
+                          ))}
+                        </Stack>
+                      </Box>
+                    );
+                  })
+                )}
+              </Stack>
+            </CardContent>
+          </Card>
+        )}
 
         {/* ======================================
             PRODUCTOS Y COMBOS

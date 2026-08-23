@@ -686,6 +686,12 @@ const resources = {
           generalNotes: "Observaciones generales",
           noItems: "Este pedido no contiene elementos registrados.",
           unitPrice: "Precio unitario",
+          preparationTitle: "Estaciones de preparación",
+          noPreparationStations:
+            "No hay estaciones configuradas para estos productos.",
+          preparationLoadError:
+            "No fue posible cargar las estaciones de preparación.",
+          preparationUpdateError: "No fue posible validar la estación.",
         },
 
         invoice: {
@@ -730,7 +736,7 @@ const resources = {
           loading: "Cargando seguimiento del pedido...",
           title: "Seguimiento del pedido",
           description:
-            "El estado se actualiza automáticamente cada 5 segundos mientras el pedido siga en proceso.",
+            "Su pedido está siendo preparado.",
           creatingDemo: "Creando...",
           createDemo: "Crear demo",
           progress: "Progreso",
@@ -744,6 +750,9 @@ const resources = {
           outForDelivery: "El pedido salió a entrega.",
           readyForPickup: "El pedido está listo para retiro.",
           history: "Historial del pedido",
+          advance: "Avanzar estado",
+          updating: "Actualizando...",
+          updateError: "No fue posible actualizar el estado del pedido.",
         },
       },
     },
@@ -1428,6 +1437,11 @@ const resources = {
           generalNotes: "General notes",
           noItems: "This order has no registered items.",
           unitPrice: "Unit price",
+          preparationTitle: "Preparation stations",
+          noPreparationStations:
+            "No stations are configured for these products.",
+          preparationLoadError: "Preparation stations could not be loaded.",
+          preparationUpdateError: "The station could not be validated.",
         },
 
         invoice: {
@@ -1477,6 +1491,9 @@ const resources = {
           outForDelivery: "The order is out for delivery.",
           readyForPickup: "The order is ready for pickup.",
           history: "Order history",
+          advance: "Advance status",
+          updating: "Updating...",
+          updateError: "The order status could not be updated.",
         },
       },
     },

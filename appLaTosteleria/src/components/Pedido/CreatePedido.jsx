@@ -165,7 +165,7 @@ export function CreatePedido() {
   const userData = decodeToken();
   const roleName = userData?.rol?.name ?? "";
   const isCliente = roleName === "Cliente";
-  const isStaff = roleName === "Empleado";
+  const isStaff = ["Empleado", "Encargado", "Administrador"].includes(roleName);
 
   const {
     cart,

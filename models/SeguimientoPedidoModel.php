@@ -57,7 +57,15 @@ class SeguimientoPedidoModel
             }
 
             $this->ensureInitialTracking($pedido);
-            $this->advanceTrackingIfNeeded($pedidoId);
+
+            /*
+             * El avance automatico por tiempo solo aplica a Domicilio.
+             * Los pedidos de retiro en Tienda avanzan unicamente
+             * mediante el boton "Avanzar estado" (avanzarManual).
+             */
+            if ($pedido->metodo_entrega === 'Domicilio') {
+                $this->advanceTrackingIfNeeded($pedidoId);
+            }
 
             return $this->buildTrackingResponse($pedidoId);
         } catch (Exception $e) {
@@ -354,7 +362,11 @@ class SeguimientoPedidoModel
 
     private function asignarRepartidor()
     {
-        $sql = "SELECT id_repartidor FROM repartidores ORDER BY RAND() LIMIT 1";
+        $sql = "SELECT id_repartidor
+            FROM repartidores
+            WHERE disponible = 1
+            ORDER BY RAND()
+            LIMIT 1";
         $result = $this->enlace->executeSQL($sql);
 
         return (is_array($result) && !empty($result)) ? (int) $result[0]->id_repartidor : null;

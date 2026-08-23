@@ -1,8 +1,6 @@
 import axios from "axios";
 
-const BASE_URL =
-  import.meta.env.VITE_BASE_URL +
-  "pedido";
+const BASE_URL = import.meta.env.VITE_BASE_URL + "pedido";
 
 class PedidoService {
   // ==========================================
@@ -18,13 +16,9 @@ class PedidoService {
       /pedido
     */
 
-    const suffix = clienteId
-      ? `?cliente_id=${clienteId}`
-      : "";
+    const suffix = clienteId ? `?cliente_id=${clienteId}` : "";
 
-    return axios.get(
-      `${BASE_URL}${suffix}`,
-    );
+    return axios.get(`${BASE_URL}${suffix}`);
   }
 
   // ==========================================
@@ -32,9 +26,7 @@ class PedidoService {
   // ==========================================
 
   getOrderById(orderId) {
-    return axios.get(
-      `${BASE_URL}/${orderId}`,
-    );
+    return axios.get(`${BASE_URL}/${orderId}`);
   }
 
   // ==========================================
@@ -42,16 +34,22 @@ class PedidoService {
   // ==========================================
 
   createOrder(order) {
-    return axios.post(
-      BASE_URL,
-      order,
-    );
+    return axios.post(BASE_URL, order);
   }
 
   getDashboardSummary() {
-    return axios.get(
-      `${BASE_URL}/dashboard`,
-    );
+    return axios.get(`${BASE_URL}/dashboard`);
+  }
+
+  getPreparation(orderId) {
+    return axios.get(`${BASE_URL}/preparation/${orderId}`);
+  }
+
+  advancePreparation(orderId, stationId) {
+    return axios.post(`${BASE_URL}/advancePreparation`, {
+      pedido_id: orderId,
+      station_id: stationId,
+    });
   }
 }
 

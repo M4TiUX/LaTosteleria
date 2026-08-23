@@ -24,6 +24,7 @@ import {
 import AddShoppingCartOutlinedIcon from "@mui/icons-material/AddShoppingCartOutlined";
 import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
+import UpdateOutlinedIcon from "@mui/icons-material/UpdateOutlined";
 
 import PedidoService from "../../services/PedidoService";
 import { UserContext } from "../../context/UserContext";
@@ -87,11 +88,11 @@ export function ListPedidos() {
 
   const isCliente = roleName === "Cliente";
 
-  const isEmpleado = roleName === "Empleado";
+  const isEmpleado = ["Empleado", "Encargado"].includes(roleName);
 
   const isAdministrador = roleName === "Administrador";
 
-  const canCreateOrder = isCliente || isEmpleado;
+  const canCreateOrder = isCliente || isEmpleado || isAdministrador;
 
   // ==========================================
   // ESTADOS
@@ -592,7 +593,7 @@ export function ListPedidos() {
                           ACCIONES DEL CLIENTE
                       ================================== */}
 
-                    {canCreateOrder && (
+                    {(canCreateOrder || isAdministrador) && (
                       <Stack
                         direction={{
                           xs: "column",
@@ -605,18 +606,21 @@ export function ListPedidos() {
                           to={`/pedido/seguimiento/${order.id_pedido}`}
                           variant="contained"
                           fullWidth
+                          startIcon={<UpdateOutlinedIcon />}
                         >
                           {t("orders.list.actions.tracking")}
                         </Button>
 
-                        <Button
-                          component={Link}
-                          to="/pedido/crear"
-                          variant="outlined"
-                          fullWidth
-                        >
-                          {t("orders.list.actions.repeat")}
-                        </Button>
+                        {canCreateOrder && (
+                          <Button
+                            component={Link}
+                            to="/pedido/crear"
+                            variant="outlined"
+                            fullWidth
+                          >
+                            {t("orders.list.actions.repeat")}
+                          </Button>
+                        )}
                       </Stack>
                     )}
 

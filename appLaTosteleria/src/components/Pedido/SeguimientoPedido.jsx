@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Alert,
@@ -29,6 +29,7 @@ import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 
 import SeguimientoPedidoService from "../../services/SeguimientoPedidoService";
+import { UserContext } from "../../context/UserContext";
 import UbicacionRepartidorService from "../../services/UbicacionRepartidorService";
 import RouteService from "../../services/RouteService";
 import { buildCumulativeDistances, pointAtFraction } from "../../utils/geo";
@@ -138,10 +139,16 @@ export function SeguimientoPedido() {
   const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
+  const { decodeToken } = useContext(UserContext);
+  const roleName = decodeToken()?.rol?.name ?? "";
+  const canAdvanceTracking = ["Administrador", "Empleado", "Cocina"].includes(
+    roleName,
+  );
 
   const [tracking, setTracking] = useState(null);
   const [loading, setLoading] = useState(true);
   const [creatingDemo, setCreatingDemo] = useState(false);
+  const [updatingTracking, setUpdatingTracking] = useState(false);
   const [error, setError] = useState(null);
 
   // ==========================================================
@@ -394,6 +401,23 @@ export function SeguimientoPedido() {
     }
   };
 
+  const handleAdvanceTracking = async () => {
+    try {
+      setUpdatingTracking(true);
+      const response = await SeguimientoPedidoService.updateTracking(id);
+      setTracking(response.data ?? null);
+      setError(null);
+    } catch (requestError) {
+      setError(
+        requestError?.response?.data?.message ??
+          requestError?.message ??
+          t("orders.tracking.updateError"),
+      );
+    } finally {
+      setUpdatingTracking(false);
+    }
+  };
+
   if (loading) {
     return (
       <Stack spacing={2} alignItems="center" sx={{ py: 8 }}>
@@ -503,6 +527,19 @@ export function SeguimientoPedido() {
                   label={tracking.estado_actual}
                   color={tracking.progreso === 100 ? "success" : "warning"}
                 />
+
+                {canAdvanceTracking &&
+                  tracking.estado_actual !== "Entregado" && (
+                    <Button
+                      variant="contained"
+                      onClick={handleAdvanceTracking}
+                      disabled={updatingTracking}
+                    >
+                      {updatingTracking
+                        ? t("orders.tracking.updating")
+                        : t("orders.tracking.advance")}
+                    </Button>
+                  )}
               </Stack>
 
               <Box>

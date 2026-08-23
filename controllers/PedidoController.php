@@ -5,6 +5,72 @@ use Firebase\JWT\Key;
 
 class pedido
 {
+    public function preparation($id)
+    {
+        try {
+            $response = new Response();
+            $user = $this->getAuthenticatedUser();
+            $role = $user->rol->name ?? '';
+
+            if (!in_array($role, ['Administrador', 'Empleado', 'Encargado'], true)) {
+                $response->status(403)->toJSON(['message' => 'No tiene permisos para validar estaciones.']);
+                return;
+            }
+
+            $pedidoModel = new PedidoModel();
+            $pedido = $pedidoModel->get((int) $id);
+
+            if ($pedido === null) {
+                $response->status(404)->toJSON(['message' => 'No se encontro el pedido solicitado.']);
+                return;
+            }
+
+            if ($pedido->metodo_entrega !== 'Tienda') {
+                $response->status(400)->toJSON(['message' => 'La validacion de estaciones solo aplica para pedidos de retiro en tienda.']);
+                return;
+            }
+
+            $response->toJSON($pedidoModel->getPreparation((int) $id));
+        } catch (Exception $e) {
+            handleException($e);
+        }
+    }
+
+    public function advancePreparation()
+    {
+        try {
+            $request = new Request();
+            $response = new Response();
+            $user = $this->getAuthenticatedUser();
+            $role = $user->rol->name ?? '';
+
+            if (!in_array($role, ['Administrador', 'Empleado', 'Encargado'], true)) {
+                $response->status(403)->toJSON(['message' => 'No tiene permisos para validar estaciones.']);
+                return;
+            }
+
+            $body = $request->getJSON();
+            $pedidoId = (int) ($body->pedido_id ?? 0);
+            $stationId = (int) ($body->station_id ?? 0);
+            $pedidoModel = new PedidoModel();
+            $pedido = $pedidoModel->get($pedidoId);
+
+            if ($pedido === null) {
+                $response->status(404)->toJSON(['message' => 'No se encontro el pedido solicitado.']);
+                return;
+            }
+
+            if ($pedido->metodo_entrega !== 'Tienda') {
+                $response->status(400)->toJSON(['message' => 'La validacion de estaciones solo aplica para pedidos de retiro en tienda.']);
+                return;
+            }
+
+            $response->toJSON($pedidoModel->advancePreparation($pedidoId, $stationId));
+        } catch (Exception $e) {
+            (new Response())->status(400)->toJSON(['message' => $e->getMessage()]);
+        }
+    }
+
     public function dashboard()
     {
         try {
@@ -349,12 +415,15 @@ class pedido
             }
 
             // =================================================
-            // EMPLEADO
-            // Puede crear pedido para cliente
-            // y queda registrado como encargado
+            // EMPLEADO / ENCARGADO / ADMINISTRADOR
+            // Puede crear pedido para cliente y queda registrado como responsable
             // =================================================
 
-            elseif ($role === 'Empleado') {
+            elseif (
+                $role === 'Empleado' ||
+                $role === 'Encargado' ||
+                $role === 'Administrador'
+            ) {
 
                 if (
                     !isset(
@@ -376,29 +445,7 @@ class pedido
                     return;
                 }
 
-                $inputJSON
-                    ->encargado_id =
-                    $userId;
-            }
-
-            // =================================================
-            // ADMINISTRADOR
-            // No puede registrar pedidos
-            // =================================================
-
-            elseif (
-                $role ===
-                'Administrador'
-            ) {
-
-                $response
-                    ->status(403)
-                    ->toJSON([
-                        'message' =>
-                        'El rol Administrador no puede registrar pedidos.'
-                    ]);
-
-                return;
+                $inputJSON->encargado_id = $userId;
             } else {
 
                 $response
