@@ -11,7 +11,6 @@ import { Divider, Menu, MenuItem } from "@mui/material";
 import Badge from "@mui/material/Badge";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import AccountCircle from "@mui/icons-material/AccountCircle";
-import NotificationsIcon from "@mui/icons-material/Notifications";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -628,15 +627,6 @@ export default function Header() {
           </MenuItem>
         )}
 
-      <MenuItem>
-        <IconButton size="large" color="inherit">
-          <Badge badgeContent={17} color="error">
-            <NotificationsIcon />
-          </Badge>
-        </IconButton>
-
-        <p>Notificaciones</p>
-      </MenuItem>
     </Menu>
   );
 
@@ -888,13 +878,6 @@ export default function Header() {
                 </Button>
               </Box>
 
-              {/* Notificaciones */}
-
-              <IconButton size="large" color="inherit">
-                <Badge badgeContent={17} color="error">
-                  <NotificationsIcon />
-                </Badge>
-              </IconButton>
             </Box>
 
             {/* Usuario */}

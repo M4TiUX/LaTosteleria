@@ -433,17 +433,17 @@ SELECT 57, 26, 5, 2, 4 UNION ALL
 SELECT 58, 26, 3, 3, 2;
 
 INSERT INTO `combos` (`id_combo`, `categoria_id`, `nombre_combo`, `imagen`, `descripcion`, `precio_especial`, `activo`)
-SELECT 1, 1, 'Combo Desayuno Tostelero', NULL, 'Incluye café latte, tostada de aguacate y cheesecake.', 6500.00, 1 UNION ALL
-SELECT 2, 1, 'Combo Croissant Cafetero', NULL, 'Croissant de jamón y queso con latte de vainilla', 5200.00, 1 UNION ALL
-SELECT 3, 4, 'Combo Panini Caprese', NULL, 'Panini caprese con americano', 5500.00, 1 UNION ALL
-SELECT 4, 3, 'Combo Muffin y Latte', NULL, 'Muffin de arándanos con latte de caramelo', 4600.00, 1 UNION ALL
-SELECT 5, 3, 'Combo Galleta y Café', NULL, 'Galleta de chocolate con café macchiato', 3300.00, 1 UNION ALL
-SELECT 6, 3, 'Combo Cheesecake Especial', NULL, 'Cheesecake de frutos rojos con mocha', 5800.00, 1 UNION ALL
-SELECT 7, 3, 'Combo Brownie Chocolate', NULL, 'Brownie con nueces y chocolate caliente', 4200.00, 1 UNION ALL
-SELECT 8, 5, 'Combo Merienda Completa', NULL, 'Bagel de pollo, frappé de chocolate y cheesecake', 8900.00, 1 UNION ALL
-SELECT 9, 1, 'Combo Cappuccino', NULL, 'Cappuccino con cheesecake', 4200.00, 1 UNION ALL
-SELECT 10, 2, 'Combo Caprese', NULL, 'Tostada Caprese y café latte', 5000.00, 1 UNION ALL
-SELECT 11, 5, 'Combo Frappé Dulce', NULL, 'Frappé de Caramelo y Brownie', 4500.00, 1;
+SELECT 1, 1, 'Combo Desayuno Tostelero', 'Combo Desayuno Tostelero.jpg', 'Incluye café latte, tostada de aguacate y cheesecake.', 6500.00, 1 UNION ALL
+SELECT 2, 1, 'Combo Croissant Cafetero', 'Combo Croissant Cafetero.jpg', 'Croissant de jamón y queso con latte de vainilla', 5200.00, 1 UNION ALL
+SELECT 3, 4, 'Combo Panini Caprese', 'Combo Panini Caprese.avif', 'Panini caprese con americano', 5500.00, 1 UNION ALL
+SELECT 4, 3, 'Combo Muffin y Latte', 'Combo Muffin y Latte.webp', 'Muffin de arándanos con latte de caramelo', 4600.00, 1 UNION ALL
+SELECT 5, 3, 'Combo Galleta y Café', 'Combo Galleta y Café.jpg', 'Galleta de chocolate con café macchiato', 3300.00, 1 UNION ALL
+SELECT 6, 3, 'Combo Cheesecake Especial', 'Combo Cheesecake Especial.jpg', 'Cheesecake de frutos rojos con mocha', 5800.00, 1 UNION ALL
+SELECT 7, 3, 'Combo Brownie Chocolate', 'Combo Brownie Chocolate.jpg', 'Brownie con nueces y chocolate caliente', 4200.00, 1 UNION ALL
+SELECT 8, 5, 'Combo Merienda Completa', 'Combo Merienda Completa.jpg', 'Bagel de pollo, frappé de chocolate y cheesecake', 8900.00, 1 UNION ALL
+SELECT 9, 1, 'Combo Cappuccino', 'Combo Cappuccino.jpg', 'Cappuccino con cheesecake', 4200.00, 1 UNION ALL
+SELECT 10, 2, 'Combo Caprese', 'Combo Caprese.jpg', 'Tostada Caprese y café latte', 5000.00, 1 UNION ALL
+SELECT 11, 5, 'Combo Frappé Dulce', 'Combo Frappé Dulce.webp', 'Frappé de Caramelo y Brownie', 4500.00, 1;
 
 INSERT INTO `combo_producto` (`combo_id`, `producto_id`, `cantidad`)
 SELECT 1, 19, 1 UNION ALL
@@ -472,13 +472,13 @@ SELECT 11, 6, 1 UNION ALL
 SELECT 11, 16, 1;
 
 INSERT INTO `menus` (`id_menu`, `nombre_menu`, `imagen`, `fecha_inicio`, `fecha_fin`, `hora_inicio`, `hora_fin`, `activo`)
-SELECT 1, 'Menú Desayuno', NULL, '2026-06-01', '2026-12-31', '07:00:00', '10:30:00', 1 UNION ALL
-SELECT 2, 'Menú Almuerzo', NULL, '2026-06-01', '2026-12-31', '11:00:00', '14:00:00', 1 UNION ALL
-SELECT 3, 'Menú Tarde', NULL, '2026-06-01', '2026-12-31', '14:00:00', '17:30:00', 1 UNION ALL
-SELECT 4, 'Menú Especial', NULL, '2026-06-01', '2026-12-31', '08:00:00', '18:00:00', 1 UNION ALL
-SELECT 5, 'Menú Frappés', NULL, '2026-06-01', '2026-12-31', '12:00:00', '18:00:00', 0 UNION ALL
-SELECT 6, 'Menú Fin de Semana', NULL, '2026-06-01', '2026-12-31', '08:00:00', '16:00:00', 0 UNION ALL
-SELECT 7, 'Menú 24/7', NULL, '2026-01-01', '2035-12-31', '00:00:00', '23:59:59', 1;
+SELECT 1, 'Menú Desayuno', 'Menú Desayuno.jpg', '2026-06-01', '2026-12-31', '07:00:00', '10:30:00', 1 UNION ALL
+SELECT 2, 'Menú Almuerzo', 'Menú Almuerzo.webp', '2026-06-01', '2026-12-31', '11:00:00', '14:00:00', 1 UNION ALL
+SELECT 3, 'Menú Tarde', 'Menú Tarde.jpg', '2026-06-01', '2026-12-31', '14:00:00', '17:30:00', 1 UNION ALL
+SELECT 4, 'Menú Especial', 'Menú Especial.png', '2026-06-01', '2026-12-31', '08:00:00', '18:00:00', 1 UNION ALL
+SELECT 5, 'Menú Frappés', 'Menú Frappés.jpg', '2026-06-01', '2026-12-31', '12:00:00', '18:00:00', 0 UNION ALL
+SELECT 6, 'Menú Fin de Semana', 'Menú Fin de Semana.webp', '2026-06-01', '2026-12-31', '08:00:00', '16:00:00', 0 UNION ALL
+SELECT 7, 'Menú 24/7', 'Menú 247.jpg', '2026-01-01', '2035-12-31', '00:00:00', '23:59:59', 1;
 
 INSERT INTO `menu_items` (`menu_id`, `producto_id`, `combo_id`)
 SELECT 1, 19, NULL UNION ALL
