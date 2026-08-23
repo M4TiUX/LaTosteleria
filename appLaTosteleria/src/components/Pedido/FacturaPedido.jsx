@@ -12,6 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
+import PrintOutlinedIcon from "@mui/icons-material/PrintOutlined";
 import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -107,6 +108,7 @@ export function FacturaPedido() {
 
   return (
     <Box
+      className="invoice-print-area"
       sx={{
         maxWidth: "850px",
         mx: "auto",
@@ -129,14 +131,28 @@ export function FacturaPedido() {
             <Typography color="text.secondary">La Tostelería</Typography>
           </Box>
 
-          <Button
-            component={Link}
-            to={`/pedido/detalle/${pedido.id_pedido}`}
-            variant="outlined"
-            startIcon={<ArrowBackOutlinedIcon />}
+          <Stack
+            className="no-print"
+            direction="row"
+            spacing={1.5}
           >
-            {t("orders.common.back")}
-          </Button>
+            <Button
+              component={Link}
+              to={`/pedido/detalle/${pedido.id_pedido}`}
+              variant="outlined"
+              startIcon={<ArrowBackOutlinedIcon />}
+            >
+              {t("orders.common.back")}
+            </Button>
+
+            <Button
+              variant="contained"
+              startIcon={<PrintOutlinedIcon />}
+              onClick={() => window.print()}
+            >
+              {t("orders.invoice.print")}
+            </Button>
+          </Stack>
         </Stack>
 
         <Card sx={{ borderRadius: 3, boxShadow: 2 }}>

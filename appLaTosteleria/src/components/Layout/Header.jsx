@@ -636,6 +636,7 @@ export default function Header() {
 
   return (
     <Box
+      className="no-print"
       sx={{
         flexGrow: 1,
       }}

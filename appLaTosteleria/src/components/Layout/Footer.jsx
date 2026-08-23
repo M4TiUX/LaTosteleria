@@ -11,6 +11,7 @@ export function Footer() {
 
   return (
     <Toolbar
+      className="no-print"
       sx={{
         px: 2,
         position: "fixed",

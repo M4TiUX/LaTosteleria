@@ -38,3 +38,19 @@ textarea,
 select {
   font: inherit;
 }
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .invoice-print-area {
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .invoice-print-area .MuiCard-root {
+    break-inside: avoid;
+  }
+}
