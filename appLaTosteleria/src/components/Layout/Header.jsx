@@ -623,7 +623,7 @@ export default function Header() {
               </Badge>
             </IconButton>
 
-            <p>Nuevo pedido</p>
+            <p>{t("orders.create.title")}</p>
           </MenuItem>
         )}
 
@@ -814,13 +814,13 @@ export default function Header() {
               {userData &&
                 Object.keys(userData).length > 0 &&
                 autorize(["Cliente"]) && (
-                  <Tooltip title="Mi carrito">
+                  <Tooltip title={t("header.myCart")}>
                     <IconButton
                       size="large"
                       edge="end"
                       component={Link}
                       to="/pedido/crear"
-                      aria-label="Mi carrito"
+                      aria-label={t("header.myCart")}
                       sx={{
                         color: "secondary.main",
                       }}

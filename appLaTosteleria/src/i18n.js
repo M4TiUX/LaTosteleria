@@ -24,10 +24,124 @@ const resources = {
         logout: "Cerrar sesión",
       },
 
+      auth: {
+        login: {
+          title: "Iniciar sesión",
+          email: "Correo electrónico",
+          password: "Contraseña",
+          submit: "Ingresar",
+          success: "Inicio de sesión exitoso.",
+          serverInternalError:
+            "Error interno del servidor. Contacte al administrador.",
+          htmlError: "El servidor devolvió un error HTML.",
+          invalidCredentials: "Credenciales incorrectas",
+          error: "Error al iniciar sesión. Intente de nuevo.",
+          unknownError: "Error desconocido",
+          validation: {
+            emailRequired: "El correo electrónico es obligatorio.",
+            emailInvalid: "El correo electrónico no tiene un formato válido.",
+            passwordRequired: "La contraseña es obligatoria.",
+          },
+        },
+
+        signup: {
+          title: "Registro de cliente",
+          name: "Nombre",
+          email: "Correo electrónico",
+          password: "Contraseña",
+          submit: "Registrarme",
+          success: "Registro exitoso. Ahora puede iniciar sesión.",
+          error: "No fue posible completar el registro.",
+          validation: {
+            nameRequired: "El nombre es obligatorio.",
+            nameMin: "El nombre debe tener al menos 3 caracteres.",
+            emailRequired: "El correo electrónico es obligatorio.",
+            emailInvalid: "El correo electrónico no tiene un formato válido.",
+            passwordRequired: "La contraseña es obligatoria.",
+            passwordMin: "La contraseña debe tener al menos 8 caracteres.",
+          },
+        },
+      },
+
+      userManagement: {
+        title: "Gestión de usuarios",
+        adminDescription:
+          "El Administrador puede consultar usuarios y crear cuentas de Empleado o Cocina.",
+        employeeDescription:
+          "El Empleado puede consultar usuarios, pero no gestionar roles privilegiados ni crear cuentas administrativas.",
+        createUser: "Crear usuario",
+        registeredUsers: "Usuarios registrados",
+        name: "Nombre",
+        email: "Correo",
+        password: "Contraseña",
+        role: "Rol",
+        saving: "Guardando...",
+        loading: "Cargando usuarios...",
+        noUsers: "No hay usuarios para mostrar.",
+        createSuccess: "Usuario creado correctamente.",
+        roles: {
+          employee: "Empleado",
+          kitchen: "Cocina",
+        },
+        validation: {
+          nameRequired: "El nombre es obligatorio.",
+          nameMin: "El nombre debe tener al menos 3 caracteres.",
+          nameMax: "El nombre no puede superar los 100 caracteres.",
+          emailRequired: "El correo es obligatorio.",
+          emailInvalid: "El correo no tiene un formato válido.",
+          passwordRequired: "La contraseña es obligatoria.",
+          passwordMin: "La contraseña debe tener al menos 8 caracteres.",
+          roleRequired: "Debe seleccionar un rol.",
+          roleAllowed: "Solo puede seleccionar Empleado o Cocina.",
+        },
+        errors: {
+          operation: "No fue posible completar la operación.",
+        },
+      },
+
+      dashboard: {
+        title: "Dashboard",
+        description:
+          "Resumen en tiempo real basado en pedidos y detalles registrados en la base de datos.",
+        referenceDate: "Fecha de referencia",
+        evaluatedProducts: "Top productos evaluados",
+        todayOrders: "Pedidos de hoy",
+        topProducts: "Top 3 productos más vendidos",
+        noSales: "No hay ventas para mostrar.",
+        ordersByStatus: "Pedidos por estado del día actual",
+        noOrdersToday: "No hay pedidos registrados hoy.",
+        loadError: "No fue posible cargar el dashboard.",
+      },
+
+      publicProcesses: {
+        title: "Procesos de Preparación",
+        loading: "Cargando procesos...",
+        detailLoading: "Cargando detalle...",
+        connectionError: "Error al conectar con el servidor",
+        station: "estación",
+        stations: "estaciones",
+        viewDetail: "Ver detalle",
+        back: "Volver a procesos",
+        inThisProcess: "en este proceso",
+      },
+
+      header: {
+        myCart: "Mi carrito",
+      },
+
+      errors: {
+        unauthorizedTitle: "Autorización",
+        unauthorizedMessage: "Usuario no autorizado",
+        notFoundTitle: "Recurso no encontrado",
+        notFoundMessage:
+          "La página que está buscando podría haber sido eliminada, haber cambiado de nombre o no estar disponible temporalmente.",
+      },
+
       language: {
         spanish: "Español",
         english: "Inglés",
       },
+
       home: {
         slogan: "Descubre nuestros productos y combos especiales.",
       },
@@ -47,6 +161,7 @@ const resources = {
         noDescription: "Producto sin descripción.",
         viewDetail: "Ver detalle",
         noProducts: "No se encontraron productos disponibles.",
+
         detail: {
           title: "Detalle del producto",
           loading: "Cargando producto...",
@@ -111,7 +226,6 @@ const resources = {
           selectSeveralIngredients: "Seleccione uno o varios ingredientes",
           noIngredientsAvailable: "No hay ingredientes disponibles",
           loadingIngredients: "Cargando ingredientes...",
-
           loadingCategories: "Cargando categorías...",
 
           productImage: "Imagen del producto",
@@ -200,7 +314,6 @@ const resources = {
           disable: "Inhabilitar",
           enable: "Habilitar",
           noCombos: "No se encontraron combos",
-
           image: "Imagen",
           statusEnabledSuccess: "Combo habilitado correctamente.",
           statusDisabledSuccess: "Combo inhabilitado correctamente.",
@@ -220,6 +333,7 @@ const resources = {
           createError: "Ocurrió un error al registrar el combo.",
           updateError: "Ocurrió un error al actualizar el combo.",
           loadError: "No fue posible cargar el combo.",
+          serverError: "No fue posible comunicarse con el servidor.",
 
           name: "Nombre del combo",
           description: "Descripción",
@@ -235,39 +349,27 @@ const resources = {
           productWithId: "Producto {{id}}",
 
           comboImage: "Imagen del combo",
-
           imageDescription: "Seleccione una imagen relacionada con el combo.",
-
           selectImage: "Seleccionar imagen",
-
           selectedFile: "Archivo seleccionado: {{name}}",
-
           imagePreview: "Vista previa de la imagen del combo",
 
           validation: {
             nameRequired: "El nombre del combo es obligatorio",
             nameMin: "El nombre debe tener al menos 3 caracteres",
-
             descriptionRequired: "La descripción es obligatoria",
             descriptionMin: "La descripción debe tener al menos 5 caracteres",
-
             priceNumber: "El precio debe ser un número",
             pricePositive: "El precio debe ser mayor que cero",
             priceRequired: "El precio especial es obligatorio",
-
             categorySelect: "Debe seleccionar una categoría",
             categoryRequired: "La categoría es obligatoria",
-
             productsRequired: "Debe seleccionar al menos un producto",
-
             nameLetters:
               "El nombre del combo debe contener al menos una letra.",
-
             imageRequired: "Debe seleccionar una imagen para el combo.",
-
             invalidImage:
               "Debe seleccionar una imagen en formato PNG, JPG, JPEG o WEBP.",
-
             duplicateName: "Ya existe un combo registrado con ese nombre.",
           },
         },
@@ -340,9 +442,8 @@ const resources = {
           error: "No fue posible registrar el menú.",
           success: "Menú creado correctamente.",
         },
-
         edit: {
-          title: "Modificar menú",
+          title: "Editar menú",
           description:
             "Actualice la disponibilidad y los elementos incluidos en el menú.",
           update: "Actualizar menú",
@@ -365,14 +466,16 @@ const resources = {
           combos: "Combos",
 
           selectMultiple: "Seleccione uno o varios {{items}}",
+
           noAvailable: "No hay {{items}} disponibles",
+
           loadingItems: "Cargando {{items}}...",
 
           itemHint:
             "Los elementos se agrupan por categoría para facilitar la selección.",
 
           comboHint:
-            "Si el menú no incluye combos, puede dejar esta selección vacía mientras exista al menos un producto.",
+            "Si el menú no incluye combos, puede dejar esta selección vacía siempre que haya seleccionado al menos un producto.",
 
           save: "Guardar menú",
           saving: "Guardando...",
@@ -387,22 +490,34 @@ const resources = {
             nameRequired: "El nombre del menú es obligatorio.",
             nameMin: "El nombre del menú debe tener al menos 3 caracteres.",
             nameMax: "El nombre del menú no puede superar los 100 caracteres.",
+
             startDateRequired: "La fecha de inicio es obligatoria.",
             startDateFormat:
-              "La fecha de inicio debe tener formato YYYY-MM-DD.",
+              "La fecha de inicio debe utilizar el formato AAAA-MM-DD.",
+
             endDateRequired: "La fecha de fin es obligatoria.",
-            endDateFormat: "La fecha de fin debe tener formato YYYY-MM-DD.",
+            endDateFormat:
+              "La fecha de fin debe utilizar el formato AAAA-MM-DD.",
+
             dateRange:
-              "La fecha de inicio no puede ser mayor que la fecha final.",
+              "La fecha de inicio no puede ser posterior a la fecha de fin.",
+
             startTimeRequired: "La hora de inicio es obligatoria.",
-            startTimeFormat: "La hora de inicio debe tener formato HH:MM.",
+            startTimeFormat:
+              "La hora de inicio debe utilizar el formato HH:MM.",
+
             endTimeRequired: "La hora de fin es obligatoria.",
-            endTimeFormat: "La hora de fin debe tener formato HH:MM.",
+            endTimeFormat: "La hora de fin debe utilizar el formato HH:MM.",
+
             timeRange:
-              "La hora de inicio no puede ser mayor que la hora final cuando las fechas son iguales.",
+              "La hora de inicio no puede ser posterior a la hora de fin cuando ambas fechas son iguales.",
+
             itemsRequired: "Debe seleccionar al menos un producto o un combo.",
+
             imageRequired: "Debe seleccionar una imagen para el menú.",
+
             imageType: "La imagen debe ser PNG, JPG, JPEG o WEBP.",
+
             nameNumeric:
               "El nombre del menú no puede contener únicamente números.",
           },
@@ -411,11 +526,14 @@ const resources = {
         maintenance: {
           loading: "Cargando mantenimiento de menús...",
           title: "Mantenimiento de Menús",
-          description: "Administra los menús registrados en el sistema",
+          description: "Administre los menús registrados en el sistema",
+
           newMenu: "Nuevo Menú",
 
           search: "Buscar menú...",
+
           allStatuses: "Todos los estados",
+
           total: "Total: {{count}} menús",
 
           id: "ID",
@@ -432,13 +550,17 @@ const resources = {
           saving: "Guardando...",
 
           noResults: "No se encontraron menús",
+
           loadError: "No fue posible cargar los menús.",
 
-          confirmEnable: '¿Desea activar el menú "{{name}}"?',
-          confirmDisable: '¿Desea desactivar el menú "{{name}}"?',
+          confirmEnable: '¿Desea habilitar el menú "{{name}}"?',
 
-          enableSuccess: "El menú fue activado correctamente.",
-          disableSuccess: "El menú fue desactivado correctamente.",
+          confirmDisable: '¿Desea inhabilitar el menú "{{name}}"?',
+
+          enableSuccess: "El menú fue habilitado correctamente.",
+
+          disableSuccess: "El menú fue inhabilitado correctamente.",
+
           statusError: "No fue posible actualizar el estado del menú.",
 
           image: "Imagen",
@@ -446,82 +568,110 @@ const resources = {
       },
 
       processMaintenance: {
-        title: "Mantenimiento de procesos",
+        title: "Mantenimiento de Procesos",
+
         description:
-          "Administre los procesos de preparación asociados a los productos.",
+          "Administre los procesos de preparación registrados en el sistema.",
 
         newProcess: "Nuevo proceso",
-        search: "Buscar por producto...",
+
+        search: "Buscar proceso...",
+
         product: "Producto",
+
         stations: "Estaciones",
+
         actions: "Acciones",
 
         detail: "Detalle",
+
         edit: "Editar",
+
         delete: "Eliminar",
 
-        loadingError: "No fue posible cargar los procesos.",
         noResults: "No se encontraron procesos.",
 
-        deleteDialog: {
-          title: "Eliminar proceso",
-          message:
-            "¿Está seguro de eliminar el proceso de preparación de {{product}}? Esta acción eliminará todos sus pasos.",
-          cancel: "Cancelar",
-          delete: "Eliminar",
-          deleting: "Eliminando...",
-          error: "No fue posible eliminar el proceso.",
-        },
-
-        form: {
-          product: "Producto",
-          stepsTitle: "Pasos del proceso",
-          stepsDescription:
-            "Seleccione la estación y el tiempo estimado para cada paso.",
-          step: "Paso {{number}}",
-          station: "Estación",
-          estimatedTime: "Tiempo estimado (minutos)",
-          addStep: "Agregar paso",
-          save: "Guardar proceso",
-          saving: "Guardando...",
-
-          createSuccess: "Proceso registrado correctamente.",
-          updateSuccess: "Proceso actualizado correctamente.",
-          deleteSuccess: "Proceso eliminado correctamente.",
-
-          createError: "Ocurrió un error al registrar el proceso.",
-          updateError: "Ocurrió un error al actualizar el proceso.",
-          deleteError: "Ocurrió un error al eliminar el proceso.",
-
-          serverError: "No fue posible comunicarse con el servidor.",
-
-          loadOptionsError: "No fue posible cargar los productos y estaciones.",
-
-          validation: {
-            product: "Debe seleccionar un producto.",
-            minimumStep: "El proceso debe tener al menos una estación.",
-            station: "Debe seleccionar una estación en todos los pasos.",
-            time: "El tiempo estimado debe ser mayor a cero.",
-          },
-
-          saveError: "Ocurrió un error al guardar el proceso.",
-        },
+        loadingError: "No fue posible cargar los procesos de preparación.",
 
         create: {
           title: "Crear proceso",
+
           description:
-            "Seleccione el producto y defina las estaciones que forman su proceso de preparación.",
-          button: "Registrar proceso",
-          error: "No fue posible registrar el proceso.",
+            "Complete la información necesaria para registrar un nuevo proceso de preparación.",
+
+          button: "Crear proceso",
         },
 
         update: {
           title: "Editar proceso",
-          description:
-            "Modifique las estaciones y tiempos del proceso de preparación.",
+
+          description: "Modifique la información del proceso de preparación.",
+
           button: "Actualizar proceso",
-          loadError: "No fue posible cargar el proceso.",
+
+          loadError: "No fue posible cargar el proceso de preparación.",
+        },
+
+        deleteDialog: {
+          title: "Eliminar proceso",
+
+          message:
+            '¿Está seguro de que desea eliminar el proceso de "{{product}}"?',
+
+          cancel: "Cancelar",
+
+          delete: "Eliminar",
+
+          deleting: "Eliminando...",
+        },
+
+        form: {
+          product: "Producto",
+
+          stepsTitle: "Pasos de preparación",
+
+          stepsDescription:
+            "Agregue las estaciones, el orden de los pasos y el tiempo estimado para completar el proceso.",
+
+          step: "Paso {{number}}",
+
+          station: "Estación",
+
+          estimatedTime: "Tiempo estimado (minutos)",
+
+          addStep: "Agregar paso",
+
+          save: "Guardar proceso",
+
+          saving: "Guardando...",
+
+          loadOptionsError: "No fue posible cargar los productos o estaciones.",
+
+          saveError: "No fue posible guardar el proceso.",
+
+          createSuccess: "Proceso creado correctamente.",
+
+          createError: "No fue posible crear el proceso.",
+
+          updateSuccess: "Proceso actualizado correctamente.",
+
           updateError: "No fue posible actualizar el proceso.",
+
+          deleteSuccess: "Proceso eliminado correctamente.",
+
+          deleteError: "No fue posible eliminar el proceso.",
+
+          serverError: "No fue posible comunicarse con el servidor.",
+
+          validation: {
+            product: "Debe seleccionar un producto.",
+
+            minimumStep: "Debe agregar al menos un paso al proceso.",
+
+            station: "Debe seleccionar una estación.",
+
+            time: "El tiempo estimado debe ser mayor que cero.",
+          },
         },
       },
 
@@ -535,120 +685,42 @@ const resources = {
           date: "Fecha",
           delete: "Eliminar",
           deliveryMethod: "Método de entrega",
-          email: "Correo",
-          noNotes: "Sin observaciones.",
+          email: "Correo electrónico",
+          noNotes: "Sin notas",
           noTracking: "Sin seguimiento",
-          notes: "Observaciones",
+          notes: "Notas",
           orderNumber: "Pedido #{{id}}",
           paymentMethod: "Método de pago",
           product: "Producto",
           productsAndCombos: "Productos y combos",
-          quantity: "Cantidad: {{count}}",
           quantityLabel: "Cantidad",
           save: "Guardar",
           saving: "Guardando...",
           status: "Estado",
           subtotal: "Subtotal",
-          summary: "Resumen",
           taxes: "Impuestos",
           total: "Total",
         },
 
-        create: {
-          title: "Nuevo pedido",
-          description:
-            "Selecciona un menú activo y arma el pedido agregando o quitando productos y combos.",
-          viewHistory: "Ver historial",
-          loadingMenus: "Cargando menús para crear el pedido...",
-          menu: "Menú",
-          storePickup: "Retiro en tienda",
-          homeDelivery: "Domicilio",
-          loadingAddresses: "Cargando direcciones...",
-          noSavedAddresses:
-            "No tiene direcciones guardadas. Puede seleccionar una ubicación en el mapa más abajo.",
-          deliveryAddress: "Dirección de entrega",
-          location: "Ubicación",
-          unnamedAddress: "Dirección sin nombre",
-          mapInstruction: "Haz clic en el mapa para seleccionar una ubicación",
-          selectedLocation: "Ubicación seleccionada",
-          saveAsAddress: "Guardar como dirección",
-          mapHint: "Haz clic en el mapa para seleccionar una ubicación",
-          orderNotes: "Observaciones del pedido",
-          orderNotesPlaceholder:
-            "Ejemplo: sin cebolla, empacar por separado, retirar a nombre de Ana",
-          characters500: "{{count}}/500 caracteres",
-          characters300: "{{count}}/300 caracteres",
-          start: "Inicio",
-          end: "Fin",
-          loadingMenuDetail: "Cargando detalle del menú...",
-          remove: "Quitar",
-          add: "Agregar",
-          inOrder: "{{count}} en pedido",
-          summary: "Resumen del pedido",
-          items: "{{count}} items",
-          emptyCart: "Todavía no has agregado productos ni combos.",
-          itemNote: "Observación para {{type}}",
-          itemNotePlaceholder: "Indicaciones para este producto o combo",
-          shipping: "Envío",
-          method: "Método",
-          cash: "Efectivo",
-          card: "Tarjeta",
-          amountReceived: "Monto recibido",
-          payExactAmount: "Pagar monto exacto: {{amount}}",
-          insufficientAmount: "El monto recibido es insuficiente.",
-          lastFourDigits: "Últimos 4 dígitos",
-          lastFourDigitsHelp: "Digite únicamente los últimos 4 dígitos.",
-          submitting: "Registrando pedido...",
-          confirm: "Confirmar pedido",
-          clearOrder: "Limpiar pedido",
-          loginWarning:
-            "Debe iniciar sesión para registrar el pedido. Ya no se usa un cliente por defecto del sistema.",
-          saveLocationTitle: "Guardar ubicación como dirección",
-          saveLocationDescription:
-            'Escribe una descripción o referencia para esta ubicación (ej: "Casa", "Oficina", "Calle 123").',
-          addressDetails: "Detalles de la dirección",
-          coordinates: "Coordenadas",
-
-          errors: {
-            loadMenus: "No fue posible cargar los menús disponibles.",
-            loadMenu: "No fue posible cargar el menú seleccionado.",
-            loadAddresses: "No fue posible cargar las direcciones guardadas.",
-            selectMapLocation: "Primero selecciona una ubicación en el mapa.",
-            addressDescription:
-              "Debes escribir una descripción o referencia de la dirección.",
-            saveAddress: "No se pudo guardar la dirección.",
-            loginRequired: "Debe iniciar sesión para registrar un pedido.",
-            menuRequired: "Debe seleccionar un menú antes de crear el pedido.",
-            itemRequired:
-              "Debe agregar al menos un producto o combo al pedido.",
-            addressRequired:
-              "Debe guardar la ubicación seleccionada como dirección antes de continuar.",
-            amountRequired: "Debe indicar el monto recibido.",
-            insufficientAmount:
-              "El monto recibido es insuficiente para pagar el pedido.",
-            cardBrandRequired: "Debe seleccionar la marca de la tarjeta.",
-            cardDigits:
-              "Debe ingresar exactamente los últimos 4 dígitos de la tarjeta.",
-            createOrder: "No fue posible registrar el pedido.",
-          },
-        },
-
         list: {
-          loading: "Cargando pedidos...",
-          loadError: "No fue posible cargar el historial de pedidos.",
           titles: {
             client: "Mis pedidos",
             staff: "Administración de pedidos",
-            default: "Historial de pedidos",
+            default: "Pedidos",
           },
+
           descriptions: {
             client:
-              "Consulta tus pedidos registrados y accede al seguimiento de cada uno.",
+              "Consulte los pedidos que ha realizado y revise su estado actual.",
             staff:
-              "Consulta los pedidos registrados por los clientes y utiliza los filtros para localizar la información.",
-            default: "Consulta los pedidos registrados.",
+              "Consulte los pedidos registrados por los clientes y utilice los filtros para localizar la información.",
+            default: "Consulte los pedidos registrados en el sistema.",
           },
+
           newOrder: "Nuevo pedido",
+          loading: "Cargando pedidos...",
+          loadError: "No fue posible cargar los pedidos.",
+
           filters: {
             title: "Filtros del historial",
             all: "Todos",
@@ -657,102 +729,242 @@ const resources = {
             clear: "Limpiar",
             showing: "Mostrando {{filtered}} de {{total}} pedidos.",
           },
+
           noResults: {
             title: "No hay pedidos que coincidan con los filtros actuales.",
             description:
-              "Ajusta el estado o el rango de fechas para consultar otros pedidos.",
+              "Ajuste el estado o el rango de fechas para consultar otros pedidos.",
             create: "Crear pedido",
           },
-          items: "{{count}} items",
+
+          items: "{{count}} artículos",
           created: "Creado",
           lastMovement: "Último movimiento",
-          moreItems: "y {{count}} elementos más...",
+          moreItems: "+{{count}} artículos más",
+
           actions: {
             detail: "Ver detalle",
-            tracking: "Ver seguimiento",
-            repeat: "Repetir pedido",
+            tracking: "Seguimiento",
+            repeat: "Nuevo pedido",
+          },
+        },
+
+        create: {
+          title: "Crear pedido",
+          description:
+            "Complete la información necesaria para registrar el pedido.",
+
+          orderDateTime: "Fecha y hora del pedido",
+          staffMember: "Funcionario encargado",
+          customer: "Cliente",
+          customerDetail: "Detalle del cliente",
+          selectCustomer: "Seleccione un cliente",
+          selectCustomerToContinue: "Seleccione un cliente para continuar.",
+
+          menu: "Menú",
+          loadingMenus: "Cargando menús...",
+          loadingMenuDetail: "Cargando detalle del menú...",
+          noAvailableMenus: "No hay menús disponibles en este momento.",
+
+          start: "Inicio",
+          end: "Fin",
+
+          items: "Productos y combos",
+          add: "Agregar",
+          remove: "Eliminar",
+          inOrder: "En el pedido",
+
+          method: "Método de entrega",
+          homeDelivery: "Entrega a domicilio",
+          storePickup: "Retiro en tienda",
+
+          deliveryAddress: "Dirección de entrega",
+          loadingAddresses: "Cargando direcciones...",
+          noSavedAddresses: "El cliente no tiene direcciones guardadas.",
+          unnamedAddress: "Dirección sin nombre",
+
+          addressDetails: "Detalles de la dirección",
+          location: "Ubicación",
+          coordinates: "Coordenadas",
+          selectedLocation: "Ubicación seleccionada",
+
+          mapHint: "Seleccione la ubicación de entrega en el mapa.",
+          mapInstruction:
+            "Haga clic en el mapa para seleccionar la ubicación exacta.",
+
+          saveAsAddress: "Guardar como dirección",
+          saveLocationTitle: "Nombre de la dirección",
+          saveLocationDescription: "Descripción de la dirección",
+
+          orderNotes: "Notas generales del pedido",
+          orderNotesPlaceholder:
+            "Agregue observaciones generales para el pedido.",
+          itemNote: "Nota del artículo",
+          itemNotePlaceholder: "Agregue una observación para este artículo.",
+
+          characters300: "{{count}}/300 caracteres",
+          characters500: "{{count}}/500 caracteres",
+
+          cash: "Efectivo",
+          card: "Tarjeta",
+
+          amountReceived: "Monto recibido",
+          payExactAmount: "Pagar monto exacto",
+          insufficientAmount: "Monto insuficiente",
+
+          lastFourDigits: "Últimos 4 dígitos",
+          lastFourDigitsHelp:
+            "Ingrese únicamente los últimos 4 dígitos de la tarjeta.",
+
+          shipping: "Envío",
+
+          summary: "Resumen del pedido",
+
+          clearOrder: "Limpiar pedido",
+          confirm: "Confirmar pedido",
+          submitting: "Procesando pedido...",
+
+          loginWarning: "Debe iniciar sesión para crear un pedido.",
+
+          viewHistory: "Ver historial de pedidos",
+
+          errors: {
+            loginRequired: "Debe iniciar sesión para crear un pedido.",
+
+            loadCustomers: "No fue posible cargar los clientes.",
+
+            loadMenus: "No fue posible cargar los menús.",
+
+            loadMenu: "No fue posible cargar el detalle del menú.",
+
+            menuRequired: "Debe seleccionar un menú.",
+
+            itemRequired: "Debe agregar al menos un producto o combo.",
+
+            loadAddresses: "No fue posible cargar las direcciones.",
+
+            addressRequired: "Debe seleccionar una dirección de entrega.",
+
+            addressDescription:
+              "Debe indicar una descripción para la dirección.",
+
+            selectMapLocation: "Debe seleccionar una ubicación en el mapa.",
+
+            saveAddress: "No fue posible guardar la dirección.",
+
+            amountRequired: "Debe indicar el monto recibido.",
+
+            insufficientAmount:
+              "El monto recibido es insuficiente para cubrir el total.",
+
+            cardBrandRequired: "Debe seleccionar la marca de la tarjeta.",
+
+            cardDigits: "Debe ingresar los últimos 4 dígitos de la tarjeta.",
+
+            createOrder: "No fue posible crear el pedido.",
           },
         },
 
         detail: {
-          loading: "Cargando detalle del pedido...",
+          loading: "Cargando pedido...",
           loadError: "No fue posible cargar el pedido.",
-          unauthorized: "No tiene autorización para consultar este pedido.",
-          backToOrders: "Volver a pedidos",
-          notFound: "No se encontró el pedido solicitado.",
-          description: "Detalle completo del pedido.",
-          viewInvoice: "Ver comprobante",
-          orderInfo: "Información del pedido",
-          generalNotes: "Observaciones generales",
-          noItems: "Este pedido no contiene elementos registrados.",
-          unitPrice: "Precio unitario",
-          preparationTitle: "Estaciones de preparación",
-          noPreparationStations:
-            "No hay estaciones configuradas para estos productos.",
-          preparationLoadError:
-            "No fue posible cargar las estaciones de preparación.",
-          preparationUpdateError: "No fue posible validar la estación.",
-        },
+          notFound: "Pedido no encontrado.",
+          unauthorized: "No tiene permisos para consultar este pedido.",
 
-        invoice: {
-          loading: "Cargando comprobante...",
-          loadError: "No fue posible cargar el comprobante.",
-          notFound: "No se encontró el comprobante.",
-          title: "Comprobante #{{id}}",
-          print: "Imprimir",
-          generalInfo: "Información general",
-          manager: "Empleado",
-          notApplicable: "No aplica",
-          notRegistered: "No registrado",
-          detailTitle: "Detalle del comprobante",
-          noItems: "No hay elementos registrados.",
-          each: "c/u",
-          linePrice: "Precio",
-          lineSubtotal: "Subtotal",
-          lineTax: "Impuesto",
+          description:
+            "Consulte la información general y el estado de preparación del pedido.",
+
+          orderInfo: "Información del pedido",
+          generalNotes: "Notas generales",
+
+          preparationTitle: "Preparación del pedido",
+          noPreparationStations:
+            "No hay estaciones de preparación registradas.",
+
+          preparationLoadError:
+            "No fue posible cargar la información de preparación.",
+
+          preparationUpdateError:
+            "No fue posible actualizar el estado de preparación.",
+
+          viewInvoice: "Ver factura",
+          backToOrders: "Volver a pedidos",
         },
 
         summary: {
-          title: "Resumen de comprobante",
-          amountPaid: "Monto pagado",
-          amountReceived: "Monto recibido",
-          change: "Vuelto",
-          brand: "Marca",
-          card: "Tarjeta",
-          totalBeforeTax: "Total sin impuesto",
+          title: "Resumen del pago",
+          totalBeforeTax: "Total antes de impuestos",
           shippingCost: "Costo de envío",
-          totalWithTax: "Total con impuesto",
+          totalWithTax: "Total con impuestos",
+          amountReceived: "Monto recibido",
+          amountPaid: "Monto pagado",
+          change: "Cambio",
+          card: "Tarjeta",
+          brand: "Marca",
+        },
+
+        invoice: {
+          title: "Factura",
+          detailTitle: "Detalle de la factura",
+          generalInfo: "Información general",
+
+          loading: "Cargando factura...",
+          loadError: "No fue posible cargar la factura.",
+          notFound: "Factura no encontrada.",
+
+          manager: "Funcionario encargado",
+          notApplicable: "No aplica",
+          notRegistered: "No registrado",
+
+          noItems: "No hay artículos registrados en esta factura.",
+
+          linePrice: "Precio",
+          lineSubtotal: "Subtotal",
+          lineTax: "Impuesto",
+
+          print: "Imprimir factura",
         },
 
         tracking: {
-          orderRequired:
-            "Debe indicar un pedido para consultar el seguimiento.",
-          loadError: "No fue posible consultar el seguimiento.",
-          locationError:
-            "No fue posible consultar la ubicación del repartidor.",
-          routeError:
-            "No fue posible calcular la ruta por calles; se muestra una línea recta como referencia.",
-          demoError: "No fue posible crear el pedido demo.",
-          loading: "Cargando seguimiento del pedido...",
           title: "Seguimiento del pedido",
+
           description:
-            "Su pedido está siendo preparado.",
-          creatingDemo: "Creando...",
-          createDemo: "Crear demo",
+            "Consulte el progreso y la ubicación relacionada con la entrega del pedido.",
+
+          loading: "Cargando seguimiento...",
+          loadError: "No fue posible cargar el seguimiento del pedido.",
+
           progress: "Progreso",
-          mapLocation: "Ubicación en el mapa",
-          store: "La Tostelería (tienda)",
+          history: "Historial",
+
+          store: "Tienda",
           deliveryAddress: "Dirección de entrega",
+          mapLocation: "Ubicación en el mapa",
+          route: "Ruta",
+
           driver: "Repartidor",
-          route: "del trayecto",
-          driverPositionUpdates: "La posición del repartidor se actualiza cada",
-          seconds: "segundos",
-          outForDelivery: "El pedido salió a entrega.",
-          readyForPickup: "El pedido está listo para retiro.",
-          history: "Historial del pedido",
+          driverPositionUpdates:
+            "Actualizaciones de la ubicación del repartidor",
+
+          readyForPickup: "Listo para retirar",
+          outForDelivery: "En camino",
+
           advance: "Avanzar estado",
           updating: "Actualizando...",
-          updateError: "No fue posible actualizar el estado del pedido.",
+
+          seconds: "{{count}} segundos",
+
+          orderRequired: "Se requiere un pedido para consultar el seguimiento.",
+
+          locationError: "No fue posible obtener la ubicación.",
+
+          routeError: "No fue posible calcular la ruta.",
+
+          updateError: "No fue posible actualizar el seguimiento.",
+
+          createDemo: "Crear seguimiento de prueba",
+          creatingDemo: "Creando seguimiento...",
+          demoError: "No fue posible crear el seguimiento de prueba.",
         },
       },
     },
@@ -765,7 +977,7 @@ const resources = {
         mantenimientoProductos: "Product Management",
         combos: "Combos",
         procesos: "Processes",
-        mantenimientoProcesos: "Process Maintenance",
+        mantenimientoProcesos: "Process Management",
         menus: "Menus",
         pedidos: "Orders",
         mantenimientoMenus: "Menu Management",
@@ -776,14 +988,134 @@ const resources = {
 
       user: {
         login: "Log in",
-        register: "Sign up",
+        register: "Register",
         logout: "Log out",
+      },
+
+      auth: {
+        login: {
+          title: "Log in",
+          email: "Email",
+          password: "Password",
+          submit: "Log in",
+          success: "Login successful.",
+          serverInternalError:
+            "Internal server error. Contact the administrator.",
+          htmlError: "The server returned an HTML error.",
+          invalidCredentials: "Invalid credentials",
+          error: "Unable to log in. Please try again.",
+          unknownError: "Unknown error",
+          validation: {
+            emailRequired: "Email is required.",
+            emailInvalid: "Enter a valid email address.",
+            passwordRequired: "Password is required.",
+          },
+        },
+
+        signup: {
+          title: "Customer registration",
+          name: "Name",
+          email: "Email",
+          password: "Password",
+          submit: "Register",
+          success: "Registration successful. You can now log in.",
+          error: "Unable to complete the registration.",
+          validation: {
+            nameRequired: "Name is required.",
+            nameMin: "The name must contain at least 3 characters.",
+            emailRequired: "Email is required.",
+            emailInvalid: "Enter a valid email address.",
+            passwordRequired: "Password is required.",
+            passwordMin: "The password must contain at least 8 characters.",
+          },
+        },
+      },
+
+      userManagement: {
+        title: "User Management",
+
+        adminDescription:
+          "The Administrator can view users and create Employee or Kitchen accounts.",
+
+        employeeDescription:
+          "The Employee can view users, but cannot manage privileged roles or create administrative accounts.",
+
+        createUser: "Create user",
+        registeredUsers: "Registered users",
+        name: "Name",
+        email: "Email",
+        password: "Password",
+        role: "Role",
+        saving: "Saving...",
+        loading: "Loading users...",
+        noUsers: "There are no users to display.",
+        createSuccess: "User created successfully.",
+
+        roles: {
+          employee: "Employee",
+          kitchen: "Kitchen",
+        },
+
+        validation: {
+          nameRequired: "Name is required.",
+          nameMin: "The name must contain at least 3 characters.",
+          nameMax: "The name cannot exceed 100 characters.",
+          emailRequired: "Email is required.",
+          emailInvalid: "Enter a valid email address.",
+          passwordRequired: "Password is required.",
+          passwordMin: "The password must contain at least 8 characters.",
+          roleRequired: "You must select a role.",
+          roleAllowed: "You can only select Employee or Kitchen.",
+        },
+
+        errors: {
+          operation: "Unable to complete the operation.",
+        },
+      },
+
+      dashboard: {
+        title: "Dashboard",
+        description:
+          "Real-time summary based on orders and details registered in the database.",
+        referenceDate: "Reference date",
+        evaluatedProducts: "Top evaluated products",
+        todayOrders: "Today's orders",
+        topProducts: "Top 3 best-selling products",
+        noSales: "There are no sales to display.",
+        ordersByStatus: "Orders by status for the current day",
+        noOrdersToday: "There are no orders registered today.",
+        loadError: "Unable to load the dashboard.",
+      },
+
+      publicProcesses: {
+        title: "Preparation Processes",
+        loading: "Loading processes...",
+        detailLoading: "Loading details...",
+        connectionError: "Unable to connect to the server",
+        station: "station",
+        stations: "stations",
+        viewDetail: "View details",
+        back: "Back to processes",
+        inThisProcess: "in this process",
+      },
+
+      header: {
+        myCart: "My cart",
+      },
+
+      errors: {
+        unauthorizedTitle: "Authorization",
+        unauthorizedMessage: "Unauthorized user",
+        notFoundTitle: "Resource not found",
+        notFoundMessage:
+          "The page you are looking for may have been removed, renamed, or temporarily unavailable.",
       },
 
       language: {
         spanish: "Spanish",
         english: "English",
       },
+
       home: {
         slogan: "Discover our products and special combos.",
       },
@@ -794,8 +1126,10 @@ const resources = {
 
       products: {
         title: "Our products",
+
         description:
           "Discover our variety of products specially prepared to enjoy at any time of the day.",
+
         loading: "Loading products...",
         loadError: "Unable to load products.",
         invalidResponse: "The API did not return a valid product list.",
@@ -814,7 +1148,6 @@ const resources = {
           ingredients: "Ingredients",
           noIngredients: "No ingredients registered.",
           back: "Back",
-
           backToProducts: "Back to products",
           noCategory: "No category",
           description: "Description",
@@ -854,8 +1187,10 @@ const resources = {
 
           createTitle: "Create product",
           updateTitle: "Update product",
+
           createDescription:
             "Complete the required information to register a new product in the catalog.",
+
           updateDescription: "Modify the required product information.",
 
           name: "Product name",
@@ -869,7 +1204,6 @@ const resources = {
           selectSeveralIngredients: "Select one or more ingredients",
           noIngredientsAvailable: "No ingredients available",
           loadingIngredients: "Loading ingredients...",
-
           loadingCategories: "Loading categories...",
 
           productImage: "Product image",
@@ -957,7 +1291,6 @@ const resources = {
           disable: "Disable",
           enable: "Enable",
           noCombos: "No combos found",
-
           image: "Image",
           statusEnabledSuccess: "Combo enabled successfully.",
           statusDisabledSuccess: "Combo disabled successfully.",
@@ -977,6 +1310,7 @@ const resources = {
           createError: "An error occurred while registering the combo.",
           updateError: "An error occurred while updating the combo.",
           loadError: "Unable to load the combo.",
+          serverError: "Unable to communicate with the server.",
 
           name: "Combo name",
           description: "Description",
@@ -992,39 +1326,27 @@ const resources = {
           productWithId: "Product {{id}}",
 
           comboImage: "Combo image",
-
           imageDescription: "Select an image related to the combo.",
-
           selectImage: "Select image",
-
           selectedFile: "Selected file: {{name}}",
-
           imagePreview: "Combo image preview",
 
           validation: {
             nameRequired: "Combo name is required",
             nameMin: "The name must contain at least 3 characters",
-
             descriptionRequired: "Description is required",
             descriptionMin:
               "The description must contain at least 5 characters",
-
             priceNumber: "The price must be a number",
             pricePositive: "The price must be greater than zero",
             priceRequired: "The special price is required",
-
             categorySelect: "You must select a category",
             categoryRequired: "Category is required",
-
             productsRequired: "You must select at least one product",
-
             nameLetters: "The combo name must contain at least one letter.",
-
             imageRequired: "You must select an image for the combo.",
-
             invalidImage:
               "You must select an image in PNG, JPG, JPEG, or WEBP format.",
-
             duplicateName: "A combo with that name already exists.",
           },
         },
@@ -1096,7 +1418,6 @@ const resources = {
           error: "Unable to create the menu.",
           success: "Menu created successfully.",
         },
-
         edit: {
           title: "Edit menu",
           description:
@@ -1121,7 +1442,9 @@ const resources = {
           combos: "Combos",
 
           selectMultiple: "Select one or more {{items}}",
+
           noAvailable: "No {{items}} available",
+
           loadingItems: "Loading {{items}}...",
 
           itemHint: "Items are grouped by category to make selection easier.",
@@ -1133,7 +1456,6 @@ const resources = {
           saving: "Saving...",
 
           menuImage: "Menu image",
-
           imageDescription: "Select an image related to the menu.",
           selectImage: "Select image",
           selectedFile: "Selected file: {{name}}",
@@ -1141,57 +1463,91 @@ const resources = {
 
           validation: {
             nameRequired: "The menu name is required.",
+
             nameMin: "The menu name must contain at least 3 characters.",
+
             nameMax: "The menu name cannot exceed 100 characters.",
+
             startDateRequired: "The start date is required.",
+
             startDateFormat: "The start date must use the YYYY-MM-DD format.",
+
             endDateRequired: "The end date is required.",
+
             endDateFormat: "The end date must use the YYYY-MM-DD format.",
+
             dateRange: "The start date cannot be later than the end date.",
+
             startTimeRequired: "The start time is required.",
+
             startTimeFormat: "The start time must use the HH:MM format.",
+
             endTimeRequired: "The end time is required.",
+
             endTimeFormat: "The end time must use the HH:MM format.",
+
             timeRange:
               "The start time cannot be later than the end time when both dates are the same.",
+
             itemsRequired: "You must select at least one product or one combo.",
+
             imageRequired: "You must select an image for the menu.",
+
             imageType: "The image must be PNG, JPG, JPEG or WEBP.",
+
             nameNumeric: "The menu name cannot contain only numbers.",
           },
         },
 
         maintenance: {
           loading: "Loading menu maintenance...",
+
           title: "Menu Maintenance",
+
           description: "Manage the menus registered in the system",
+
           newMenu: "New Menu",
 
           search: "Search menu...",
+
           allStatuses: "All statuses",
+
           total: "Total: {{count}} menus",
 
           id: "ID",
+
           menu: "Menu",
+
           start: "Start",
+
           end: "End",
+
           status: "Status",
+
           actions: "Actions",
 
           detail: "Details",
+
           edit: "Edit",
+
           enable: "Enable",
+
           disable: "Disable",
+
           saving: "Saving...",
 
           noResults: "No menus found",
+
           loadError: "Unable to load the menus.",
 
           confirmEnable: 'Do you want to enable the menu "{{name}}"?',
+
           confirmDisable: 'Do you want to disable the menu "{{name}}"?',
 
           enableSuccess: "The menu was enabled successfully.",
+
           disableSuccess: "The menu was disabled successfully.",
+
           statusError: "Unable to update the menu status.",
 
           image: "Image",
@@ -1199,82 +1555,110 @@ const resources = {
       },
 
       processMaintenance: {
-        title: "Process maintenance",
+        title: "Process Maintenance",
+
         description:
-          "Manage the preparation processes associated with products.",
+          "Manage the preparation processes registered in the system.",
 
         newProcess: "New process",
-        search: "Search by product...",
+
+        search: "Search process...",
+
         product: "Product",
+
         stations: "Stations",
+
         actions: "Actions",
 
         detail: "Details",
+
         edit: "Edit",
+
         delete: "Delete",
 
-        loadingError: "Unable to load the processes.",
-        noResults: "No processes were found.",
+        noResults: "No processes found.",
 
-        deleteDialog: {
-          title: "Delete process",
-          message:
-            "Are you sure you want to delete the preparation process for {{product}}? This action will delete all of its steps.",
-          cancel: "Cancel",
-          delete: "Delete",
-          deleting: "Deleting...",
-          error: "Unable to delete the process.",
-        },
-
-        form: {
-          product: "Product",
-          stepsTitle: "Process steps",
-          stepsDescription:
-            "Select the station and estimated time for each step.",
-          step: "Step {{number}}",
-          station: "Station",
-          estimatedTime: "Estimated time (minutes)",
-          addStep: "Add step",
-          save: "Save process",
-          saving: "Saving...",
-
-          createSuccess: "Process created successfully.",
-          updateSuccess: "Process updated successfully.",
-          deleteSuccess: "Process deleted successfully.",
-
-          createError: "An error occurred while creating the process.",
-          updateError: "An error occurred while updating the process.",
-          deleteError: "An error occurred while deleting the process.",
-
-          serverError: "Unable to communicate with the server.",
-
-          loadOptionsError: "Unable to load products and stations.",
-
-          validation: {
-            product: "You must select a product.",
-            minimumStep: "The process must have at least one station.",
-            station: "You must select a station for every step.",
-            time: "The estimated time must be greater than zero.",
-          },
-
-          saveError: "An error occurred while saving the process.",
-        },
+        loadingError: "Unable to load the preparation processes.",
 
         create: {
           title: "Create process",
+
           description:
-            "Select the product and define the stations that make up its preparation process.",
+            "Complete the required information to register a new preparation process.",
+
           button: "Create process",
-          error: "Unable to create the process.",
         },
 
         update: {
           title: "Edit process",
-          description:
-            "Modify the stations and times of the preparation process.",
+
+          description: "Modify the preparation process information.",
+
           button: "Update process",
-          loadError: "Unable to load the process.",
+
+          loadError: "Unable to load the preparation process.",
+        },
+
+        deleteDialog: {
+          title: "Delete process",
+
+          message:
+            'Are you sure you want to delete the process for "{{product}}"?',
+
+          cancel: "Cancel",
+
+          delete: "Delete",
+
+          deleting: "Deleting...",
+        },
+
+        form: {
+          product: "Product",
+
+          stepsTitle: "Preparation steps",
+
+          stepsDescription:
+            "Add the stations, step order, and estimated time required to complete the process.",
+
+          step: "Step {{number}}",
+
+          station: "Station",
+
+          estimatedTime: "Estimated time (minutes)",
+
+          addStep: "Add step",
+
+          save: "Save process",
+
+          saving: "Saving...",
+
+          loadOptionsError: "Unable to load the products or stations.",
+
+          saveError: "Unable to save the process.",
+
+          createSuccess: "Process created successfully.",
+
+          createError: "Unable to create the process.",
+
+          updateSuccess: "Process updated successfully.",
+
           updateError: "Unable to update the process.",
+
+          deleteSuccess: "Process deleted successfully.",
+
+          deleteError: "Unable to delete the process.",
+
+          serverError: "Unable to communicate with the server.",
+
+          validation: {
+            product: "You must select a product.",
+
+            minimumStep: "You must add at least one step to the process.",
+
+            station: "You must select a station.",
+
+            time: "The estimated time must be greater than zero.",
+          },
         },
       },
 
@@ -1289,117 +1673,41 @@ const resources = {
           delete: "Delete",
           deliveryMethod: "Delivery method",
           email: "Email",
-          noNotes: "No notes.",
+          noNotes: "No notes",
           noTracking: "No tracking",
           notes: "Notes",
           orderNumber: "Order #{{id}}",
           paymentMethod: "Payment method",
           product: "Product",
           productsAndCombos: "Products and combos",
-          quantity: "Quantity: {{count}}",
           quantityLabel: "Quantity",
           save: "Save",
           saving: "Saving...",
           status: "Status",
           subtotal: "Subtotal",
-          summary: "Summary",
           taxes: "Taxes",
           total: "Total",
         },
 
-        create: {
-          title: "New order",
-          description:
-            "Select an active menu and build the order by adding or removing products and combos.",
-          viewHistory: "View history",
-          loadingMenus: "Loading menus to create the order...",
-          menu: "Menu",
-          storePickup: "Store pickup",
-          homeDelivery: "Delivery",
-          loadingAddresses: "Loading addresses...",
-          noSavedAddresses:
-            "You have no saved addresses. You can select a location on the map below.",
-          deliveryAddress: "Delivery address",
-          location: "Location",
-          unnamedAddress: "Unnamed address",
-          mapInstruction: "Click the map to select a location",
-          selectedLocation: "Selected location",
-          saveAsAddress: "Save as address",
-          mapHint: "Click the map to select a location",
-          orderNotes: "Order notes",
-          orderNotesPlaceholder:
-            "Example: no onion, pack separately, pickup under Ana's name",
-          characters500: "{{count}}/500 characters",
-          characters300: "{{count}}/300 characters",
-          start: "Start",
-          end: "End",
-          loadingMenuDetail: "Loading menu details...",
-          remove: "Remove",
-          add: "Add",
-          inOrder: "{{count}} in order",
-          summary: "Order summary",
-          items: "{{count}} items",
-          emptyCart: "You have not added any products or combos yet.",
-          itemNote: "Note for {{type}}",
-          itemNotePlaceholder: "Instructions for this product or combo",
-          shipping: "Shipping",
-          method: "Method",
-          cash: "Cash",
-          card: "Card",
-          amountReceived: "Amount received",
-          payExactAmount: "Pay exact amount: {{amount}}",
-          insufficientAmount: "The amount received is insufficient.",
-          lastFourDigits: "Last 4 digits",
-          lastFourDigitsHelp: "Enter only the last 4 digits.",
-          submitting: "Submitting order...",
-          confirm: "Confirm order",
-          clearOrder: "Clear order",
-          loginWarning:
-            "You must log in to place the order. A default system customer is no longer used.",
-          saveLocationTitle: "Save location as address",
-          saveLocationDescription:
-            'Enter a description or reference for this location (e.g. "Home", "Office", "123 Main Street").',
-          addressDetails: "Address details",
-          coordinates: "Coordinates",
-
-          errors: {
-            loadMenus: "Unable to load available menus.",
-            loadMenu: "Unable to load the selected menu.",
-            loadAddresses: "Unable to load saved addresses.",
-            selectMapLocation: "First select a location on the map.",
-            addressDescription:
-              "Enter a description or reference for the address.",
-            saveAddress: "Unable to save the address.",
-            loginRequired: "You must log in to place an order.",
-            menuRequired: "You must select a menu before creating the order.",
-            itemRequired:
-              "You must add at least one product or combo to the order.",
-            addressRequired:
-              "You must save the selected location as an address before continuing.",
-            amountRequired: "You must enter the amount received.",
-            insufficientAmount:
-              "The amount received is insufficient to pay for the order.",
-            cardBrandRequired: "You must select the card brand.",
-            cardDigits: "You must enter exactly the last 4 digits of the card.",
-            createOrder: "Unable to create the order.",
-          },
-        },
-
         list: {
-          loading: "Loading orders...",
-          loadError: "Unable to load the order history.",
           titles: {
             client: "My orders",
-            staff: "Order management",
-            default: "Order history",
+            staff: "Order Management",
+            default: "Orders",
           },
+
           descriptions: {
-            client: "View your orders and access tracking for each one.",
+            client:
+              "View the orders you have placed and check their current status.",
             staff:
               "View customer orders and use the filters to find the information you need.",
-            default: "View registered orders.",
+            default: "View the orders registered in the system.",
           },
+
           newOrder: "New order",
+          loading: "Loading orders...",
+          loadError: "Unable to load orders.",
+
           filters: {
             title: "History filters",
             all: "All",
@@ -1408,92 +1716,235 @@ const resources = {
             clear: "Clear",
             showing: "Showing {{filtered}} of {{total}} orders.",
           },
+
           noResults: {
-            title: "No orders match the current filters.",
+            title: "There are no orders matching the current filters.",
             description:
               "Adjust the status or date range to view other orders.",
             create: "Create order",
           },
+
           items: "{{count}} items",
           created: "Created",
-          lastMovement: "Last update",
-          moreItems: "and {{count}} more items...",
+          lastMovement: "Last movement",
+          moreItems: "+{{count}} more items",
+
           actions: {
             detail: "View details",
-            tracking: "View tracking",
-            repeat: "Repeat order",
+            tracking: "Tracking",
+            repeat: "New order",
+          },
+        },
+
+        create: {
+          title: "Create order",
+          description:
+            "Complete the required information to register the order.",
+
+          orderDateTime: "Order date and time",
+          staffMember: "Employee in charge",
+          customer: "Customer",
+          customerDetail: "Customer details",
+          selectCustomer: "Select a customer",
+          selectCustomerToContinue: "Select a customer to continue.",
+
+          menu: "Menu",
+          loadingMenus: "Loading menus...",
+          loadingMenuDetail: "Loading menu details...",
+          noAvailableMenus: "There are no menus available at this time.",
+
+          start: "Start",
+          end: "End",
+
+          items: "Products and combos",
+          add: "Add",
+          remove: "Remove",
+          inOrder: "In the order",
+
+          method: "Delivery method",
+          homeDelivery: "Home delivery",
+          storePickup: "Store pickup",
+
+          deliveryAddress: "Delivery address",
+          loadingAddresses: "Loading addresses...",
+          noSavedAddresses: "The customer has no saved addresses.",
+          unnamedAddress: "Unnamed address",
+
+          addressDetails: "Address details",
+          location: "Location",
+          coordinates: "Coordinates",
+          selectedLocation: "Selected location",
+
+          mapHint: "Select the delivery location on the map.",
+          mapInstruction: "Click on the map to select the exact location.",
+
+          saveAsAddress: "Save as address",
+          saveLocationTitle: "Address name",
+          saveLocationDescription: "Address description",
+
+          orderNotes: "General order notes",
+          orderNotesPlaceholder: "Add general notes for the order.",
+          itemNote: "Item note",
+          itemNotePlaceholder: "Add a note for this item.",
+
+          characters300: "{{count}}/300 characters",
+          characters500: "{{count}}/500 characters",
+
+          cash: "Cash",
+          card: "Card",
+
+          amountReceived: "Amount received",
+          payExactAmount: "Pay exact amount",
+          insufficientAmount: "Insufficient amount",
+
+          lastFourDigits: "Last 4 digits",
+          lastFourDigitsHelp: "Enter only the last 4 digits of the card.",
+
+          shipping: "Shipping",
+
+          summary: "Order summary",
+
+          clearOrder: "Clear order",
+          confirm: "Confirm order",
+          submitting: "Processing order...",
+
+          loginWarning: "You must log in to create an order.",
+
+          viewHistory: "View order history",
+
+          errors: {
+            loginRequired: "You must log in to create an order.",
+
+            loadCustomers: "Unable to load customers.",
+
+            loadMenus: "Unable to load menus.",
+
+            loadMenu: "Unable to load the menu details.",
+
+            menuRequired: "You must select a menu.",
+
+            itemRequired: "You must add at least one product or combo.",
+
+            loadAddresses: "Unable to load addresses.",
+
+            addressRequired: "You must select a delivery address.",
+
+            addressDescription: "You must enter an address description.",
+
+            selectMapLocation: "You must select a location on the map.",
+
+            saveAddress: "Unable to save the address.",
+
+            amountRequired: "You must enter the amount received.",
+
+            insufficientAmount:
+              "The amount received is insufficient to cover the total.",
+
+            cardBrandRequired: "You must select the card brand.",
+
+            cardDigits: "You must enter the last 4 digits of the card.",
+
+            createOrder: "Unable to create the order.",
           },
         },
 
         detail: {
-          loading: "Loading order details...",
+          loading: "Loading order...",
           loadError: "Unable to load the order.",
-          unauthorized: "You are not authorized to view this order.",
-          backToOrders: "Back to orders",
-          notFound: "The requested order was not found.",
-          description: "Complete order details.",
-          viewInvoice: "View invoice",
+          notFound: "Order not found.",
+          unauthorized: "You do not have permission to view this order.",
+
+          description:
+            "View the general information and preparation status of the order.",
+
           orderInfo: "Order information",
           generalNotes: "General notes",
-          noItems: "This order has no registered items.",
-          unitPrice: "Unit price",
-          preparationTitle: "Preparation stations",
-          noPreparationStations:
-            "No stations are configured for these products.",
-          preparationLoadError: "Preparation stations could not be loaded.",
-          preparationUpdateError: "The station could not be validated.",
-        },
 
-        invoice: {
-          loading: "Loading invoice...",
-          loadError: "Unable to load the invoice.",
-          notFound: "Invoice not found.",
-          title: "Invoice #{{id}}",
-          print: "Print",
-          generalInfo: "General information",
-          manager: "Person in charge",
-          notApplicable: "Not applicable",
-          notRegistered: "Not registered",
-          detailTitle: "Invoice details",
-          noItems: "No registered items.",
-          each: "each",
+          preparationTitle: "Order preparation",
+          noPreparationStations:
+            "There are no preparation stations registered.",
+
+          preparationLoadError: "Unable to load the preparation information.",
+
+          preparationUpdateError: "Unable to update the preparation status.",
+
+          viewInvoice: "View invoice",
+          backToOrders: "Back to orders",
         },
 
         summary: {
-          title: "Invoice summary",
+          title: "Payment summary",
+          totalBeforeTax: "Total before taxes",
+          shippingCost: "Shipping cost",
+          totalWithTax: "Total with taxes",
+          amountReceived: "Amount received",
           amountPaid: "Amount paid",
           change: "Change",
-          brand: "Brand",
           card: "Card",
+          brand: "Brand",
+        },
+
+        invoice: {
+          title: "Invoice",
+          detailTitle: "Invoice details",
+          generalInfo: "General information",
+
+          loading: "Loading invoice...",
+          loadError: "Unable to load the invoice.",
+          notFound: "Invoice not found.",
+
+          manager: "Employee in charge",
+          notApplicable: "Not applicable",
+          notRegistered: "Not registered",
+
+          noItems: "There are no items registered on this invoice.",
+
+          linePrice: "Price",
+          lineSubtotal: "Subtotal",
+          lineTax: "Tax",
+
+          print: "Print invoice",
         },
 
         tracking: {
-          orderRequired: "You must specify an order to view tracking.",
-          loadError: "Unable to load tracking.",
-          locationError: "Unable to load the driver's location.",
-          routeError:
-            "Unable to calculate the street route; showing a straight line as a reference.",
-          demoError: "Unable to create the demo order.",
-          loading: "Loading order tracking...",
           title: "Order tracking",
+
           description:
-            "The status updates automatically every 5 seconds while the order is still in progress.",
-          creatingDemo: "Creating...",
-          createDemo: "Create demo",
+            "View the progress and location related to the delivery of the order.",
+
+          loading: "Loading tracking...",
+          loadError: "Unable to load the order tracking.",
+
           progress: "Progress",
-          mapLocation: "Location on map",
-          store: "La Tostelería (store)",
+          history: "History",
+
+          store: "Store",
           deliveryAddress: "Delivery address",
+          mapLocation: "Map location",
+          route: "Route",
+
           driver: "Driver",
-          route: "of the route",
-          driverPositionUpdates: "The driver's position updates every",
-          seconds: "seconds",
-          outForDelivery: "The order is out for delivery.",
-          readyForPickup: "The order is ready for pickup.",
-          history: "Order history",
+          driverPositionUpdates: "Driver location updates",
+
+          readyForPickup: "Ready for pickup",
+          outForDelivery: "Out for delivery",
+
           advance: "Advance status",
           updating: "Updating...",
-          updateError: "The order status could not be updated.",
+
+          seconds: "{{count}} seconds",
+
+          orderRequired: "An order is required to view tracking.",
+
+          locationError: "Unable to obtain the location.",
+
+          routeError: "Unable to calculate the route.",
+
+          updateError: "Unable to update the tracking.",
+
+          createDemo: "Create test tracking",
+          creatingDemo: "Creating tracking...",
+          demoError: "Unable to create the test tracking.",
         },
       },
     },
@@ -1503,8 +1954,7 @@ const resources = {
 i18n.use(initReactI18next).init({
   resources,
 
-  // Idioma inicial
-  lng: "es",
+  lng: localStorage.getItem("language") || "es",
 
   fallbackLng: "es",
 

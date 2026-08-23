@@ -1,6 +1,10 @@
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
+import { useTranslation } from "react-i18next";
+
 export function Unauthorized() {
+  const { t } = useTranslation();
+
   return (
     <Container sx={{ p: 2 }} maxWidth="sm">
       <Typography
@@ -10,10 +14,10 @@ export function Unauthorized() {
         color="text.primary"
         gutterBottom
       >
-        Autorizacion
+        {t("errors.unauthorizedTitle")}
       </Typography>
       <Typography variant="h5" align="center" color="text.secondary" paragraph>
-        Usuario no autorizado
+        {t("errors.unauthorizedMessage")}
       </Typography>
     </Container>
   );

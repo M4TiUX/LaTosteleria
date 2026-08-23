@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import ProcesoServices from "../../services/ProcesosServices";
 import { Card, CardContent, Typography, Button, Grid, Box } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 export function ProcesosDetail() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const [proceso, setProceso] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -21,12 +23,12 @@ export function ProcesosDetail() {
         setLoading(false);
       })
       .catch(() => {
-        setError("Error al conectar con el servidor");
+        setError(t("publicProcesses.connectionError"));
         setLoading(false);
       });
-  }, [id]);
+  }, [id, t]);
 
-  if (loading) return <p style={{ textAlign: "center", marginTop: "2.5rem" }}>Cargando detalle...</p>;
+  if (loading) return <p style={{ textAlign: "center", marginTop: "2.5rem" }}>{t("publicProcesses.detailLoading")}</p>;
   if (error) return <p style={{ textAlign: "center", marginTop: "2.5rem", color: "red" }}>{error}</p>;
 
   const estacionesOrdenadas = [...(proceso?.estaciones || [])].sort((a, b) => {
@@ -49,7 +51,7 @@ export function ProcesosDetail() {
           "&:hover": { textDecoration: "underline", backgroundColor: "primary.light", p: 1 , color: "primary.contrastText" }
         }}
       >
-        Volver a procesos
+        {t("publicProcesses.back")}
       </Button>
 
       <Typography variant="h4" component="h1" sx={{ fontWeight: "bold", mb: 1 }}>
@@ -58,7 +60,9 @@ export function ProcesosDetail() {
 
       <Typography variant="body2" sx={{ color: "gray.500", mb: 3 }}>
         {proceso.estaciones.length}{" "}
-        {proceso.estaciones.length === 1 ? "estación" : "estaciones"} en este proceso
+        {proceso.estaciones.length === 1
+          ? t("publicProcesses.station")
+          : t("publicProcesses.stations")} {t("publicProcesses.inThisProcess")}
       </Typography>
 
       <Grid container spacing={2} sx={{ mt: 2 }}>

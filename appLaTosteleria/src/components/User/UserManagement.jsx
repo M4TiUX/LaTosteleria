@@ -24,46 +24,45 @@ import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import UserService from "../../services/UserService";
 import { UserContext } from "../../context/UserContext";
 
-const schema = yup.object({
-  name: yup
-    .string()
-    .trim()
-    .required("El nombre es obligatorio.")
-    .min(3, "El nombre debe tener al menos 3 caracteres.")
-    .max(100, "El nombre no puede superar los 100 caracteres."),
-  email: yup
-    .string()
-    .trim()
-    .required("El correo es obligatorio.")
-    .email("El correo no tiene un formato valido."),
-  password: yup
-    .string()
-    .required("La contrasena es obligatoria.")
-    .min(8, "La contrasena debe tener al menos 8 caracteres."),
-  rol_id: yup
-    .number()
-    .required("Debe seleccionar un rol.")
-    .oneOf([3, 4], "Solo puede seleccionar Encargado o Cocina."),
-});
+function createSchema(t) {
+  return yup.object({
+    name: yup
+      .string()
+      .trim()
+      .required(t("userManagement.validation.nameRequired"))
+      .min(3, t("userManagement.validation.nameMin"))
+      .max(100, t("userManagement.validation.nameMax")),
+    email: yup
+      .string()
+      .trim()
+      .required(t("userManagement.validation.emailRequired"))
+      .email(t("userManagement.validation.emailInvalid")),
+    password: yup
+      .string()
+      .required(t("userManagement.validation.passwordRequired"))
+      .min(8, t("userManagement.validation.passwordMin")),
+    rol_id: yup
+      .number()
+      .required(t("userManagement.validation.roleRequired"))
+      .oneOf([3, 4], t("userManagement.validation.roleAllowed")),
+  });
+}
 
-const ROLE_OPTIONS = [
-  { id: 3, label: "Empleado" },
-  { id: 4, label: "Cocina" },
-];
-
-function getErrorMessage(error) {
+function getErrorMessage(error, fallback) {
   return (
     error?.response?.data?.message ||
     error?.response?.data?.error ||
     error?.message ||
-    "No fue posible completar la operacion."
+    fallback
   );
 }
 
 export function UserManagement() {
+  const { t } = useTranslation();
   const { decodeToken } = useContext(UserContext);
   const activeUser = decodeToken();
   const roleName = activeUser?.rol?.name ?? "";
@@ -73,6 +72,8 @@ export function UserManagement() {
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [usersError, setUsersError] = useState("");
   const [saving, setSaving] = useState(false);
+
+  const schema = useMemo(() => createSchema(t), [t]);
 
   const {
     control,
@@ -89,12 +90,20 @@ export function UserManagement() {
     resolver: yupResolver(schema),
   });
 
+  const roleOptions = useMemo(
+    () => [
+      { id: 3, label: t("userManagement.roles.employee") },
+      { id: 4, label: t("userManagement.roles.kitchen") },
+    ],
+    [t],
+  );
+
   const roleLabelById = useMemo(() => {
-    return ROLE_OPTIONS.reduce((acc, role) => {
+    return roleOptions.reduce((acc, role) => {
       acc[role.id] = role.label;
       return acc;
     }, {});
-  }, []);
+  }, [roleOptions]);
 
   const loadUsers = () => {
     setLoadingUsers(true);
@@ -106,7 +115,9 @@ export function UserManagement() {
         setUsers(data);
       })
       .catch((error) => {
-        setUsersError(getErrorMessage(error));
+        setUsersError(
+          getErrorMessage(error, t("userManagement.errors.operation")),
+        );
       })
       .finally(() => {
         setLoadingUsers(false);
@@ -126,11 +137,11 @@ export function UserManagement() {
         rol_id: Number(formData.rol_id),
       });
 
-      toast.success("Usuario creado correctamente.");
+      toast.success(t("userManagement.createSuccess"));
       reset({ name: "", email: "", password: "", rol_id: 3 });
       loadUsers();
     } catch (error) {
-      toast.error(getErrorMessage(error));
+      toast.error(getErrorMessage(error, t("userManagement.errors.operation")));
     } finally {
       setSaving(false);
     }
@@ -139,13 +150,13 @@ export function UserManagement() {
   return (
     <Box>
       <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-        Gestion de usuarios
+        {t("userManagement.title")}
       </Typography>
 
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
         {isAdmin
-          ? "Administrador puede consultar usuarios y crear cuentas de Encargado o Cocina."
-          : "Encargado puede consultar usuarios, pero no gestionar roles privilegiados ni crear cuentas administrativas."}
+          ? t("userManagement.adminDescription")
+          : t("userManagement.employeeDescription")}
       </Typography>
 
       <Grid container spacing={3}>
@@ -154,7 +165,7 @@ export function UserManagement() {
             <Card>
               <CardContent>
                 <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-                  Crear usuario
+                  {t("userManagement.createUser")}
                 </Typography>
 
                 <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -165,7 +176,7 @@ export function UserManagement() {
                       render={({ field }) => (
                         <TextField
                           {...field}
-                          label="Nombre"
+                          label={t("userManagement.name")}
                           error={Boolean(errors.name)}
                           helperText={errors.name?.message || " "}
                         />
@@ -178,7 +189,7 @@ export function UserManagement() {
                       render={({ field }) => (
                         <TextField
                           {...field}
-                          label="Correo"
+                          label={t("userManagement.email")}
                           error={Boolean(errors.email)}
                           helperText={errors.email?.message || " "}
                         />
@@ -192,7 +203,7 @@ export function UserManagement() {
                         <TextField
                           {...field}
                           type="password"
-                          label="Contrasena"
+                          label={t("userManagement.password")}
                           error={Boolean(errors.password)}
                           helperText={errors.password?.message || " "}
                         />
@@ -204,9 +215,15 @@ export function UserManagement() {
                       control={control}
                       render={({ field }) => (
                         <FormControl fullWidth error={Boolean(errors.rol_id)}>
-                          <InputLabel id="rol-id-label">Rol</InputLabel>
-                          <Select {...field} labelId="rol-id-label" label="Rol">
-                            {ROLE_OPTIONS.map((role) => (
+                          <InputLabel id="rol-id-label">
+                            {t("userManagement.role")}
+                          </InputLabel>
+                          <Select
+                            {...field}
+                            labelId="rol-id-label"
+                            label={t("userManagement.role")}
+                          >
+                            {roleOptions.map((role) => (
                               <MenuItem key={role.id} value={role.id}>
                                 {role.label}
                               </MenuItem>
@@ -221,8 +238,15 @@ export function UserManagement() {
                       )}
                     />
 
-                    <Button type="submit" variant="contained" color="secondary" disabled={saving}>
-                      {saving ? "Guardando..." : "Crear usuario"}
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      color="secondary"
+                      disabled={saving}
+                    >
+                      {saving
+                        ? t("userManagement.saving")
+                        : t("userManagement.createUser")}
                     </Button>
                   </Stack>
                 </Box>
@@ -235,7 +259,7 @@ export function UserManagement() {
           <Card>
             <CardContent>
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-                Usuarios registrados
+                {t("userManagement.registeredUsers")}
               </Typography>
 
               {usersError && (
@@ -245,16 +269,18 @@ export function UserManagement() {
               )}
 
               {loadingUsers ? (
-                <Typography color="text.secondary">Cargando usuarios...</Typography>
+                <Typography color="text.secondary">
+                  {t("userManagement.loading")}
+                </Typography>
               ) : (
                 <TableContainer>
                   <Table size="small">
                     <TableHead>
                       <TableRow>
                         <TableCell>ID</TableCell>
-                        <TableCell>Nombre</TableCell>
-                        <TableCell>Correo</TableCell>
-                        <TableCell>Rol</TableCell>
+                        <TableCell>{t("userManagement.name")}</TableCell>
+                        <TableCell>{t("userManagement.email")}</TableCell>
+                        <TableCell>{t("userManagement.role")}</TableCell>
                       </TableRow>
                     </TableHead>
 
@@ -262,7 +288,9 @@ export function UserManagement() {
                       {users.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={4}>
-                            <Typography color="text.secondary">No hay usuarios para mostrar.</Typography>
+                            <Typography color="text.secondary">
+                              {t("userManagement.noUsers")}
+                            </Typography>
                           </TableCell>
                         </TableRow>
                       ) : (
@@ -271,7 +299,11 @@ export function UserManagement() {
                             <TableCell>{item.id}</TableCell>
                             <TableCell>{item.name}</TableCell>
                             <TableCell>{item.email}</TableCell>
-                            <TableCell>{item.role_name || roleLabelById[item.rol_id] || item.rol_id}</TableCell>
+                            <TableCell>
+                              {item.role_name ||
+                                roleLabelById[item.rol_id] ||
+                                item.rol_id}
+                            </TableCell>
                           </TableRow>
                         ))
                       )}

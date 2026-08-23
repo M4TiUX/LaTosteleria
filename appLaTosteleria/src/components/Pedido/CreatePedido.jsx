@@ -301,7 +301,7 @@ export function CreatePedido() {
         setError(
           requestError?.response?.data?.message ??
             requestError?.message ??
-            "No fue posible cargar los clientes disponibles.",
+            t("orders.create.errors.loadCustomers"),
         );
       })
       .finally(() => {
@@ -721,7 +721,7 @@ export function CreatePedido() {
 
       {menus.length === 0 && !loadingMenus && (
         <Alert severity="warning">
-          No hay menús disponibles en este momento según el horario configurado.
+          {t("orders.create.noAvailableMenus")}
         </Alert>
       )}
 
@@ -736,7 +736,7 @@ export function CreatePedido() {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label="Fecha y hora del pedido"
+                      label={t("orders.create.orderDateTime")}
                       value={formatDateTime(currentDateTime)}
                       InputProps={{ readOnly: true }}
                     />
@@ -746,7 +746,7 @@ export function CreatePedido() {
                     <Grid item xs={12} md={6}>
                       <TextField
                         fullWidth
-                        label="Funcionario encargado"
+                        label={t("orders.create.staffMember")}
                         value={userData?.name ?? "-"}
                         InputProps={{ readOnly: true }}
                         helperText={roleName || "Empleado"}
@@ -758,7 +758,7 @@ export function CreatePedido() {
                     {isCliente ? (
                       <TextField
                         fullWidth
-                        label="Cliente"
+                        label={t("orders.create.customer")}
                         value={userData?.name ?? "-"}
                         InputProps={{ readOnly: true }}
                         helperText={userData?.email ?? ""}
@@ -766,12 +766,12 @@ export function CreatePedido() {
                     ) : (
                       <FormControl fullWidth disabled={loadingCustomers}>
                         <InputLabel id="customer-select-label">
-                          Cliente
+                          {t("orders.create.customer")}
                         </InputLabel>
                         <Select
                           labelId="customer-select-label"
                           value={selectedCustomerId}
-                          label="Cliente"
+                          label={t("orders.create.customer")}
                           onChange={(event) =>
                             setSelectedCustomerId(String(event.target.value))
                           }
@@ -792,17 +792,17 @@ export function CreatePedido() {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label="Detalle del cliente"
+                      label={t("orders.create.customerDetail")}
                       value={
                         selectedCustomer
                           ? `${selectedCustomer.name ?? "-"} · ${selectedCustomer.email ?? "-"}`
-                          : "Seleccione un cliente"
+                          : t("orders.create.selectCustomer")
                       }
                       InputProps={{ readOnly: true }}
                       helperText={
                         selectedCustomer?.id
                           ? `ID ${selectedCustomer.id}`
-                          : "Debe seleccionar el cliente para continuar"
+                          : t("orders.create.selectCustomerToContinue")
                       }
                     />
                   </Grid>

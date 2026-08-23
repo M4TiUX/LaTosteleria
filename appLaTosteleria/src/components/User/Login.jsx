@@ -12,19 +12,21 @@ import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import UserService from "../../services/UserService";
 import { UserContext } from "../../context/UserContext";
+import { useTranslation } from "react-i18next";
 
 export function Login() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const { login, decodeToken } = useContext(UserContext);
   const [error, setError] = useState(null);
 
   const loginSchema = yup.object({
     email: yup
       .string()
-      .required("El email es requerido")
-      .email("Formato email"),
-    password: yup.string().required("El password es requerido"),
+      .required(t("auth.login.validation.emailRequired"))
+      .email(t("auth.login.validation.emailInvalid")),
+    password: yup.string().required(t("auth.login.validation.passwordRequired")),
   });
 
   const {
@@ -48,10 +50,10 @@ export function Login() {
         typeof data === "string" &&
         (data.includes("<html") || data.includes("xdebug"))
       ) {
-        toast.error("Error interno del servidor. Contacta al administrador.", {
+        toast.error(t("auth.login.serverInternalError"), {
           duration: 5000,
         });
-        setError("El servidor devolvió un error HTML.");
+        setError(t("auth.login.htmlError"));
         return;
       }
 
@@ -78,7 +80,7 @@ export function Login() {
         login(token);
         const activeUser = decodeToken();
         const roleName = activeUser?.rol?.name ?? "";
-        toast.success("Inicio de sesion exitoso.", { duration: 2000 });
+        toast.success(t("auth.login.success"), { duration: 2000 });
 
         const requestedPath = location.state?.from?.pathname;
         const canRespectRequestedPath = Boolean(
@@ -100,16 +102,16 @@ export function Login() {
         }
       } else {
         // Si no hay token, mostramos el mensaje de error que venga del backend
-        const msg = data?.message || data?.error || "Credenciales incorrectas";
+        const msg = data?.message || data?.error || t("auth.login.invalidCredentials");
         toast.error(msg, { duration: 4000 });
         setError(msg);
       }
     } catch (err) {
       console.error("Error en login:", err);
-      toast.error("Error al iniciar sesión. Intenta de nuevo.", {
+      toast.error(t("auth.login.error"), {
         duration: 4000,
       });
-      setError(err.message || "Error desconocido");
+      setError(err.message || t("auth.login.unknownError"));
     }
   };
 
@@ -120,7 +122,7 @@ export function Login() {
       <Grid container spacing={1}>
         <Grid size={12}>
           <Typography variant="h5" gutterBottom>
-            Iniciar sesion
+            {t("auth.login.title")}
           </Typography>
         </Grid>
 
@@ -139,7 +141,7 @@ export function Login() {
                 <TextField
                   {...field}
                   id="email"
-                  label="Email"
+                  label={t("auth.login.email")}
                   error={Boolean(errors.email)}
                   helperText={errors.email ? errors.email.message : " "}
                 />
@@ -157,7 +159,7 @@ export function Login() {
                 <TextField
                   {...field}
                   id="password"
-                  label="Contrasena"
+                  label={t("auth.login.password")}
                   type="password"
                   error={Boolean(errors.password)}
                   helperText={errors.password ? errors.password.message : " "}
@@ -174,7 +176,7 @@ export function Login() {
             color="secondary"
             sx={{ m: 1 }}
           >
-            Ingresar
+            {t("auth.login.submit")}
           </Button>
         </Grid>
       </Grid>

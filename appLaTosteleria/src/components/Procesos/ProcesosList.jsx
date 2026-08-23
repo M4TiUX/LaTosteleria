@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ProcesoServices from "../../services/ProcesosServices";
 import { Card, CardContent, Typography, Grid, Button } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 export function ProcesosList() {
+  const { t } = useTranslation();
   const [procesos, setProcesos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,12 +22,12 @@ export function ProcesosList() {
         setLoading(false);
       })
       .catch(() => {
-        setError("Error al conectar con el servidor");
+        setError(t("publicProcesses.connectionError"));
         setLoading(false);
       });
-  }, []);
+  }, [t]);
 
-  if (loading) return <p className="text-center mt-10">Cargando procesos...</p>;
+  if (loading) return <p className="text-center mt-10">{t("publicProcesses.loading")}</p>;
   if (error) return <p className="text-center mt-10 text-red-500">{error}</p>;
 
   // Advertencia (opcional) en consola si hay IDs duplicados
@@ -43,7 +45,7 @@ export function ProcesosList() {
         className="text-2xl font-bold mb-6"
         textAlign="center"
       >
-        Procesos de Preparación
+        {t("publicProcesses.title")}
       </Typography>
 
       <Grid container spacing={4}>
@@ -70,8 +72,8 @@ export function ProcesosList() {
                     >
                       {proceso.total_estaciones}{" "}
                       {proceso.total_estaciones == 1
-                        ? "estación"
-                        : "estaciones"}
+                        ? t("publicProcesses.station")
+                        : t("publicProcesses.stations")}
                     </Typography>
                   </div>
 
@@ -87,7 +89,7 @@ export function ProcesosList() {
                       marginTop: "auto",
                     }}
                   >
-                    Ver detalle
+                    {t("publicProcesses.viewDetail")}
                   </Button>
                 </CardContent>
               </Card>

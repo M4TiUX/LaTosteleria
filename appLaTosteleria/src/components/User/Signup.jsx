@@ -11,26 +11,28 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import UserService from "../../services/UserService";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useTranslation } from "react-i18next";
 
 export function Signup() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [error, setError] = useState("");
 
   const signupSchema = yup.object({
     name: yup
       .string()
       .trim()
-      .required("El nombre es requerido")
-      .min(3, "El nombre debe tener al menos 3 caracteres"),
+      .required(t("auth.signup.validation.nameRequired"))
+      .min(3, t("auth.signup.validation.nameMin")),
     email: yup
       .string()
       .trim()
-      .required("El email es requerido")
-      .email("Formato de email invalido"),
+      .required(t("auth.signup.validation.emailRequired"))
+      .email(t("auth.signup.validation.emailInvalid")),
     password: yup
       .string()
-      .required("La contrasena es requerida")
-      .min(8, "La contrasena debe tener al menos 8 caracteres"),
+      .required(t("auth.signup.validation.passwordRequired"))
+      .min(8, t("auth.signup.validation.passwordMin")),
   });
 
   const {
@@ -56,7 +58,7 @@ export function Signup() {
         rol_id: 2,
       });
 
-      toast.success("Registro exitoso. Ahora puede iniciar sesion.", {
+      toast.success(t("auth.signup.success"), {
         duration: 3000,
         position: "top-center",
       });
@@ -68,7 +70,7 @@ export function Signup() {
         e?.response?.data?.message ||
         e?.response?.data?.error ||
         e?.message ||
-        "No fue posible completar el registro.";
+        t("auth.signup.error");
 
       setError(message);
       toast.error(message);
@@ -83,7 +85,7 @@ export function Signup() {
         <Grid container spacing={1}>
           <Grid size={12} sm={12}>
             <Typography variant="h5" gutterBottom>
-              Registro de cliente
+              {t("auth.signup.title")}
             </Typography>
           </Grid>
 
@@ -102,7 +104,7 @@ export function Signup() {
                   <TextField
                     {...field}
                     id="name"
-                    label="Nombre"
+                    label={t("auth.signup.name")}
                     error={Boolean(errors.name)}
                     helperText={errors.name ? errors.name.message : " "}
                   />
@@ -119,7 +121,7 @@ export function Signup() {
                   <TextField
                     {...field}
                     id="email"
-                    label="Email"
+                    label={t("auth.signup.email")}
                     error={Boolean(errors.email)}
                     helperText={errors.email ? errors.email.message : " "}
                   />
@@ -136,7 +138,7 @@ export function Signup() {
                   <TextField
                     {...field}
                     id="password"
-                    label="Contrasena"
+                    label={t("auth.signup.password")}
                     type="password"
                     error={Boolean(errors.password)}
                     helperText={errors.password ? errors.password.message : " "}
@@ -152,7 +154,7 @@ export function Signup() {
               color="secondary"
               sx={{ m: 1 }}
             >
-              Registrarme
+              {t("auth.signup.submit")}
             </Button>
           </Grid>
         </Grid>

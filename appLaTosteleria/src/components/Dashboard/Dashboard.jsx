@@ -21,20 +21,22 @@ import {
   Legend,
 } from "recharts";
 import PedidoService from "../../services/PedidoService";
+import { useTranslation } from "react-i18next";
 
 const BAR_COLORS = ["#8c2f24", "#ba4a2f", "#dd7e52"];
 const PIE_COLORS = ["#8c2f24", "#4d7c0f", "#0369a1", "#7c2d12", "#4338ca", "#475569"];
 
-function parseErrorMessage(error) {
+function parseErrorMessage(error, fallback) {
   return (
     error?.response?.data?.message ||
     error?.response?.data?.error ||
     error?.message ||
-    "No fue posible cargar el dashboard."
+    fallback
   );
 }
 
 export function Dashboard() {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [summary, setSummary] = useState({
@@ -64,7 +66,7 @@ export function Dashboard() {
       })
       .catch((err) => {
         if (mounted) {
-          setError(parseErrorMessage(err));
+          setError(parseErrorMessage(err, t("dashboard.loadError")));
         }
       })
       .finally(() => {
@@ -76,7 +78,7 @@ export function Dashboard() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [t]);
 
   if (loading) {
     return (
@@ -107,11 +109,11 @@ export function Dashboard() {
   return (
     <Box>
       <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-        Dashboard
+        {t("dashboard.title")}
       </Typography>
 
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        Resumen en tiempo real basado en pedidos y detalles registrados en la base de datos.
+        {t("dashboard.description")}
       </Typography>
 
       <Grid container spacing={2} sx={{ mb: 2 }}>
@@ -119,7 +121,7 @@ export function Dashboard() {
           <Card>
             <CardContent>
               <Typography variant="subtitle2" color="text.secondary">
-                Fecha de referencia
+                {t("dashboard.referenceDate")}
               </Typography>
               <Typography variant="h6" sx={{ fontWeight: 700 }}>
                 {summary.fecha || "-"}
@@ -132,7 +134,7 @@ export function Dashboard() {
           <Card>
             <CardContent>
               <Typography variant="subtitle2" color="text.secondary">
-                Top productos evaluados
+                {t("dashboard.evaluatedProducts")}
               </Typography>
               <Typography variant="h6" sx={{ fontWeight: 700 }}>
                 {topProducts.length}
@@ -145,7 +147,7 @@ export function Dashboard() {
           <Card>
             <CardContent>
               <Typography variant="subtitle2" color="text.secondary">
-                Pedidos de hoy
+                {t("dashboard.todayOrders")}
               </Typography>
               <Typography variant="h6" sx={{ fontWeight: 700 }}>
                 {ordersByState.reduce((acc, item) => acc + item.total, 0)}
@@ -160,11 +162,11 @@ export function Dashboard() {
           <Card sx={{ height: "100%" }}>
             <CardContent>
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-                Top 3 productos mas vendidos
+                {t("dashboard.topProducts")}
               </Typography>
 
               {topProducts.length === 0 ? (
-                <Typography color="text.secondary">No hay ventas para mostrar.</Typography>
+                <Typography color="text.secondary">{t("dashboard.noSales")}</Typography>
               ) : (
                 <Box sx={{ width: "100%", height: 320 }}>
                   <ResponsiveContainer>
@@ -190,11 +192,11 @@ export function Dashboard() {
           <Card sx={{ height: "100%" }}>
             <CardContent>
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-                Pedidos por estado del dia actual
+                {t("dashboard.ordersByStatus")}
               </Typography>
 
               {ordersByState.length === 0 ? (
-                <Typography color="text.secondary">No hay pedidos registrados hoy.</Typography>
+                <Typography color="text.secondary">{t("dashboard.noOrdersToday")}</Typography>
               ) : (
                 <Box sx={{ width: "100%", height: 320 }}>
                   <ResponsiveContainer>
