@@ -39,16 +39,6 @@ function parseDateValue(value) {
   return new Date(year, month - 1, day);
 }
 
-function parseMinutes(value) {
-  if (!timePattern.test(value ?? "")) {
-    return null;
-  }
-
-  const [hours, minutes] = String(value).split(":").map(Number);
-
-  return hours * 60 + minutes;
-}
-
 function crearMenuSchema(t) {
   return yup.object({
     nombre_menu: yup
@@ -125,38 +115,14 @@ function crearMenuSchema(t) {
       .required(t("menus.form.validation.startTimeRequired"))
       .matches(timePattern, t("menus.form.validation.startTimeFormat")),
 
+    /*
+     * hora_fin puede ser menor que hora_inicio: representa una
+     * ventana horaria diaria que cruza la medianoche.
+     */
     hora_fin: yup
       .string()
       .required(t("menus.form.validation.endTimeRequired"))
-      .matches(timePattern, t("menus.form.validation.endTimeFormat"))
-      .test(
-        "hora-rango",
-        t("menus.form.validation.timeRange"),
-        function validarHoraFinal(value) {
-          const fechaInicio = this.parent.fecha_inicio;
-
-          const fechaFin = this.parent.fecha_fin;
-
-          const horaInicio = parseMinutes(this.parent.hora_inicio);
-
-          const horaFin = parseMinutes(value);
-
-          if (
-            !fechaInicio ||
-            !fechaFin ||
-            horaInicio === null ||
-            horaFin === null
-          ) {
-            return true;
-          }
-
-          if (fechaInicio !== fechaFin) {
-            return true;
-          }
-
-          return horaInicio <= horaFin;
-        },
-      ),
+      .matches(timePattern, t("menus.form.validation.endTimeFormat")),
 
     productos: yup.array().of(yup.number().integer().positive()).default([]),
 

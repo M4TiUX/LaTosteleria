@@ -23,10 +23,14 @@ class MenuModel
                     activo,
                     CASE
                         WHEN activo = 1
-                             AND NOW() BETWEEN
-                                 TIMESTAMP(fecha_inicio, hora_inicio)
-                                 AND
-                                 TIMESTAMP(fecha_fin, hora_fin)
+                             AND CURDATE() BETWEEN fecha_inicio AND fecha_fin
+                             AND (
+                                 (hora_inicio <= hora_fin
+                                  AND CURTIME() BETWEEN hora_inicio AND hora_fin)
+                                 OR
+                                 (hora_inicio > hora_fin
+                                  AND (CURTIME() >= hora_inicio OR CURTIME() <= hora_fin))
+                             )
                         THEN 1
                         ELSE 0
                     END AS disponible
@@ -174,10 +178,14 @@ class MenuModel
                     1 AS disponible
                 FROM menus
                 WHERE activo = 1
-                  AND NOW() BETWEEN
-                      TIMESTAMP(fecha_inicio, hora_inicio)
-                      AND
-                      TIMESTAMP(fecha_fin, hora_fin)
+                  AND CURDATE() BETWEEN fecha_inicio AND fecha_fin
+                  AND (
+                      (hora_inicio <= hora_fin
+                       AND CURTIME() BETWEEN hora_inicio AND hora_fin)
+                      OR
+                      (hora_inicio > hora_fin
+                       AND (CURTIME() >= hora_inicio OR CURTIME() <= hora_fin))
+                  )
                 ORDER BY
                     fecha_inicio DESC,
                     hora_inicio DESC,

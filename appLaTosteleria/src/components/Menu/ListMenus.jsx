@@ -26,7 +26,11 @@ export function ListMenus() {
 
   const [error, setError] = useState(null);
 
-  const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
+  /*
+   * Por defecto el catálogo público solo debe
+   * mostrar los menús vigentes según el horario.
+   */
+  const [showOnlyAvailable, setShowOnlyAvailable] = useState(true);
 
   const [now, setNow] = useState(() => new Date());
 
@@ -104,10 +108,6 @@ export function ListMenus() {
           >
             {t("menus.list.title")}
           </Typography>
-
-          <Typography variant="body1" color="text.secondary">
-            {t("menus.list.description")}
-          </Typography>
         </Box>
       </Stack>
 
@@ -122,10 +122,6 @@ export function ListMenus() {
           mb: 4,
         }}
       >
-        <Typography variant="body1" color="text.secondary">
-          {t("menus.list.availableDescription")}
-        </Typography>
-
         <Button
           variant={showOnlyAvailable ? "contained" : "outlined"}
           onClick={() => setShowOnlyAvailable((current) => !current)}

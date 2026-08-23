@@ -1,6 +1,4 @@
-import { useEffect, useState } from "react";
-
-import PropTypes from "prop-types";
+import { useEffect, useMemo, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 
@@ -22,192 +20,29 @@ import { Link } from "react-router-dom";
 
 import MenuService from "../../services/MenuService";
 
-import { formatMenuDate, formatMenuTime } from "./menuUtils";
+import { formatMenuDate, formatMenuTime, isMenuAvailable } from "./menuUtils";
 
 /*
- * Tarjeta para productos y combos
- * incluidos en el menú.
+ * Intervalo para volver a evaluar la disponibilidad
+ * con la hora del navegador (igual que ListMenus).
  */
-function MenuItemCard({ item }) {
-  return (
-    <Card
-      sx={{
-        height: "100%",
-        borderRadius: "8px",
-        boxShadow: 2,
-        backgroundColor: "#fff",
-        overflow: "hidden",
-
-        display: "flex",
-        flexDirection: "column",
-
-        transition: "0.25s",
-
-        "&:hover": {
-          transform: "translateY(-4px)",
-          boxShadow: 5,
-        },
-      }}
-    >
-      {/* Imagen del producto/combo */}
-      {item.imagen ? (
-        <CardMedia
-          component="img"
-          height="180"
-          image={`/images/${item.imagen}`}
-          alt={item.nombre}
-          sx={{
-            objectFit: "cover",
-          }}
-        />
-      ) : (
-        <Box
-          sx={{
-            height: 180,
-            bgcolor: "action.hover",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <RestaurantMenuOutlinedIcon
-            sx={{
-              fontSize: 60,
-              color: "text.disabled",
-            }}
-          />
-        </Box>
-      )}
-
-      <CardContent
-        sx={{
-          flexGrow: 1,
-        }}
-      >
-        <Stack spacing={1}>
-          <Typography variant="subtitle1" fontWeight={700}>
-            {item.nombre}
-          </Typography>
-
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{
-              display: "-webkit-box",
-              WebkitBoxOrient: "vertical",
-              WebkitLineClamp: 2,
-              overflow: "hidden",
-              minHeight: 40,
-            }}
-          >
-            {item.descripcion}
-          </Typography>
-
-          <Typography variant="subtitle2" fontWeight={700} color="primary">
-            ₡{" "}
-            {new Intl.NumberFormat("es-CR", {
-              maximumFractionDigits: 0,
-            }).format(Number(item.precio ?? 0))}
-          </Typography>
-        </Stack>
-      </CardContent>
-    </Card>
-  );
-}
-
-function CategoryBlock({ category }) {
-  const { t } = useTranslation();
-
-  const productos = category.productos ?? [];
-
-  const combos = category.combos ?? [];
-
-  return (
-    <Box sx={{ mb: 4 }}>
-      <Typography variant="h5" fontWeight={700} sx={{ mb: 2 }}>
-        {category.categoria_nombre}
-      </Typography>
-
-      {/* Productos */}
-      {productos.length > 0 && (
-        <>
-          <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1 }}>
-            {t("menus.common.products")}
-          </Typography>
-
-          <Grid
-            container
-            spacing={2}
-            sx={{
-              mb: combos.length > 0 ? 3 : 0,
-            }}
-          >
-            {productos.map((item) => (
-              <Grid item xs={12} sm={6} md={4} key={`producto-${item.id}`}>
-                <MenuItemCard item={item} />
-              </Grid>
-            ))}
-          </Grid>
-        </>
-      )}
-
-      {/* Combos */}
-      {combos.length > 0 && (
-        <>
-          <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1 }}>
-            {t("menus.common.combos")}
-          </Typography>
-
-          <Grid container spacing={2}>
-            {combos.map((item) => (
-              <Grid item xs={12} sm={6} md={4} key={`combo-${item.id}`}>
-                <MenuItemCard item={item} />
-              </Grid>
-            ))}
-          </Grid>
-        </>
-      )}
-    </Box>
-  );
-}
-
-MenuItemCard.propTypes = {
-  item: PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-
-    nombre: PropTypes.string,
-
-    descripcion: PropTypes.string,
-
-    precio: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-
-    imagen: PropTypes.string,
-  }).isRequired,
-};
-
-CategoryBlock.propTypes = {
-  category: PropTypes.shape({
-    categoria_nombre: PropTypes.string,
-
-    productos: PropTypes.array,
-
-    combos: PropTypes.array,
-  }).isRequired,
-};
+const AVAILABILITY_CHECK_INTERVAL_MS = 60000;
 
 export function AvailableMenu() {
   const { t } = useTranslation();
 
-  const [menu, setMenu] = useState(null);
+  const [menus, setMenus] = useState([]);
 
   const [loaded, setLoaded] = useState(false);
 
   const [error, setError] = useState(null);
 
+  const [now, setNow] = useState(() => new Date());
+
   useEffect(() => {
-    MenuService.getAvailableMenu()
+    MenuService.getMenus()
       .then((response) => {
-        setMenu(response.data ?? null);
+        setMenus(response.data ?? []);
 
         setLoaded(true);
       })
@@ -217,6 +52,23 @@ export function AvailableMenu() {
       });
   }, []);
 
+  /*
+   * Reevalúa periódicamente con la hora del navegador,
+   * para no depender del reloj/zona horaria del servidor.
+   */
+  useEffect(() => {
+    const timerId = setInterval(() => {
+      setNow(new Date());
+    }, AVAILABILITY_CHECK_INTERVAL_MS);
+
+    return () => clearInterval(timerId);
+  }, []);
+
+  const availableMenus = useMemo(
+    () => menus.filter((menu) => isMenuAvailable(menu, now)),
+    [menus, now],
+  );
+
   if (!loaded) {
     return <p>{t("menus.available.loading")}</p>;
   }
@@ -225,7 +77,7 @@ export function AvailableMenu() {
     return <p>Error: {error.message}</p>;
   }
 
-  if (!menu) {
+  if (availableMenus.length === 0) {
     return <p>{t("menus.available.noMenu")}</p>;
   }
 
@@ -235,124 +87,112 @@ export function AvailableMenu() {
       <Typography
         variant="h3"
         sx={{
-          mb: 1,
+          mb: 3,
           fontWeight: 700,
         }}
       >
         {t("menus.available.title")}
       </Typography>
 
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        {t("menus.available.description")}
-      </Typography>
-
-      <Box sx={{ mb: 4 }}>
-        {/* Nombre del menú */}
-        <Typography
-          variant="h4"
-          sx={{
-            mb: 1,
-            fontWeight: 700,
-          }}
-        >
-          {menu.nombre_menu}
-        </Typography>
-
-        <Chip
-          label={t("menus.available.availableNow")}
-          color="success"
-          sx={{ mb: 2 }}
-        />
-
-        {/* Imagen principal del menú */}
-        {menu.imagen ? (
-          <Box
-            component="img"
-            src={`/images/${menu.imagen}`}
-            alt={menu.nombre_menu}
-            sx={{
-              width: "100%",
-              maxWidth: 900,
-
-              height: {
-                xs: 240,
-                sm: 360,
-                md: 430,
-              },
-
-              objectFit: "cover",
-              display: "block",
-              borderRadius: 3,
-              boxShadow: 3,
-              mb: 3,
-            }}
-          />
-        ) : (
-          /*
-           * Fallback para los menús
-           * antiguos sin imagen.
-           */
-          <Box
-            sx={{
-              width: "100%",
-              maxWidth: 900,
-
-              height: {
-                xs: 240,
-                sm: 360,
-                md: 430,
-              },
-
-              bgcolor: "action.hover",
-
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-
-              borderRadius: 3,
-              mb: 3,
-            }}
-          >
-            <RestaurantMenuOutlinedIcon
+      <Grid container spacing={3}>
+        {availableMenus.map((menu) => (
+          <Grid item xs={12} md={6} lg={4} key={menu.id_menu}>
+            <Card
               sx={{
-                fontSize: 100,
-                color: "text.disabled",
+                height: "100%",
+                borderRadius: "8px",
+                boxShadow: 4,
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
+                transition: "0.25s",
+                "&:hover": {
+                  transform: "translateY(-4px)",
+                  boxShadow: 7,
+                },
               }}
-            />
-          </Box>
-        )}
+            >
+              {/* Imagen del menú */}
+              {menu.imagen ? (
+                <CardMedia
+                  component="img"
+                  height="220"
+                  image={`/images/${menu.imagen}`}
+                  alt={menu.nombre_menu}
+                  sx={{
+                    objectFit: "cover",
+                  }}
+                />
+              ) : (
+                <Box
+                  sx={{
+                    height: 220,
+                    bgcolor: "action.hover",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <RestaurantMenuOutlinedIcon
+                    sx={{
+                      fontSize: 75,
+                      color: "text.disabled",
+                    }}
+                  />
+                </Box>
+              )}
 
-        {/* Vigencia */}
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-          {t("menus.available.availability", {
-            startDate: formatMenuDate(menu.fecha_inicio),
+              <CardContent
+                sx={{
+                  flexGrow: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                <Stack spacing={1.5} sx={{ flexGrow: 1 }}>
+                  <Typography variant="h5" fontWeight={700}>
+                    {menu.nombre_menu}
+                  </Typography>
 
-            startTime: formatMenuTime(menu.hora_inicio),
+                  <Chip
+                    label={t("menus.available.availableNow")}
+                    color="success"
+                    size="small"
+                    sx={{ alignSelf: "flex-start" }}
+                  />
 
-            endDate: formatMenuDate(menu.fecha_fin),
+                  <Typography variant="body2" color="text.secondary">
+                    {t("menus.available.availability", {
+                      startDate: formatMenuDate(menu.fecha_inicio),
 
-            endTime: formatMenuTime(menu.hora_fin),
-          })}
-        </Typography>
+                      startTime: formatMenuTime(menu.hora_inicio),
 
-        <Button
-          component={Link}
-          to={`/menu/${menu.id_menu}`}
-          variant="outlined"
-          sx={{
-            mb: 3,
-            textTransform: "none",
-            fontWeight: 600,
-          }}
-        >
-          {t("menus.available.viewDetail")}
-        </Button>
+                      endDate: formatMenuDate(menu.fecha_fin),
 
-        {/* Categorías */}
-        {menu.categorias?.map((category) => (
-          <CategoryBlock key={category.categoria_nombre} category={category} />
+                      endTime: formatMenuTime(menu.hora_fin),
+                    })}
+                  </Typography>
+                </Stack>
+
+                <Button
+                  component={Link}
+                  to={`/menu/${menu.id_menu}`}
+                  variant="contained"
+                  fullWidth
+                  sx={{
+                    mt: 3,
+                    borderRadius: "8px",
+                    textTransform: "none",
+                    fontWeight: 600,
+                  }}
+                >
+                  {t("menus.available.viewDetail")}
+                </Button>
+              </CardContent>
+            </Card>
+          </Grid>
         ))}
-      </Box>
+      </Grid>
     </Box>
   );
 }
