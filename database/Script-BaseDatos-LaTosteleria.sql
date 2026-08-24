@@ -321,7 +321,7 @@ SELECT 29, 'Crema batida';
 INSERT INTO `roles` (`id_rol`, `nombre_rol`)
 SELECT 1, 'Administrador' UNION ALL
 SELECT 2, 'Cliente' UNION ALL
-SELECT 3, 'Encargado' UNION ALL
+SELECT 3, 'Empleado' UNION ALL
 SELECT 4, 'Cocina';
 
 INSERT INTO `usuarios` (`id_usuario`, `rol_id`, `nombre`, `correo`, `contrasena`, `token_recuperacion`, `fecha_expiracion_token`)
